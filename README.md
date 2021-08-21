@@ -1,7 +1,7 @@
 # Vauhtijuoksu API
 
 ## Requirements
-* java 15
+* java 16
 
 ## Generating API
 ```shell
