@@ -16,6 +16,7 @@ tasks {
             inputFile = file("$projectDir/openapi.yaml")
         }
     }
+
     generateSwaggerUI {
         swaggerSources {
             inputFile = file("$projectDir/openapi.yaml")
