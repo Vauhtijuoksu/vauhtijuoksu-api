@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mockserver.fullname" . }}
+  labels:
+    {{- include "mockserver.labels" . | nindent 4 }}
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: Vauhtijuoksu-Azure-Sponsorship
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 51.13.65.44
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "mockserver.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,10 @@
+image:
+  repository: muonsoft/openapi-mock
+  tag: "v0.3.1"
+
+# Possible values:
+# no
+# if_present
+# exclusively
+use_examples: if_present
+specification_url: "https://raw.githubusercontent.com/Vauhtijuoksu/vauhtijuoksu-api/main/api-doc/openapi.yaml"
