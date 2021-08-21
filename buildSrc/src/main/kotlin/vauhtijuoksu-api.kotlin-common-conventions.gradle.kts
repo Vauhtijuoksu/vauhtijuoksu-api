@@ -15,10 +15,12 @@ repositories {
 
 dependencies {
     constraints {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk15")
-
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk16")
+        // Codegen components
         implementation("io.swagger.codegen.v3:swagger-codegen-cli:3.0.26")
         implementation("org.webjars:swagger-ui:3.10.0")
+
+        testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
     }
 
     // Align versions of all Kotlin components
@@ -28,7 +30,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     // Use JUnit Jupiter API for testing.
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
 
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")

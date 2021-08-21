@@ -1,7 +1,8 @@
 # Vauhtijuoksu API
 
 ## Requirements
-* java 15
+* java 16
+* gradle
 
 ## Generating API
 ```shell
