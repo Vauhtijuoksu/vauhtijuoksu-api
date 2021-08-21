@@ -9,7 +9,8 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.30-RC")
+
     // The plugin is not released with OAS3 support, even though it exists in master
     implementation(files("${projectDir}/libs/gradle-swagger-generator-plugin-SNAPSHOT.jar"))
     // Used by the plugin
