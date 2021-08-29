@@ -2,4 +2,47 @@ openapi: 3.0.3
 info:
   version: 0.0.1
   title: Vauhtijuoksu API
-paths: {}
+paths:
+  /target:
+    get:
+      responses:
+        200:
+          $ref: '#/components/responses/TargetOk'
+components:
+  responses:
+    TargetOk:
+      description: Donation target
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Target'
+  schemas:
+    Target:
+      type: object
+      required:
+        - target
+        - currency
+        - _links
+      properties:
+        _links:
+          type: object
+          required:
+            - href
+          properties:
+            href:
+              type: string
+              format: uri
+              description: A link to self
+        target:
+          type: integer
+        currency:
+          type: string
+          enum:
+            - euro
+      example: {
+        "links": {
+          href: "/target"
+        },
+        "currency": "euro",
+        "target": 1000
+      }
