@@ -1,48 +1,620 @@
 openapi: 3.0.3
 info:
-  version: 0.0.1
+  version: 0.0.4
   title: Vauhtijuoksu API
 paths:
-  /target:
+  /donations:
     get:
+      description: >
+        Get all donations with one request. List of individual donations with
+        metadata.
       responses:
-        200:
-          $ref: '#/components/responses/TargetOk'
+        '200':
+          $ref: '#/components/responses/DonationsAllOk'
+    post:
+      description: Add a new donation object.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Donation'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkReturnId'
+  /donations/{donationId}:
+    parameters:
+      - name: donationId
+        in: path
+        required: true
+        description: Donation id (uuid).
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+    get:
+      description: Get donation by id.
+      responses:
+        '200':
+          $ref: '#/components/responses/DonationsOk'
+    put:
+      description: Put donation with client specified id (uuid).
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Donation'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+    patch:
+      description: Patch donation data.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Donation'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+    delete:
+      description: Delete donation.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+  /gamedata:
+    get:
+      description: >
+        Get list of all game data. List of games that are scheduled for the event.
+      
+      responses:
+        '200':
+          $ref: '#/components/responses/GameDataAllOk'
+    post:
+      description: Add a new gamedata object.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameData'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkReturnId'
+  /gamedata/{gamedataId}:
+    parameters:
+      - name: gamedataId
+        in: path
+        required: true
+        description: Game data id (uuid).
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+    get:
+      description: Get game data by id.
+      responses:
+        '200':
+          $ref: '#/components/responses/GameDataOk'
+    patch:
+      description: Patch game data.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameData'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+    delete:
+      description: Delete game data.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+  /stream_metadata:
+    get:
+      description: >
+        Get stream metadata. This is meant for misc information shown on stream
+        layout
+      responses:
+        '200':
+          $ref: '#/components/responses/StreamMetadataOk'
+    patch:
+      description: Patch stream metadata.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StreamMetadata'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+  /player_info:
+    get:
+      description: >
+        Get player info. This is used for displaying messages for player when they
+        are on stream.
+      responses:
+        '200':
+          $ref: '#/components/responses/PlayerInfoOk'
+    patch:
+      description: Patch player info.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerInfo'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+  /incentives:
+    get:
+      description: >
+        Get list of all incentives. These are incentives for donating money to charity for
+        exchange to influence what happens on stream.
+      responses:
+        '200':
+          $ref: '#/components/responses/IncentivesAllOk'
+    post:
+      description: Add a new incentive object.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Incentives'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkReturnId'
+  /incentives/{incentiveId}:
+    parameters:
+      - name: incentiveId
+        in: path
+        required: true
+        description: Incentive id (uuid).
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+    get:
+      description: Get incentive by id.
+      responses:
+        '200':
+          $ref: '#/components/responses/IncentiveOk'
+    patch:
+      description: Patch incentive
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Incentives'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+    delete:
+      description: Delete incentive
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+  /incentive_codes:
+    get:
+      description: >
+        Get list of all incentive codes. These codes are used for pasting them on
+        donation message. This links donation to insentive.
+      responses:
+        '200':
+          $ref: '#/components/responses/IncentiveCodesAllOk'
+    post:
+      description: Add a new incentive code object.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncentiveCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkReturnId'
+  /incentive_codes/{incentiveCode}:
+    parameters:
+      - name: incentiveCode
+        in: path
+        required: true
+        description: incentive code.
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+    get:
+      description: Get incentive code by id.
+      responses:
+        '200':
+          $ref: '#/components/responses/IncentiveCodesOk'
+    put:
+      description: Put incentive code with client specified id.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncentiveCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+    patch:
+      description: Patch incentive code
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncentiveCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
+    delete:
+      description: Delete incentive code
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/OkEmpty'
 components:
   responses:
-    TargetOk:
-      description: Donation target
+    OkEmpty:
+      description: Return empty 200
+    OkReturnId:
+      description: Return id when POST is successful
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Target'
+            properties:
+              id:
+                type: string
+    DonationsAllOk:
+      description: List of donations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Donations'
+    DonationsOk:
+      description: Donation by id
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Donation'
+    GameDataAllOk:
+      description: List of game data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GameDataAll'
+    GameDataOk:
+      description: Game data by id
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GameData'
+    StreamMetadataOk:
+      description: Stream metadata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StreamMetadata'
+    PlayerInfoOk:
+      description: Player info
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PlayerInfo'
+    IncentivesAllOk:
+      description: List of incentives
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Incentives'
+    IncentiveOk:
+      description: Incentives by id (uuid)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Incentive'
+    IncentiveCodesAllOk:
+      description: List of incentive code data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IncentiveCodes'
+    IncentiveCodesOk:
+      description: Incentice data by code
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IncentiveCode'
   schemas:
-    Target:
+    Donation:
       type: object
-      required:
-        - target
-        - currency
-        - _links
       properties:
-        _links:
-          type: object
-          required:
-            - href
-          properties:
-            href:
-              type: string
-              format: uri
-              description: A link to self
-        target:
-          type: integer
-        currency:
+        timestamp:
           type: string
-          enum:
-            - euro
-      example: {
-        "links": {
-          href: "/target"
-        },
-        "currency": "euro",
-        "target": 1000
-      }
+        name:
+          type: string
+        message:
+          type: string
+        amount:
+          type: number
+      required:
+      - timestamp
+      - message
+      - amount
+      example:
+        timestamp: '2021-09-21 15:05:47'
+        name: jsloth
+        message: ota tää :D 🤔🤔
+        amount: 10
+    Donations:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Donation'
+      required:
+      - id
+      example:
+        6c28df04-b9d2-4ebe-bd33-58c9b290d929:
+          timestamp: '2021-09-21 15:05:47'
+          name: jsloth
+          message: ota tää :D 🤔🤔
+          amount: 10
+        7c28df04-b9d2-4ebe-bd33-58c9b290d930:
+          timestamp: '2021-09-21 15:05:50'
+          name: luuranki
+          message: 'mee tänne: töihin :))))))))'
+          amount: 5
+    GameData:
+      type: object
+      properties:
+        game:
+          type: string
+        player:
+          type: string
+        start_time:
+          type: string
+        end_time:
+          type: string
+        category:
+          type: string
+        device:
+          type: string
+        published:
+          type: string
+        vod_link:
+          type: string
+        img_filename:
+          type: string
+        player_twitch:
+          type: string
+      required:
+      - game
+      - player
+      - start_time
+      - end_time
+      - category
+      - device
+      - published
+      example:
+        game: Tetris
+        player: jsloth
+        start_time: '2021-09-21 15:05:47'
+        end_time: '2021-09-21 16:05:47'
+        category: any%
+        device: PC
+        published: '1970'
+        vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+        img_filename: tetris.png
+        player_twitch: jiisloth
+    GameDataAll:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/GameData'
+      required:
+      - id
+      example:
+        6c28df04-b9d2-4ebe-bd33-58c9b290d929:
+          game: Tetris
+          player: jsloth
+          start_time: '2021-09-21 15:05:47'
+          end_time: '2021-09-21 16:05:47'
+          category: any%
+          device: PC
+          published: '1970'
+          vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+          img_filename: tetris.png
+          player_twitch: jiisloth
+        6c28df04-b9d2-4ebe-bd33-58c9b290d930:
+          game: Tetris2
+          player: jsloth
+          start_time: '2021-09-21 15:07:47'
+          end_time: '2021-09-21 16:08:47'
+          category: any% no t
+          device: PC
+          published: '1971'
+          vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+          img_filename: tetris.png
+          player_twitch: jiisloth
+    StreamMetadata:
+      type: object
+      properties:
+        donation_goal:
+          type: integer
+        current_game_id:
+          type: string
+        donatebar_info:
+          type: array
+          items:
+            type: string
+        counters:
+          type: array
+          items:
+            type: integer
+      required:
+      - donation_goal
+      example:
+        donation_goal: 10000
+        current_game_id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+        donatebar_info:
+          - lahjota rahhaa
+          - mee töihi :D
+        counters:
+          - 1
+          - 7
+          - 6
+          - 9
+    PlayerInfo:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+      - message
+      example:
+        message: Lahjoituksia luettavana!!
+    Incentive:
+      type: object
+      properties:
+        game:
+          type: string
+        title:
+          type: string
+        end_time:
+          type: string
+        type:
+          type: string
+        open_char_limit:
+          type: string
+        updrade_parameters:
+          items:
+            type: integer
+        option_parameters:
+          items:
+            type: string
+      required:
+      - title
+      - type
+      example:
+        game: Tetris2
+        title: Tetrispakikan nimi
+        end_time: '2021-09-21 19:08:47'
+        type: open
+        open_char_limit: 10
+        info: Nimeä tetrispalikka poggers
+    Incentives:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Incentive'
+      required:
+      - id
+      example:
+        6c28df04-b9d2-4ebe-bd33-58c9b290d929:
+          game: Tetris
+          title: Ei pyörimistä
+          end_time: '2021-09-21 16:08:47'
+          type: upgrade
+          upgrade_parameters:
+            - 200
+            - 300
+          info: Ei saa pyörittää palikoita
+        6c28df04-b9d2-4ebe-bd33-58c9b290d930:
+          game: Tetris2
+          title: silmät kii
+          end_time: '2021-09-21 19:08:47'
+          type: option
+          option_parameters:
+            - kissa
+            - koira
+          info: Saa kattoa vaan kissoja tai koiria
+        6c28df04-b9d2-4ebe-bd33-58c9b290d931:
+          game: Tetris2
+          title: Tetrispakikan nimi
+          end_time: '2021-09-21 19:08:47'
+          type: open
+          open_char_limit: 10
+          info: Nimeä tetrispalikka poggers
+    IncentiveCode:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          parameters:
+            type: string
+        required:
+        - id
+      example:
+        - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
+          parameter: kalle tetr
+        - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
+          parameter: kissa
+        - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+    IncentiveCodes:
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/IncentiveCode'
+      required:
+      - code
+      example:
+        XY123:
+          - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
+            parameter: kalle tetr
+          - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
+            parameter: kissa
+          - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+        XY124:
+          - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
+            parameter: T3mu pls
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+
