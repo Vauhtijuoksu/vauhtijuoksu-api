@@ -30,7 +30,7 @@ jobs:
           path: api-doc/build/swagger-ui
 
   publish:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/refactor-build'
     needs: build
     runs-on: ubuntu-latest
     steps:
