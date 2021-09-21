@@ -5,7 +5,7 @@ on:
   - pull_request
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
@@ -28,3 +28,21 @@ jobs:
         with:
           name: swagger ui
           path: api-doc/build/swagger-ui
+
+  publish:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - uses: azure/aks-set-context@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          cluster-name: vauhtijuoksu
+          resource-group: Vauhtijuoksu-Azure-Sponsorship
+      - uses: azure/setup-helm@v1
+        id: install
+      - name: Deploy mock server to AKS
+        run: |
+          helm upgrade --install mockserver deployment/mockserver
