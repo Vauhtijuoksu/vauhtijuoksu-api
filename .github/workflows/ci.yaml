@@ -36,6 +36,16 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: swagger ui
+          path: swagger-ui
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Upload rendered specification to Azure
+        run: |
+          az storage blob upload-batch -s swagger-ui -d '$web' --account-name vauhtijuoksu
       - uses: azure/aks-set-context@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
