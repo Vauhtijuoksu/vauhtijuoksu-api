@@ -12,10 +12,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - dev.vauhtijuoksu.fi
-      secretName: tls-secret
+        - mockapi.dev.vauhtijuoksu.fi
+      secretName: mockapi.dev.vauhtijuoksu.fi
   rules:
-    - host: dev.vauhtijuoksu.fi
+    - host: mockapi.dev.vauhtijuoksu.fi
       http:
         paths:
           - path: /(.*)

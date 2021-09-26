@@ -26,6 +26,6 @@ spec:
               cpu: 50m
           env:
             - name: OPENAPI_MOCK_SPECIFICATION_URL
-              value: {{ .Values.specification_url }}
+              value: "https://raw.githubusercontent.com/Vauhtijuoksu/vauhtijuoksu-api/{{ .Values.commit }}/api-doc/openapi.yaml"
             - name: OPENAPI_MOCK_USE_EXAMPLES
               value: {{ .Values.use_examples }}

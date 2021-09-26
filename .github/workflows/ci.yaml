@@ -55,4 +55,4 @@ jobs:
         id: install
       - name: Deploy mock server to AKS
         run: |
-          helm upgrade --install mockserver deployment/mockserver
+          helm upgrade --install mockserver deployment/mockserver --set commit=${{ github.sha }}

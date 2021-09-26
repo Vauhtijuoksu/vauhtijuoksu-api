@@ -10,4 +10,4 @@
 ```
 
 ## Testing the API
-A mock server using the API specification (from `main` branch) is served at 51.13.65.44.
+A mock server using the API specification (from `main` branch) is served at https://mockapi.dev.vauhtijuoksu.fi
