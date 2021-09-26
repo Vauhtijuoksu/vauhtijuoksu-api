@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "vauhtijuoksu-api.fullname" . }}
+  labels:
+    {{- include "vauhtijuoksu-api.labels" . | nindent 4 }}
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: Vauhtijuoksu-Azure-Sponsorship
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "vauhtijuoksu-api.selectorLabels" . | nindent 4 }}

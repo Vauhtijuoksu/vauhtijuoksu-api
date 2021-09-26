@@ -15,12 +15,19 @@ repositories {
 
 dependencies {
     constraints {
+        val vertxVersion = "4.1.4"
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk16")
         // Codegen components
         implementation("io.swagger.codegen.v3:swagger-codegen-cli:3.0.26")
         implementation("org.webjars:swagger-ui:3.10.0")
 
+        implementation("io.vertx:vertx-core:$vertxVersion")
+        implementation("io.vertx:vertx-web:$vertxVersion")
+        implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
+
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
+        testImplementation("io.vertx:vertx-junit5:$vertxVersion")
+        testImplementation("io.vertx:vertx-web-client:$vertxVersion")
     }
 
     // Align versions of all Kotlin components
