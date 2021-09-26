@@ -28,6 +28,14 @@ jobs:
         with:
           name: swagger ui
           path: api-doc/build/swagger-ui
+      - name: Output docker image
+        run: |
+          docker image save vauhtijuoksu-api:dev -o vauhtijuoksu-api.tar
+      - name: Save Docker image
+        uses: actions/upload-artifact@v2
+        with:
+          name: vauhtijuosu-api.tar
+          path: vauhtijuoksu-api.tar
 
   publish:
     if: github.ref == 'refs/heads/main'
@@ -46,6 +54,21 @@ jobs:
       - name: Upload rendered specification to Azure
         run: |
           az storage blob upload-batch -s swagger-ui -d '$web' --account-name vauhtijuoksu
+      - uses: actions/download-artifact@v2
+        with:
+          name: vauhtijuosu-api.tar
+          path: .
+      - run: |
+          docker load --input vauhtijuoksu-api.tar
+      - uses: azure/docker-login@v1
+        with:
+          login-server: vauhtijuoksu.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Push docker image to ACR
+        run: |
+          docker tag vauhtijuoksu-api:dev vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:dev
+          docker push vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:dev
       - uses: azure/aks-set-context@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -56,3 +79,6 @@ jobs:
       - name: Deploy mock server to AKS
         run: |
           helm upgrade --install mockserver deployment/mockserver --set commit=${{ github.sha }}
+      - name: Deploy API server to AKS
+        run: |
+          helm upgrade --install vauhtijuoksu-api deployment/api-server

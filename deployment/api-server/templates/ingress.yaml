@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "vauhtijuoksu-api.fullname" . }}
+  labels:
+    {{- include "vauhtijuoksu-api.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  tls:
+    - hosts:
+        - api.dev.vauhtijuoksu.fi
+      secretName: api.dev.vauhtijuoksu.fi
+  rules:
+    - host: api.dev.vauhtijuoksu.fi
+      http:
+        paths:
+          - path: /(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: vauhtijuoksu-api
+                port:
+                  number: 8080
