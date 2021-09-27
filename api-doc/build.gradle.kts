@@ -6,20 +6,20 @@ plugins {
 }
 
 dependencies {
-    swaggerCodegen("io.swagger.codegen.v3:swagger-codegen-cli:3.0.26")
     swaggerUI("org.webjars:swagger-ui:3.10.0")
 }
 
 tasks {
+    val swaggerInput = file("$projectDir/openapi.yaml")
     validateSwagger {
         swaggerSources {
-            inputFile = file("$projectDir/openapi.yaml")
+            inputFile = swaggerInput
         }
     }
 
     generateSwaggerUI {
         swaggerSources {
-            inputFile = file("$projectDir/openapi.yaml")
+            inputFile = swaggerInput
         }
     }
 
