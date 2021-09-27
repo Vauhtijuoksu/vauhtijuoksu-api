@@ -19,14 +19,14 @@ class ServerTest {
     private lateinit var client: WebClient
 
     @BeforeEach
-    fun beforeEach(){
+    fun beforeEach() {
         server = Server()
         server.start()
         client = WebClient.create(vertx, WebClientOptions().setDefaultPort(8080))
     }
 
     @AfterEach
-    fun afterEach(){
+    fun afterEach() {
         server.stop()
         client.close()
     }

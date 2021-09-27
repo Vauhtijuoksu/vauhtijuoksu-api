@@ -8,8 +8,15 @@ repositories {
     gradlePluginPortal()
 }
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31")
+    implementation("com.diffplug.spotless:spotless-plugin-gradle:5.15.2")
 
     // The plugin is not released with OAS3 support, even though it exists in master
     implementation(files("${projectDir}/libs/gradle-swagger-generator-plugin-SNAPSHOT.jar"))
