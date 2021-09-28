@@ -20,17 +20,6 @@ application {
     mainClass.set("fi.vauhtijuoksu.vauhtijuoksuapi.server.ServerKt")
 }
 
-kotlin {
-    sourceSets {
-        main {
-            kotlin.srcDirs("src/main")
-        }
-        test {
-            kotlin.srcDirs("src/test")
-        }
-    }
-}
-
 val dockerBuild by tasks.registering {
     description = "Build a docker image"
     val imageName = "vauhtijuoksu-api"

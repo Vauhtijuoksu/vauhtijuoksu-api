@@ -17,6 +17,7 @@ buildscript {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31")
     implementation("com.diffplug.spotless:spotless-plugin-gradle:5.15.2")
+    implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.18.1")
 
     // The plugin is not released with OAS3 support, even though it exists in master
     implementation(files("${projectDir}/libs/gradle-swagger-generator-plugin-SNAPSHOT.jar"))
