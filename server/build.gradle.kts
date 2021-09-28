@@ -11,6 +11,7 @@ dependencies {
     implementation("io.vertx:vertx-core")
     implementation("io.vertx:vertx-web")
     implementation("io.vertx:vertx-lang-kotlin")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("io.vertx:vertx-web-client")

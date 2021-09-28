@@ -18,6 +18,7 @@ dependencies {
         implementation("io.swagger.codegen.v3:swagger-codegen-cli:3.0.26")
         implementation("org.webjars:swagger-ui:3.10.0")
 
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.+")
         implementation("io.vertx:vertx-core:$vertxVersion")
         implementation("io.vertx:vertx-web:$vertxVersion")
         implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
