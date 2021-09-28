@@ -7,16 +7,17 @@ import java.util.concurrent.CountDownLatch
 
 class Server {
     private val vertx = Vertx.vertx()
-    private val server = vertx.createHttpServer(HttpServerOptions().setPort(8080))
+    @Suppress("MagicNumber") // Configuration is not yet implemented
+    private val httpServer = vertx.createHttpServer(HttpServerOptions().setPort(8080))
     private val router = Router.router(vertx)
 
     init {
         router.get().handler { ctx -> ctx.response().end("Hello world") }
-        server.requestHandler(router)
+        httpServer.requestHandler(router)
     }
 
     fun start() {
-        server.listen()
+        httpServer.listen()
     }
 
     fun stop() {
