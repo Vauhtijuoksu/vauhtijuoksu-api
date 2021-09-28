@@ -8,3 +8,6 @@ data:
   conf.yaml: |
     server:
       port: 8080
+    database:
+      address: {{ .Values.database.address }}
+      port: {{ .Values.database.port }}
