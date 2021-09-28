@@ -8,15 +8,20 @@ plugins {
 }
 
 dependencies {
+    implementation(project(path = ":models"))
+    implementation(project(path = ":database"))
+
     implementation("com.google.inject:guice")
     implementation("com.sksamuel.hoplite:hoplite-core")
     implementation("com.sksamuel.hoplite:hoplite-yaml")
     implementation("io.vertx:vertx-core")
     implementation("io.vertx:vertx-web")
     implementation("io.vertx:vertx-lang-kotlin")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("io.vertx:vertx-web-client")
+    testImplementation("org.mockito:mockito-core")
 }
 
 application {

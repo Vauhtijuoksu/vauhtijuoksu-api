@@ -33,6 +33,7 @@ dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
         testImplementation("io.vertx:vertx-junit5:$vertxVersion")
         testImplementation("io.vertx:vertx-web-client:$vertxVersion")
+        testImplementation("org.mockito:mockito-core:3.+")
     }
 
     // Align versions of all Kotlin components
