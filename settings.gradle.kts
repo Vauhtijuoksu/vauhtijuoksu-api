@@ -10,6 +10,7 @@
 rootProject.name = "vauhtijuoksu-api"
 
 include("api-doc")
+include("database")
 include("deployment")
 include("models")
 include("server")
