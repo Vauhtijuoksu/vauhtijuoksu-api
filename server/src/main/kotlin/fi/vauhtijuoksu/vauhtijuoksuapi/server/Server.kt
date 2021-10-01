@@ -1,19 +1,20 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiRouter
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServerOptions
+import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
 import java.time.Instant
 import java.util.*
 import java.util.concurrent.CountDownLatch
+import javax.inject.Inject
 
-class Server {
-    private val vertx = Vertx.vertx()
+class Server @Inject constructor(private val vertx: Vertx, private val httpServer: HttpServer, apiRouter: ApiRouter){
 
     @Suppress("MagicNumber") // Configuration is not yet implemented
-    private val httpServer = vertx.createHttpServer(HttpServerOptions().setPort(8080))
     private val router = Router.router(vertx)
 
     init {
@@ -37,5 +38,7 @@ class Server {
 }
 
 fun main() {
-    Server().start()
+    val injector = Guice.createInjector(ApiModule());
+    val server = injector.getInstance(Server::class.java)
+    server.start()
 }

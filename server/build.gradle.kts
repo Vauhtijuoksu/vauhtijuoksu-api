@@ -8,6 +8,7 @@ plugins {
 }
 
 dependencies {
+    implementation("com.google.inject:guice")
     implementation("io.vertx:vertx-core")
     implementation("io.vertx:vertx-web")
     implementation("io.vertx:vertx-lang-kotlin")
