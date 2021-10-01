@@ -3,6 +3,8 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.models
 import java.net.URL
 import java.util.Date
 
+// parameter names are the same as the names in the API
+@Suppress("ConstructorParameterNaming")
 data class GameData(
     val game: String,
     val player: String,

@@ -1,5 +1,6 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
+import com.google.inject.Guice
 import io.vertx.core.Vertx
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.client.WebClientOptions
@@ -14,21 +15,24 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(VertxExtension::class)
 class ServerTest {
-    private val vertx: Vertx = Vertx.vertx()
+    private lateinit var vertx: Vertx
     private lateinit var server: Server
     private lateinit var client: WebClient
 
     @BeforeEach
     fun beforeEach() {
-        server = Server()
+        val injector = Guice.createInjector(ApiModule())
+        vertx = injector.getInstance(Vertx::class.java)
+        server = injector.getInstance(Server::class.java)
         server.start()
         client = WebClient.create(vertx, WebClientOptions().setDefaultPort(8080))
     }
 
     @AfterEach
-    fun afterEach() {
+    fun afterEach(testContext: VertxTestContext) {
         server.stop()
         client.close()
+        vertx.close { testContext.completeNow() }
     }
 
     @Test
