@@ -1,19 +1,23 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.models
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.net.URL
 import java.util.Date
 
-// parameter names are the same as the names in the API
-@Suppress("ConstructorParameterNaming")
 data class GameData(
     val game: String,
     val player: String,
-    val start_time: Date,
-    val end_time: Date,
+    @JsonProperty("start_time")
+    val startTime: Date,
+    @JsonProperty("end_time")
+    val endTime: Date,
     val category: String,
     val device: String,
     val published: String,
-    val vod_link: URL?,
-    val img_filename: String,
-    val player_twitch: String,
+    @JsonProperty("vod_link")
+    val vodLink: URL?,
+    @JsonProperty("img_filename")
+    val imgFilename: String,
+    @JsonProperty("player_twitch")
+    val playerTwitch: String,
 )

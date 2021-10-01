@@ -19,6 +19,7 @@ dependencies {
         implementation("org.webjars:swagger-ui:3.10.0")
 
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.+")
+        implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.+")
         implementation("com.google.inject:guice:5.0.1")
         implementation("io.vertx:vertx-core:$vertxVersion")
         implementation("io.vertx:vertx-web:$vertxVersion")
