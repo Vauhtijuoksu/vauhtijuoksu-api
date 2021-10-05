@@ -11,9 +11,8 @@ class ApiRouterImpl @Inject constructor(private val router: Router, private val 
         router.get("/gamedata").handler { ctx ->
             db.getAll()
                 .onFailure { ctx.response().setStatusCode(500).end() }
-                .onSuccess { res -> ctx.response().end(jacksonObjectMapper().writeValueAsString(res)) }
+                .onSuccess { all -> ctx.response().end(jacksonObjectMapper().writeValueAsString(all)) }
         }
-        router.get().handler { ctx -> ctx.response().end("Hello world") }
     }
 
     override fun router(): Router {

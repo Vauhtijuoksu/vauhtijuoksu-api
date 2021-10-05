@@ -7,6 +7,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import io.vertx.core.Future
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.client.WebClientOptions
 import io.vertx.junit5.VertxExtension
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations.openMocks
@@ -126,13 +129,26 @@ class ServerTest {
     }
 
     @Test
-    fun testGameDataDbError(testContext: VertxTestContext){
+    fun testGameDataDbError(testContext: VertxTestContext) {
         `when`(db.getAll()).thenReturn(Future.failedFuture(RuntimeException("Vituixmän")))
         client.get("/gamedata").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(500, res.statusCode())
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = arrayOf("OPTIONS", "POST", "HEAD", "PUT", "PATCH", "DELETE", "TRACE", "CONNECT"))
+    fun testNotAllowedMethods(method: String, testContext: VertxTestContext) {
+        client.request(HttpMethod(method), "/gamedata").send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(405, res.statusCode())
                 }
                 testContext.completeNow()
             }
