@@ -2,9 +2,10 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.net.URL
-import java.util.Date
+import java.util.*
 
 data class GameData(
+    val id: UUID,
     val game: String,
     val player: String,
     @JsonProperty("start_time")
