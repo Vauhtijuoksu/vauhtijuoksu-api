@@ -9,6 +9,7 @@ plugins {
 
 dependencies {
     implementation(project(path = ":models"))
+    implementation(project(path = ":database"))
 
     implementation("com.google.inject:guice")
     implementation("io.vertx:vertx-core")
@@ -18,6 +19,7 @@ dependencies {
 
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("io.vertx:vertx-web-client")
+    testImplementation("org.mockito:mockito-core")
 }
 
 application {

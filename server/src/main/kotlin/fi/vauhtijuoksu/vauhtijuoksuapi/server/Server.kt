@@ -1,6 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.google.inject.Guice
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiRouter
 import io.vertx.core.http.HttpServer
 import java.util.concurrent.CountDownLatch
@@ -33,7 +34,7 @@ class Server @Inject constructor(private val httpServer: HttpServer, apiRouter: 
 }
 
 fun main() {
-    val injector = Guice.createInjector(ApiModule())
+    val injector = Guice.createInjector(ApiModule(), DatabaseModule())
     val server = injector.getInstance(Server::class.java)
     server.start()
 }
