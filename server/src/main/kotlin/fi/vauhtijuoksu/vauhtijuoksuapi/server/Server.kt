@@ -34,7 +34,7 @@ class Server @Inject constructor(private val httpServer: HttpServer, apiRouter: 
 }
 
 fun main() {
-    val injector = Guice.createInjector(ApiModule(), DatabaseModule())
+    val injector = Guice.createInjector(ConfigurationModule(), ApiModule(), DatabaseModule())
     val server = injector.getInstance(Server::class.java)
     server.start()
 }

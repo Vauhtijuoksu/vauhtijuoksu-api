@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
@@ -24,6 +25,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations.openMocks
+import java.net.ServerSocket
 import java.net.URL
 import java.time.Instant
 import java.util.Date
@@ -77,14 +79,23 @@ class ServerTest {
         return uninitialized()
     }
 
+    private fun getFreePort(): Int {
+        val sock = ServerSocket(0)
+        val port = sock.localPort
+        sock.close()
+        return port
+    }
+
     @BeforeEach
     fun beforeEach() {
+        val serverPort = getFreePort()
         mocks = openMocks(this)
         val injector = Guice.createInjector(
             ApiModule(),
             object : AbstractModule() {
                 override fun configure() {
                     bind(VauhtijuoksuDatabase::class.java).toInstance(db)
+                    bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort))
                 }
             }
         )
@@ -92,7 +103,7 @@ class ServerTest {
         vertx = injector.getInstance(Vertx::class.java)
         server = injector.getInstance(Server::class.java)
         server.start()
-        client = WebClient.create(vertx, WebClientOptions().setDefaultPort(8080))
+        client = WebClient.create(vertx, WebClientOptions().setDefaultPort(serverPort))
     }
 
     @AfterEach
