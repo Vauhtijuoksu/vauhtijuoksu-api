@@ -2,7 +2,8 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.net.URL
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 data class GameData(
     val id: UUID,

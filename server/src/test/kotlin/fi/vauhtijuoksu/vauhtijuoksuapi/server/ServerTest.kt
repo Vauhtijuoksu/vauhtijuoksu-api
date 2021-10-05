@@ -26,7 +26,9 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations.openMocks
 import java.net.URL
 import java.time.Instant
-import java.util.*
+import java.util.Date
+import java.util.Optional
+import java.util.UUID
 
 @ExtendWith(VertxExtension::class)
 class ServerTest {
@@ -65,7 +67,6 @@ class ServerTest {
         "halo.png",
         "T3_mu & Spike_B"
     )
-
 
     // Mockito returns null with any(). This fails on non-nullable parameters
     // Stackoverflow taught me a workaround https://stackoverflow.com/questions/30305217/is-it-possible-to-use-mockito-in-kotlin
@@ -146,8 +147,14 @@ class ServerTest {
     }
 
     @Test
+    fun testPostGameData(testContext: VertxTestContext) {
+        // TODO endpoint not yet implemented
+        testContext.completeNow()
+    }
+
+    @Test
     fun testGameDataDbError(testContext: VertxTestContext) {
-        `when`(db.getAll()).thenReturn(Future.failedFuture(RuntimeException("Vituixmän")))
+        `when`(db.getAll()).thenReturn(Future.failedFuture(RuntimeException("DB error")))
         client.get("/gamedata").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -159,7 +166,7 @@ class ServerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["OPTIONS", "POST", "HEAD", "PUT", "PATCH", "DELETE", "TRACE", "CONNECT"])
+    @ValueSource(strings = ["PUT", "PATCH", "DELETE"])
     fun testGameDataNotAllowedMethods(method: String, testContext: VertxTestContext) {
         client.request(HttpMethod(method), "/gamedata").send()
             .onFailure(testContext::failNow)
@@ -198,6 +205,38 @@ class ServerTest {
                         JsonObject(jacksonObjectMapper().writeValueAsString(gameData1)),
                         JsonObject(res.bodyAsString())
                     )
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testPatchSingleGameData(testContext: VertxTestContext) {
+        // TODO endpoint not yet implemented
+        testContext.completeNow()
+    }
+
+    @Test
+    fun testSingleGameDataDbError(testContext: VertxTestContext) {
+        `when`(db.getById(any())).thenReturn(Future.failedFuture(RuntimeException("DB error")))
+        client.get("/gamedata/${UUID.randomUUID()}").send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(500, res.statusCode())
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["POST", "PUT", "DELETE"])
+    fun testGameDataByIdNotAllowedMethods(method: String, testContext: VertxTestContext) {
+        client.request(HttpMethod(method), "/gamedata/${UUID.randomUUID()}").send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(405, res.statusCode())
                 }
                 testContext.completeNow()
             }
