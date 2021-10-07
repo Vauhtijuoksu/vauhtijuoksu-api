@@ -8,6 +8,9 @@ plugins {
 }
 
 dependencies {
+    implementation("com.google.inject:guice")
+    implementation("com.sksamuel.hoplite:hoplite-core")
+    implementation("com.sksamuel.hoplite:hoplite-yaml")
     implementation("io.vertx:vertx-core")
     implementation("io.vertx:vertx-web")
     implementation("io.vertx:vertx-lang-kotlin")

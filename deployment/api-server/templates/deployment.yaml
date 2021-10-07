@@ -24,3 +24,10 @@ spec:
           resources:
             limits:
               cpu: 50m
+          volumeMounts:
+            - name: configuration
+              mountPath: /configuration
+      volumes:
+        - name: configuration
+          configMap:
+            name: vauhtijuoksu-api
