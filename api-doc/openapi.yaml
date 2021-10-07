@@ -384,7 +384,7 @@ components:
       - message
       - amount
       example:
-        timestamp: '2021-09-21 15:05:47'
+        timestamp: '2021-09-21T15:05:47Z'
         name: jsloth
         message: ota tää :D 🤔🤔
         amount: 10
@@ -397,12 +397,12 @@ components:
       - id
       example:
         6c28df04-b9d2-4ebe-bd33-58c9b290d929:
-          timestamp: '2021-09-21 15:05:47'
+          timestamp: '2021-09-21T15:05:47Z'
           name: jsloth
           message: ota tää :D 🤔🤔
           amount: 10
         7c28df04-b9d2-4ebe-bd33-58c9b290d930:
-          timestamp: '2021-09-21 15:05:50'
+          timestamp: '2021-09-21T15:05:50Z'
           name: luuranki
           message: 'mee tänne: töihin :))))))))'
           amount: 5
@@ -440,8 +440,8 @@ components:
       example:
         game: Tetris
         player: jsloth
-        start_time: '2021-09-21 15:05:47'
-        end_time: '2021-09-21 16:05:47'
+        start_time: '2021-09-21T15:05:47Z'
+        end_time: '2021-09-21T16:05:47Z'
         category: any%
         device: PC
         published: '1970'
@@ -459,8 +459,8 @@ components:
         6c28df04-b9d2-4ebe-bd33-58c9b290d929:
           game: Tetris
           player: jsloth
-          start_time: '2021-09-21 15:05:47'
-          end_time: '2021-09-21 16:05:47'
+          start_time: '2021-09-21T15:05:47Z'
+          end_time: '2021-09-21T16:05:47Z'
           category: any%
           device: PC
           published: '1970'
@@ -470,8 +470,8 @@ components:
         6c28df04-b9d2-4ebe-bd33-58c9b290d930:
           game: Tetris2
           player: jsloth
-          start_time: '2021-09-21 15:07:47'
-          end_time: '2021-09-21 16:08:47'
+          start_time: '2021-09-21T15:07:47Z'
+          end_time: '2021-09-21T16:08:47Z'
           category: any% no t
           device: PC
           published: '1971'
@@ -540,7 +540,7 @@ components:
       example:
         game: Tetris2
         title: Tetrispakikan nimi
-        end_time: '2021-09-21 19:08:47'
+        end_time: '2021-09-21T19:08:47Z'
         type: open
         open_char_limit: 10
         info: Nimeä tetrispalikka poggers
@@ -555,7 +555,7 @@ components:
         6c28df04-b9d2-4ebe-bd33-58c9b290d929:
           game: Tetris
           title: Ei pyörimistä
-          end_time: '2021-09-21 16:08:47'
+          end_time: '2021-09-21T16:08:47Z'
           type: upgrade
           upgrade_parameters:
             - 200
@@ -564,7 +564,7 @@ components:
         6c28df04-b9d2-4ebe-bd33-58c9b290d930:
           game: Tetris2
           title: silmät kii
-          end_time: '2021-09-21 19:08:47'
+          end_time: '2021-09-21T19:08:47Z'
           type: option
           option_parameters:
             - kissa
@@ -573,7 +573,7 @@ components:
         6c28df04-b9d2-4ebe-bd33-58c9b290d931:
           game: Tetris2
           title: Tetrispakikan nimi
-          end_time: '2021-09-21 19:08:47'
+          end_time: '2021-09-21T19:08:47Z'
           type: open
           open_char_limit: 10
           info: Nimeä tetrispalikka poggers
