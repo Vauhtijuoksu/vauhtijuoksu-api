@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     constraints {
+        val jacksonVersion = "2.13.+"
         val hopliteVersion = "1.4.9"
         val vertxVersion = "4.1.4"
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk16")
@@ -19,6 +20,8 @@ dependencies {
         implementation("io.swagger.codegen.v3:swagger-codegen-cli:3.0.26")
         implementation("org.webjars:swagger-ui:3.10.0")
 
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+        implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
         implementation("com.google.inject:guice:5.0.1")
         implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
         implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
@@ -26,6 +29,7 @@ dependencies {
         implementation("io.vertx:vertx-web:$vertxVersion")
         implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
 
+        testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
         testImplementation("io.vertx:vertx-junit5:$vertxVersion")
         testImplementation("io.vertx:vertx-web-client:$vertxVersion")
