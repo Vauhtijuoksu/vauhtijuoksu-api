@@ -12,12 +12,16 @@ repositories {
 
 dependencies {
     constraints {
+        val hopliteVersion = "1.4.9"
         val vertxVersion = "4.1.4"
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk16")
         // Codegen components
         implementation("io.swagger.codegen.v3:swagger-codegen-cli:3.0.26")
         implementation("org.webjars:swagger-ui:3.10.0")
 
+        implementation("com.google.inject:guice:5.0.1")
+        implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
+        implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
         implementation("io.vertx:vertx-core:$vertxVersion")
         implementation("io.vertx:vertx-web:$vertxVersion")
         implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
