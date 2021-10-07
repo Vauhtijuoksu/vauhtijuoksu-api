@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "vauhtijuoksu-api.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       {{- include "vauhtijuoksu-api.selectorLabels" . | nindent 6 }}
@@ -16,14 +16,14 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "vauhtijuoksu.azurecr.io/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.registry }}{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
           resources:
             limits:
-              cpu: 50m
+              cpu: 500m
           volumeMounts:
             - name: configuration
               mountPath: /configuration

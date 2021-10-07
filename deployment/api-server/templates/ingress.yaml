@@ -9,6 +9,8 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: "true"
+    # To work on kind cluster
+    nginx.ingress.kubernetes.io/server-alias: localhost
 spec:
   tls:
     - hosts:

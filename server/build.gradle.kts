@@ -31,9 +31,10 @@ application {
 
 val dockerBuild by tasks.registering {
     description = "Build a docker image"
-    val imageName = "vauhtijuoksu-api"
+    val imageName = "vauhtijuoksu/vauhtijuoksu-api"
     val imageTag = "dev"
-    inputs.files(tasks.distTar.get().path)
+    dependsOn(tasks.distTar)
+    inputs.files(tasks.distTar.get().outputs.files)
     inputs.file("Dockerfile")
     val imageHashFile = "$buildDir/image-hash"
     outputs.file(imageHashFile)

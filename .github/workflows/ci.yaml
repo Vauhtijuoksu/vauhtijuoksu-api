@@ -15,10 +15,16 @@ jobs:
         with:
           distribution: adopt
           java-version: 16
-      - name: Build
+      - name: Install a newer curl
+        # Integration tests utilize --retry-all-errors, which is added in curl 7.71.0
+        run: |
+          curl -vL https://github.com/moparisthebest/static-curl/releases/download/v7.78.0/curl-amd64 -o /tmp/curl
+          sudo install /tmp/curl /usr/local/bin/curl
+          echo "/usr/local/bin" >> $GITHUB_PATH
+      - name: Build and test
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: build
+          arguments: build integrationTest --info
           distributions-cache-enabled: true
           dependencies-cache-enabled: true
           configuration-cache-enabled: true
@@ -30,7 +36,7 @@ jobs:
           path: api-doc/build/swagger-ui
       - name: Output docker image
         run: |
-          docker image save vauhtijuoksu-api:dev -o vauhtijuoksu-api.tar
+          docker image save vauhtijuoksu/vauhtijuoksu-api:dev -o vauhtijuoksu-api.tar
       - name: Save Docker image
         uses: actions/upload-artifact@v2
         with:
@@ -67,7 +73,7 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
       - name: Push docker image to ACR
         run: |
-          docker tag vauhtijuoksu-api:dev vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:dev
+          docker tag vauhtijuoksu/vauhtijuoksu-api:dev vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:dev
           docker push vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:dev
       - uses: azure/aks-set-context@v1
         with:
