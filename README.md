@@ -4,6 +4,7 @@
 * java 16
 * helm 3
 * jq
+* bash
 
 ## Generating API
 ```shell

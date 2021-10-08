@@ -1,3 +1,4 @@
+import fi.vauhtijuoksu.utilities.bashCommand
 import java.io.FileOutputStream
 
 plugins {
@@ -8,7 +9,7 @@ tasks {
     val lintCharts by registering {
         fun lintDir(chartDirectory: String, output: String) {
             val res = exec {
-                commandLine("helm", "lint", chartDirectory)
+                bashCommand("helm lint $chartDirectory")
                 standardOutput = FileOutputStream(output, true)
                 isIgnoreExitValue = true
             }

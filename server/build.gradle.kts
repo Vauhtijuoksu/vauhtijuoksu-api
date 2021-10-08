@@ -1,3 +1,4 @@
+import fi.vauhtijuoksu.utilities.bashCommand
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -52,14 +53,11 @@ val dockerBuild by tasks.registering {
     }
     doLast {
         exec {
-            commandLine("docker", "build", ".", "-t", "$imageName:$imageTag")
+            bashCommand("docker build . -t $imageName:$imageTag")
         }
         // Save the image hash so that gradle caches the step
         exec {
-            commandLine(
-                "bash", "-c",
-                "docker image inspect $imageName:$imageTag | jq '.[0].Id' > build/image-hash"
-            )
+            bashCommand("docker image inspect $imageName:$imageTag | jq '.[0].Id' > build/image-hash")
         }
     }
 }
