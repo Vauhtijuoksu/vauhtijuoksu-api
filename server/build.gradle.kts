@@ -13,12 +13,17 @@ dependencies {
     implementation(project(path = ":database"))
 
     implementation("com.google.inject:guice")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.sksamuel.hoplite:hoplite-core")
     implementation("com.sksamuel.hoplite:hoplite-yaml")
+    implementation("io.github.microutils:kotlin-logging-jvm")
     implementation("io.vertx:vertx-core")
     implementation("io.vertx:vertx-web")
     implementation("io.vertx:vertx-lang-kotlin")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+    runtimeOnly("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
+    runtimeOnly("com.fasterxml.jackson.core:jackson-databind")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j18-impl")
 
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("io.vertx:vertx-web-client")
@@ -27,6 +32,7 @@ dependencies {
 
 application {
     mainClass.set("fi.vauhtijuoksu.vauhtijuoksuapi.server.ServerKt")
+    applicationDefaultJvmArgs = listOf("-Dlog4j2.configurationFile=/configuration/log4j2.yaml")
 }
 
 val dockerBuild by tasks.registering {

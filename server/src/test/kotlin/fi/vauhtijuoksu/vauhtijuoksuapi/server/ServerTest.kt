@@ -72,6 +72,7 @@ class ServerTest {
 
     // Mockito returns null with any(). This fails on non-nullable parameters
     // Stackoverflow taught me a workaround https://stackoverflow.com/questions/30305217/is-it-possible-to-use-mockito-in-kotlin
+    @Suppress("UNCHECKED_CAST")
     private fun <T> uninitialized(): T = null as T
 
     private fun <T> any(): T {
