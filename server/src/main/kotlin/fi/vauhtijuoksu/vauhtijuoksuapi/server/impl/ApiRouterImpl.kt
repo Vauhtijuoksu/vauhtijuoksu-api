@@ -5,10 +5,13 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiRouter
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
+import mu.KotlinLogging
 import java.util.UUID
 import javax.inject.Inject
 
 class ApiRouterImpl @Inject constructor(private val router: Router, private val db: VauhtijuoksuDatabase) : ApiRouter {
+    private val logger = KotlinLogging.logger {}
+
     companion object {
         const val NOT_FOUND = 404
         const val INTERNAL_SERVER_ERROR = 500

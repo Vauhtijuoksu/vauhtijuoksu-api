@@ -6,3 +6,6 @@ image:
 database:
   address: not-yet-in-place
   port: 5678
+
+logging:
+  level: info

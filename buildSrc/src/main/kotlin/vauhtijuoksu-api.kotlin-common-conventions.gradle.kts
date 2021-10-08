@@ -25,9 +25,15 @@ dependencies {
         implementation("com.google.inject:guice:5.0.1")
         implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
         implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
+        implementation("io.github.microutils:kotlin-logging-jvm:2.0.10")
         implementation("io.vertx:vertx-core:$vertxVersion")
         implementation("io.vertx:vertx-web:$vertxVersion")
         implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
+
+        // Jackson databind required by log4j2 to read yaml configuration files
+        runtimeOnly("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
+        runtimeOnly("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+        runtimeOnly("org.apache.logging.log4j:log4j-slf4j18-impl:2.14.0")
 
         testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
