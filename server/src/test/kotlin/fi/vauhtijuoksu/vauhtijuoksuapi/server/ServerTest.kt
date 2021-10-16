@@ -6,30 +6,36 @@ import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData1
+import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData2
 import io.vertx.core.Future
 import io.vertx.core.Vertx
-import io.vertx.core.http.HttpMethod
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.client.WebClientOptions
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations.openMocks
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
 import java.net.ServerSocket
-import java.net.URL
-import java.time.Instant
-import java.util.Date
-import java.util.Optional
 import java.util.UUID
 
 @ExtendWith(VertxExtension::class)
@@ -41,34 +47,13 @@ class ServerTest {
     @Mock
     private lateinit var db: VauhtijuoksuDatabase
 
-    private lateinit var mocks: AutoCloseable
+    @TempDir
+    lateinit var tmpDir: File
 
-    private val gameData1 = GameData(
-        UUID.randomUUID(),
-        "Tetris",
-        "jsloth",
-        Date.from(Instant.now()),
-        Date.from(Instant.now()),
-        "any%",
-        "PC",
-        "1970",
-        null,
-        "tetris.png",
-        "jiisloth"
-    )
-    private val gameData2 = GameData(
-        UUID.randomUUID(),
-        "Halo",
-        "T3mu & Spike_B",
-        Date.from(Instant.now()),
-        Date.from(Instant.now()),
-        "any%",
-        "PC",
-        "2004",
-        URL("https://youtube.com/video"),
-        "halo.png",
-        "T3_mu & Spike_B"
-    )
+    val username = "vauhtijuoksu"
+    val password = "vauhtijuoksu"
+
+    private lateinit var mocks: AutoCloseable
 
     // Mockito returns null with any(). This fails on non-nullable parameters
     // Stackoverflow taught me a workaround https://stackoverflow.com/questions/30305217/is-it-possible-to-use-mockito-in-kotlin
@@ -89,6 +74,12 @@ class ServerTest {
 
     @BeforeEach
     fun beforeEach() {
+        val htpasswdFile = "${tmpDir.path}/.htpasswd"
+        val writer = BufferedWriter(FileWriter(File(htpasswdFile)))
+        // Pre-generated credentials vauhtijuoksu / vauhtijuoksu
+        writer.write("vauhtijuoksu:{SHA}Iih8iFrD8jPkj1eYEw6tJmTbHrg=")
+        writer.close()
+
         val serverPort = getFreePort()
         mocks = openMocks(this)
         val injector = Guice.createInjector(
@@ -96,7 +87,7 @@ class ServerTest {
             object : AbstractModule() {
                 override fun configure() {
                     bind(VauhtijuoksuDatabase::class.java).toInstance(db)
-                    bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort))
+                    bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile))
                 }
             }
         )
@@ -104,6 +95,8 @@ class ServerTest {
         vertx = injector.getInstance(Vertx::class.java)
         server = injector.getInstance(Server::class.java)
         server.start()
+        // Vertx is too hasty to claim it's listening
+        Thread.sleep(10)
         client = WebClient.create(vertx, WebClientOptions().setDefaultPort(serverPort))
     }
 
@@ -128,8 +121,8 @@ class ServerTest {
     }
 
     @Test
-    fun testGameDataNoData(testContext: VertxTestContext) {
-        `when`(db.getAll()).thenReturn(Future.succeededFuture(ArrayList()))
+    fun testGetGameDataNoData(testContext: VertxTestContext) {
+        `when`(db.getGameData()).thenReturn(Future.succeededFuture(ArrayList()))
         client.get("/gamedata").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -143,8 +136,8 @@ class ServerTest {
     }
 
     @Test
-    fun testGameData(testContext: VertxTestContext) {
-        `when`(db.getAll()).thenReturn(Future.succeededFuture(arrayListOf(gameData1, gameData2)))
+    fun testGetGameData(testContext: VertxTestContext) {
+        `when`(db.getGameData()).thenReturn(Future.succeededFuture(arrayListOf(gameData1, gameData2)))
         client.get("/gamedata").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -159,14 +152,8 @@ class ServerTest {
     }
 
     @Test
-    fun testPostGameData(testContext: VertxTestContext) {
-        // TODO endpoint not yet implemented
-        testContext.completeNow()
-    }
-
-    @Test
     fun testGameDataDbError(testContext: VertxTestContext) {
-        `when`(db.getAll()).thenReturn(Future.failedFuture(RuntimeException("DB error")))
+        `when`(db.getGameData()).thenReturn(Future.failedFuture(RuntimeException("DB error")))
         client.get("/gamedata").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -177,14 +164,84 @@ class ServerTest {
             }
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = ["PUT", "PATCH", "DELETE"])
-    fun testGameDataNotAllowedMethods(method: String, testContext: VertxTestContext) {
-        client.request(HttpMethod(method), "/gamedata").send()
+    @Test
+    fun testAddingGameData(testContext: VertxTestContext) {
+        `when`(db.addGameData(any())).thenReturn(Future.succeededFuture(gameData1.copy(UUID.randomUUID())))
+        val body = JsonObject.mapFrom(gameData1)
+        body.remove("id")
+        client.post("/gamedata")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(body)
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
-                    assertEquals(405, res.statusCode())
+                    assertEquals(201, res.statusCode())
+                    val resJson = res.bodyAsJsonObject()
+                    assertEquals(
+                        gameData1.copy(id = UUID.fromString(resJson.getString("id"))),
+                        res.bodyAsJson(GameData::class.java)
+                    )
+                    testContext.completeNow()
+                }
+            }
+    }
+
+    @Test
+    fun testAddingGameDataWithIdFails(testContext: VertxTestContext) {
+        client.post("/gamedata")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(JsonObject.mapFrom(gameData1))
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(400, res.statusCode())
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["game", "player", "start_time", "end_time", "category", "device", "published"])
+    fun testMandatoryFieldsAreRequiredWhenAddingGameData(missingField: String, testContext: VertxTestContext) {
+        val json = JsonObject.mapFrom(gameData1)
+        json.remove("id")
+        assertNotNull(json.remove(missingField))
+        client.post("/gamedata")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(json)
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(400, res.statusCode())
+                    assertTrue(res.bodyAsString().contains(missingField))
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testAddingGameDataWithoutBodyFails(testContext: VertxTestContext) {
+        client.post("/gamedata")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(400, res.statusCode())
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testAddingGameDataWithoutAuthenticationFails(testContext: VertxTestContext) {
+        client.post("/gamedata")
+            .send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(401, res.statusCode())
+                    verify(db, times(0)).deleteGameData(any())
                 }
                 testContext.completeNow()
             }
@@ -192,7 +249,7 @@ class ServerTest {
 
     @Test
     fun testGetSingleGameDataNotFound(testContext: VertxTestContext) {
-        `when`(db.getById(any())).thenReturn(Future.succeededFuture(Optional.empty()))
+        `when`(db.getGameDataById(any())).thenReturn(Future.succeededFuture())
         client.get("/gamedata/${UUID.randomUUID()}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -206,7 +263,7 @@ class ServerTest {
 
     @Test
     fun testGetSingleGameData(testContext: VertxTestContext) {
-        `when`(db.getById(gameData1.id)).thenReturn(Future.succeededFuture(Optional.of(gameData1)))
+        `when`(db.getGameDataById(gameData1.id!!)).thenReturn(Future.succeededFuture(gameData1))
         client.get("/gamedata/${gameData1.id}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -230,7 +287,7 @@ class ServerTest {
 
     @Test
     fun testSingleGameDataDbError(testContext: VertxTestContext) {
-        `when`(db.getById(any())).thenReturn(Future.failedFuture(RuntimeException("DB error")))
+        `when`(db.getGameDataById(any())).thenReturn(Future.failedFuture(RuntimeException("DB error")))
         client.get("/gamedata/${UUID.randomUUID()}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -241,14 +298,49 @@ class ServerTest {
             }
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = ["POST", "PUT", "DELETE"])
-    fun testGameDataByIdNotAllowedMethods(method: String, testContext: VertxTestContext) {
-        client.request(HttpMethod(method), "/gamedata/${UUID.randomUUID()}").send()
+    @Test
+    fun testDeleteGameData(testContext: VertxTestContext) {
+        val uuid = UUID.randomUUID()
+        `when`(db.deleteGameData(any())).thenReturn(Future.succeededFuture(true))
+        client.delete("/gamedata/$uuid")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
-                    assertEquals(405, res.statusCode())
+                    assertEquals(204, res.statusCode())
+                    verify(db).deleteGameData(uuid)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testDeleteNonExistingGameData(testContext: VertxTestContext) {
+        val uuid = UUID.randomUUID()
+        `when`(db.deleteGameData(any())).thenReturn(Future.succeededFuture(false))
+        client.delete("/gamedata/$uuid")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(404, res.statusCode())
+                    verify(db).deleteGameData(uuid)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testDeleteWithoutAuthenticationFails(testContext: VertxTestContext) {
+        client.delete("/gamedata/${UUID.randomUUID()}")
+            .send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(401, res.statusCode())
+                    verify(db, times(0)).deleteGameData(any())
                 }
                 testContext.completeNow()
             }

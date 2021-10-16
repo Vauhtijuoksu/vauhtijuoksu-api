@@ -8,6 +8,10 @@ data:
   conf.yaml: |
     server:
       port: 8080
+      htpasswdFileLocation: /configuration/htpasswd
     database:
+      database: {{ .Values.database.database }}
       address: {{ .Values.database.address }}
       port: {{ .Values.database.port }}
+      user: {{ .Values.database.user }}
+      poolSize: {{ .Values.database.poolSize }}

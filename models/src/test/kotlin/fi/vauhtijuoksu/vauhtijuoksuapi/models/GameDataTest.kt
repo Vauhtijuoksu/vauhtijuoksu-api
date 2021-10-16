@@ -22,20 +22,6 @@ internal class GameDataTest {
     private val startUtc = "2021-09-21T15:05:47.000+00:00"
     private val endUtc = "2021-09-21T17:05:47.000+00:00"
 
-    private val gameData = GameData(
-        uuid,
-        "Tetris",
-        "jsloth",
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(start))),
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(end))),
-        "any%",
-        "PC",
-        "1970",
-        URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
-        "tetris.png",
-        "jiisloth"
-    )
-
     private val expectedGameData = JsonObject()
         .put("id", uuid.toString())
         .put("game", "Tetris")

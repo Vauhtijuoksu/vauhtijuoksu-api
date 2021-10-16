@@ -2,18 +2,27 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataRouter
 import io.vertx.core.http.HttpServer
+import io.vertx.ext.web.Router
+import io.vertx.ext.web.handler.SessionHandler
 import mu.KotlinLogging
 import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
-class Server @Inject constructor(private val httpServer: HttpServer, apiRouter: ApiRouter) {
+class Server @Inject constructor(
+    private val httpServer: HttpServer,
+    router: Router,
+    gameDataRouter: GameDataRouter,
+    sessionHandler: SessionHandler
+) {
     private val logger = KotlinLogging.logger {}
 
     init {
-        httpServer.requestHandler(apiRouter.router())
+        gameDataRouter.configure(router)
+        httpServer.requestHandler(router)
+        router.route().handler(sessionHandler)
     }
 
     fun start() {

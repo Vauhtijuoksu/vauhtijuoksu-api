@@ -17,6 +17,7 @@ dependencies {
     implementation("com.sksamuel.hoplite:hoplite-core")
     implementation("com.sksamuel.hoplite:hoplite-yaml")
     implementation("io.github.microutils:kotlin-logging-jvm")
+    implementation("io.vertx:vertx-auth-htpasswd")
     implementation("io.vertx:vertx-core")
     implementation("io.vertx:vertx-web")
     implementation("io.vertx:vertx-lang-kotlin")
@@ -24,6 +25,8 @@ dependencies {
     runtimeOnly("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
     runtimeOnly("com.fasterxml.jackson.core:jackson-databind")
     runtimeOnly("org.apache.logging.log4j:log4j-slf4j18-impl")
+
+    testImplementation(project(path = ":test-data"))
 
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("io.vertx:vertx-web-client")

@@ -95,4 +95,8 @@ jobs:
           helm upgrade --install mockserver deployment/mockserver --set commit=${{ github.sha }}
       - name: Deploy API server to AKS
         run: |
-          helm upgrade --install vauhtijuoksu-api deployment/api-server
+          helm upgrade --install vauhtijuoksu-api deployment/api-server \
+            --set database.address=${{ secrets.DATABASE_ADDRESS }} \
+            --set database.user=${{ secrets.DATABASE_USERNAME }} \
+            --set database.database=${{ secrets.DATABASE_DATABASE }} \
+            --set image.imagePullPolicy=Always

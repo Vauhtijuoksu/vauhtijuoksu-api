@@ -8,23 +8,23 @@ import java.util.Date
 import java.util.UUID
 
 data class GameData(
-    val id: UUID,
-    val game: String,
-    val player: String,
+    val id: UUID?,
+    val game: String?,
+    val player: String?,
     @JsonProperty("start_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    val startTime: Date,
+    val startTime: Date?,
     @JsonProperty("end_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    val endTime: Date,
-    val category: String,
-    val device: String,
-    val published: String,
+    val endTime: Date?,
+    val category: String?,
+    val device: String?,
+    val published: String?,
     @JsonProperty("vod_link")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val vodLink: URL?,
     @JsonProperty("img_filename")
-    val imgFilename: String,
+    val imgFilename: String?,
     @JsonProperty("player_twitch")
-    val playerTwitch: String,
+    val playerTwitch: String?,
 )

@@ -55,12 +55,33 @@ tasks {
             } else {
                 exec {
                     workingDir = File("$projectDir")
-                    bashCommand("kind create cluster --name vauhtijuoksu --config kind-cluster-config.yaml")
+                    bashCommand("kind create cluster --name vauhtijuoksu --config kind-cluster/kind-cluster-config.yaml")
                 }
                 exec {
                     workingDir = File("$projectDir")
                     bashCommand("kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml")
                 }
+                // Utilize the wait time that would otherwise be spent waiting on ingress by installing postgres here
+                exec {
+                    bashCommand("helm repo add bitnami https://charts.bitnami.com/bitnami")
+                }
+                exec {
+                    bashCommand("helm repo update")
+                }
+                exec {
+                    workingDir = File("$projectDir")
+                    bashCommand("helm install postgres bitnami/postgresql -f kind-cluster/psql-values.yaml")
+                }
+                // Postgres secrets for vauhtijuoksu api. Created manually on production environment
+                exec {
+                    workingDir = File("$projectDir")
+                    bashCommand("kubectl create secret generic vauhtijuoksu-api-psql --from-file kind-cluster/secret-conf.yaml")
+                }
+                exec {
+                    workingDir = File("$projectDir")
+                    bashCommand("kubectl create secret generic vauhtijuoksu-api-htpasswd --from-file kind-cluster/htpasswd")
+                }
+                // Wait for ingress
                 exec {
                     workingDir = File("$projectDir")
                     // Sleep a bit because the resource is not yet created
@@ -80,7 +101,11 @@ tasks {
             }
             exec {
                 workingDir = File("$projectDir")
-                bashCommand("helm upgrade --install vauhtijuoksu-api api-server --set image.registry=\"\"")
+                bashCommand("helm upgrade --install vauhtijuoksu-api api-server -f kind-cluster/vauhtijuoksu-api-values.yaml")
+            }
+            exec {
+                // As there's no versioning yet, delete pods by hand to ensure rollout
+                bashCommand("kubectl delete pod -lapp.kubernetes.io/name=vauhtijuoksu-api")
             }
         }
     }

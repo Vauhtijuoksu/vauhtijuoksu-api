@@ -1,0 +1,7 @@
+global:
+  postgresql:
+    postgresqlDatabase: vauhtijuoksu-api
+    postgresqlUsername: postgres
+    postgresqlPassword: topsecret
+image:
+  tag: 10.18.0-debian-10-r60

@@ -2,10 +2,22 @@ image:
   registry: vauhtijuoksu.azurecr.io/
   repository: vauhtijuoksu/vauhtijuoksu-api
   tag: "dev"
+  imagePullPolicy: IfNotPresent
+
+server:
+  # Generate a htpasswd file
+  # Create corresponding secret by running `kubectl create secret generic vauhtijuoksu-htpasswd --from-file <path>/htpasswd`
+  htpasswdSecret: vauhtijuoksu-api-htpasswd
 
 database:
-  address: not-yet-in-place
-  port: 5678
+  address: postgres-postgresql.default.svc.cluster.local
+  port: 5432
+  database: vauhtijuoksu-api
+  # Create a secret file. See kind-cluster/secret-conf.yaml for example
+  # Create by running `kubectl create secret generic vauhtijuoksu-api-psql --from-file <path>/secret-conf.yaml`
+  secret: vauhtijuoksu-api-psql
+  user: postgres
+  poolSize: 5
 
 logging:
   level: info

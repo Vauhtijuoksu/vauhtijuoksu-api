@@ -17,13 +17,11 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.registry }}{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
-          resources:
-            limits:
-              cpu: 500m
           volumeMounts:
           - name: configuration
             mountPath: /configuration
@@ -36,3 +34,7 @@ spec:
               name: '{{ include "vauhtijuoksu-api.fullname" . }}-conf'
           - configMap:
               name: '{{ include "vauhtijuoksu-api.fullname" . }}-log4j2'
+          - secret:
+              name: {{ .Values.database.secret }}
+          - secret:
+              name: {{ .Values.server.htpasswdSecret }}
