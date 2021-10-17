@@ -50,6 +50,10 @@ tasks {
             }
             if (res.exitValue == 0) {
                 logger.info("""Cluster named "vauhtijuoksu" already exists""")
+                // Ensure that local cluster is used for following commands, and not for example production cluster
+                exec {
+                    bashCommand("kind export kubeconfig --name vauhtijuoksu")
+                }
             } else {
                 exec {
                     workingDir = File("$projectDir")
