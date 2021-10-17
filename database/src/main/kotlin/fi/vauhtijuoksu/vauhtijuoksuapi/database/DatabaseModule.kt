@@ -6,7 +6,9 @@ import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.DonationDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.GameDataDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import io.vertx.pgclient.PgConnectOptions
 import io.vertx.pgclient.PgPool
@@ -17,6 +19,7 @@ import io.vertx.sqlclient.SqlClient
 class DatabaseModule : AbstractModule() {
     override fun configure() {
         bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).to(GameDataDatabase::class.java)
+        bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).to(DonationDatabase::class.java)
     }
 
     @Provides

@@ -3,6 +3,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.models
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.vertx.core.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.net.URL
 import java.time.Instant
@@ -22,18 +23,23 @@ internal class GameDataTest {
     private val startUtc = "2021-09-21T15:05:47.000+00:00"
     private val endUtc = "2021-09-21T17:05:47.000+00:00"
 
-    private val expectedGameData = JsonObject()
-        .put("id", uuid.toString())
-        .put("game", "Tetris")
-        .put("player", "jsloth")
-        .put("start_time", startUtc)
-        .put("end_time", endUtc)
-        .put("category", "any%")
-        .put("device", "PC")
-        .put("published", "1970")
-        .put("vod_link", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-        .put("img_filename", "tetris.png")
-        .put("player_twitch", "jiisloth")
+    private lateinit var expectedGameData: JsonObject
+
+    @BeforeEach
+    fun setup() {
+        expectedGameData = JsonObject()
+            .put("id", uuid.toString())
+            .put("game", "Tetris")
+            .put("player", "jsloth")
+            .put("start_time", startUtc)
+            .put("end_time", endUtc)
+            .put("category", "any%")
+            .put("device", "PC")
+            .put("published", "1970")
+            .put("vod_link", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            .put("img_filename", "tetris.png")
+            .put("player_twitch", "jiisloth")
+    }
 
     @Test
     fun testGameDataSerialization() {
@@ -51,25 +57,13 @@ internal class GameDataTest {
             "jiisloth"
         )
 
-        val expectedGameData = JsonObject()
-            .put("id", uuid.toString())
-            .put("game", "Tetris")
-            .put("player", "jsloth")
-            .put("start_time", startUtc)
-            .put("end_time", endUtc)
-            .put("category", "any%")
-            .put("device", "PC")
-            .put("published", "1970")
-            .put("vod_link", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-            .put("img_filename", "tetris.png")
-            .put("player_twitch", "jiisloth")
-
         val gameDataAsJson = JsonObject(jacksonObjectMapper().writeValueAsString(gameData))
         assertEquals(expectedGameData, gameDataAsJson)
     }
 
     @Test
     fun testGameDataSerializationNoVodLink() {
+        expectedGameData.remove("vod_link")
         val gameData = GameData(
             uuid,
             "Tetris",
@@ -83,18 +77,6 @@ internal class GameDataTest {
             "tetris.png",
             "jiisloth"
         )
-
-        val expectedGameData = JsonObject()
-            .put("id", uuid.toString())
-            .put("game", "Tetris")
-            .put("player", "jsloth")
-            .put("start_time", startUtc)
-            .put("end_time", endUtc)
-            .put("category", "any%")
-            .put("device", "PC")
-            .put("published", "1970")
-            .put("img_filename", "tetris.png")
-            .put("player_twitch", "jiisloth")
 
         val gameDataAsJson = JsonObject(jacksonObjectMapper().writeValueAsString(gameData))
         assertEquals(expectedGameData, gameDataAsJson)

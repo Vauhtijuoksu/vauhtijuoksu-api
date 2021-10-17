@@ -4,9 +4,11 @@ import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationPostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataPostInputValidator
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
@@ -24,6 +26,7 @@ class ApiModule : AbstractModule() {
 
     override fun configure() {
         bind(object : TypeLiteral<PostInputValidator<GameData>>() {}).to(GameDataPostInputValidator::class.java)
+        bind(object : TypeLiteral<PostInputValidator<Donation>>() {}).to(DonationPostInputValidator::class.java)
     }
 
     @Provides

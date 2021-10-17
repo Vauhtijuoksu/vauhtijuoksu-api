@@ -13,7 +13,7 @@ class ServerTest : ServerTestBase() {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(404, res.statusCode())
-                    verifyNoMoreInteractions(db)
+                    verifyNoMoreInteractions(gameDataDb)
                 }
                 testContext.completeNow()
             }

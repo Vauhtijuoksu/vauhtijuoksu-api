@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.google.inject.TypeLiteral
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
 import io.vertx.core.Vertx
@@ -25,6 +26,7 @@ import java.net.ServerSocket
 
 @ExtendWith(MockitoExtension::class)
 @ExtendWith(VertxExtension::class)
+@Suppress("UnnecessaryAbstractClass") // Using abstract as a marker
 abstract class ServerTestBase {
     private lateinit var vertx: Vertx
     private lateinit var server: Server
@@ -32,6 +34,9 @@ abstract class ServerTestBase {
 
     @Mock
     protected lateinit var gameDataDb: VauhtijuoksuDatabase<GameData>
+
+    @Mock
+    protected lateinit var donationDb: VauhtijuoksuDatabase<Donation>
 
     @TempDir
     lateinit var tmpDir: File
@@ -69,7 +74,8 @@ abstract class ServerTestBase {
             ApiModule(),
             object : AbstractModule() {
                 override fun configure() {
-                    bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(db)
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
                     bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile))
                 }
             }

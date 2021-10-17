@@ -2,6 +2,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataRouter
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
@@ -15,12 +16,14 @@ class Server @Inject constructor(
     private val httpServer: HttpServer,
     router: Router,
     gameDataRouter: GameDataRouter,
+    donationsRouter: DonationsRouter,
     sessionHandler: SessionHandler
 ) {
     private val logger = KotlinLogging.logger {}
 
     init {
         gameDataRouter.configure(router)
+        donationsRouter.configure(router)
         httpServer.requestHandler(router)
         router.route().handler(sessionHandler)
     }
