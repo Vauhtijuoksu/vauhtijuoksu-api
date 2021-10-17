@@ -4,4 +4,5 @@ global:
     postgresqlUsername: postgres
     postgresqlPassword: topsecret
 image:
+  # Upgrade version for pull command in deployment/build.gradle.kts when upgrading this
   tag: 10.18.0-debian-10-r60

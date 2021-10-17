@@ -56,36 +56,42 @@ tasks {
                 }
             } else {
                 exec {
-                    workingDir = File("$projectDir")
+                    workingDir = projectDir
                     bashCommand("kind create cluster --name vauhtijuoksu --config kind-cluster/kind-cluster-config.yaml")
                 }
                 exec {
-                    workingDir = File("$projectDir")
+                    workingDir = projectDir
                     bashCommand("kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml")
                 }
                 // Utilize the wait time that would otherwise be spent waiting on ingress by installing postgres here
                 exec {
-                    bashCommand("helm repo add bitnami https://charts.bitnami.com/bitnami")
+                    bashCommand(
+                        """
+                        helm repo add bitnami https://charts.bitnami.com/bitnami
+                        helm repo update
+                        # Download postgres image to docker on host so it's not downloaded for each new cluster
+                        # Upgrade version for image tag in deployment/kind-cluster/psql-values.yaml when upgrading this
+                        docker image pull bitnami/postgresql:10.18.0-debian-10-r60
+                        kind load docker-image bitnami/postgresql:10.18.0-debian-10-r60 --name vauhtijuoksu
+                        """
+                    )
                 }
                 exec {
-                    bashCommand("helm repo update")
-                }
-                exec {
-                    workingDir = File("$projectDir")
+                    workingDir = projectDir
                     bashCommand("helm install postgres bitnami/postgresql -f kind-cluster/psql-values.yaml")
                 }
                 // Postgres secrets for vauhtijuoksu api. Created manually on production environment
                 exec {
-                    workingDir = File("$projectDir")
+                    workingDir = projectDir
                     bashCommand("kubectl create secret generic vauhtijuoksu-api-psql --from-file kind-cluster/secret-conf.yaml")
                 }
                 exec {
-                    workingDir = File("$projectDir")
+                    workingDir = projectDir
                     bashCommand("kubectl create secret generic vauhtijuoksu-api-htpasswd --from-file kind-cluster/htpasswd")
                 }
                 // Wait for ingress
                 exec {
-                    workingDir = File("$projectDir")
+                    workingDir = projectDir
                     // Sleep a bit because the resource is not yet created
                     bashCommand("sleep 15 && kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s")
                 }
@@ -134,7 +140,7 @@ tasks {
         group = "Application"
         doLast {
             exec {
-                workingDir = File("$projectDir")
+                workingDir = projectDir
                 bashCommand("kind delete cluster --name vauhtijuoksu")
             }
         }
