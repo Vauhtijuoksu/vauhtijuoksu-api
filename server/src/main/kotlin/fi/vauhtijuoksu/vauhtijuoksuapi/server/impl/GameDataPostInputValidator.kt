@@ -1,26 +1,28 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
 
-class GameDataInputValidator {
+class GameDataPostInputValidator : PostInputValidator<GameData> {
     /**
      * Validate gamedata. Returns a string describing any errors found
      */
-    @Suppress("ReturnCount") // It's clearer to return as soon as an error is encountered
-    fun validateInput(gd: GameData): String? {
-        if (gd.id != null) {
+    @Suppress("ReturnCount")
+    override // It's clearer to return as soon as an error is encountered
+    fun validate(input: GameData): String? {
+        if (input.id != null) {
             return "ID must not be provided in input"
         }
 
         for (
             (getter, fieldName) in mapOf<() -> Any?, String>(
-                gd::game to "game",
-                gd::player to "player",
-                gd::startTime to "start_time",
-                gd::endTime to "end_time",
-                gd::category to "category",
-                gd::device to "device",
-                gd::published to "published",
+                input::game to "game",
+                input::player to "player",
+                input::startTime to "start_time",
+                input::endTime to "end_time",
+                input::category to "category",
+                input::device to "device",
+                input::published to "published",
             )
         ) {
             val v = getter()
@@ -33,7 +35,7 @@ class GameDataInputValidator {
             }
         }
 
-        if (gd.startTime?.after(gd.endTime) == true) {
+        if (input.startTime?.after(input.endTime) == true) {
             return "Start time must be earlier than end time"
         }
         return null

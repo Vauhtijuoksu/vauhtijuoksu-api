@@ -1,21 +1,185 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.Mapper
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
+import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.handler.AuthenticationHandler
+import io.vertx.ext.web.handler.BodyHandler
+import mu.KotlinLogging
+import java.util.UUID
 
-abstract class AbstractRouter {
+@Suppress("UnnecessaryAbstractClass") // Abstract is used to indicate the intended usage
+abstract class AbstractRouter<T : Model>
+@Suppress("LongParameterList") // I think this is fine as the parameters are independent toggles
+protected constructor(
+    private val endpoint: String,
+    private val mapper: Mapper<T>,
+    private val db: VauhtijuoksuDatabase<T>,
+    private val authenticationHandler: AuthenticationHandler,
+    private val allowPost: Boolean,
+    private val allowDelete: Boolean,
+    private val allowPatch: Boolean,
+    private val postInputValidator: PostInputValidator<T>?,
+) {
     companion object {
         const val CREATED = 201
         const val NO_CONTENT = 204
         const val BAD_REQUEST = 400
         const val NOT_FOUND = 404
+        const val METHOD_NOT_ALLOWED = 405
         const val INTERNAL_SERVER_ERROR = 500
         const val NOT_IMPLEMENTED = 501
     }
 
-    internal fun notImplemented(ctx: RoutingContext) {
+    private val logger = KotlinLogging.logger {}
+
+    private fun notImplemented(ctx: RoutingContext) {
         ctx.response().setStatusCode(NOT_IMPLEMENTED).end()
     }
 
-    abstract fun configure(router: Router)
+    init {
+        DatabindCodec.mapper()
+            .registerModule(kotlinModule())
+
+        if (!endpoint.startsWith("/")) {
+            throw IllegalArgumentException("Endpoint should start with /")
+        }
+        if (allowPost && postInputValidator == null) {
+            throw IllegalArgumentException("postInputValidator is required if allowPost is true")
+        }
+    }
+
+    fun configure(router: Router) {
+        router.route("$endpoint*").handler { ctx ->
+            ctx.response().putHeader("content-type", "application/json")
+            ctx.next()
+        }
+        get(router)
+
+        if (allowPost) {
+            post(router)
+        }
+        if (allowPatch) {
+            patch(router)
+        }
+        if (allowDelete) {
+            delete(router)
+        }
+        router.route(endpoint).handler { ctx ->
+            ctx.response().setStatusCode(METHOD_NOT_ALLOWED).end()
+        }
+        router.route("$endpoint/:id").handler { ctx ->
+            ctx.response().setStatusCode(METHOD_NOT_ALLOWED).end()
+        }
+    }
+
+    private fun get(router: Router) {
+        router.get(endpoint).handler { ctx ->
+            db.getAll()
+                .onFailure { t ->
+                    logger.warn { "Failed to retrieve record because of ${t.message}" }
+                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
+                }
+                .onSuccess { all -> ctx.response().end(jacksonObjectMapper().writeValueAsString(all)) }
+        }
+
+        router.get("$endpoint/:id").handler { ctx ->
+            val id: UUID
+            try {
+                id = UUID.fromString(ctx.pathParam("id"))
+            } catch (e: IllegalArgumentException) {
+                ctx.response().setStatusCode(BAD_REQUEST).end(e.message)
+                return@handler
+            }
+            db.getById(id)
+                .onFailure { t ->
+                    logger.warn { "Failed to get record because of ${t.message}" }
+                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
+                }
+                .onSuccess { gameData ->
+                    if (gameData == null) {
+                        ctx.response().setStatusCode(NOT_FOUND).end()
+                    } else {
+                        ctx.response().end(jacksonObjectMapper().writeValueAsString(gameData))
+                    }
+                }
+        }
+    }
+
+    private fun post(router: Router) {
+        router.post(endpoint)
+            .handler(authenticationHandler)
+            .handler(BodyHandler.create())
+            .handler { ctx ->
+                val record: T
+                try {
+                    val jsonBody = ctx.bodyAsJson
+                    if (jsonBody == null) {
+                        ctx.response().setStatusCode(BAD_REQUEST).end("Body is required on POST")
+                        return@handler
+                    }
+                    record = mapper.mapTo(jsonBody)
+                    logger.debug { "Inserting a new record object $record" }
+                } catch (e: IllegalArgumentException) {
+                    logger.warn { "Error parsing record object from ${ctx.bodyAsString} because ${e.message}" }
+                    ctx.response().setStatusCode(BAD_REQUEST).end(e.message)
+                    return@handler
+                }
+
+                // Asserted to be non-null in init
+                val validationMessage = postInputValidator!!.validate(record)
+                if (validationMessage != null) {
+                    ctx.response().setStatusCode(BAD_REQUEST).end(validationMessage)
+                    return@handler
+                }
+
+                db.add(record)
+                    .onFailure { t ->
+                        logger.warn { "Failed to insert record $record because of ${t.message}" }
+                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(t.message)
+                    }
+                    .onSuccess { insertedGd ->
+                        logger.info { "Inserted record $insertedGd" }
+                        ctx.response().setStatusCode(CREATED)
+                            .end(jacksonObjectMapper().writeValueAsString(insertedGd))
+                    }
+            }
+    }
+
+    private fun delete(router: Router) {
+        router.delete("$endpoint/:id")
+            .handler(authenticationHandler)
+            .handler { ctx ->
+                val id: UUID
+                try {
+                    id = UUID.fromString(ctx.pathParam("id"))
+                } catch (e: IllegalArgumentException) {
+                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(e.message)
+                    return@handler
+                }
+                db.delete(id)
+                    .onFailure { t ->
+                        logger.warn { "Failed to delete record with id $id because of ${t.message}" }
+                    }
+                    .onSuccess { res ->
+                        if (res) {
+                            ctx.response().setStatusCode(NO_CONTENT).end()
+                        } else {
+                            ctx.response().setStatusCode(NOT_FOUND).end()
+                        }
+                    }
+            }
+    }
+
+    private fun patch(router: Router) {
+        router.patch("$endpoint/:id")
+            .handler(authenticationHandler)
+            .handler(this::notImplemented)
+    }
 }

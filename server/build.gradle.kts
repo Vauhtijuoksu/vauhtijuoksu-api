@@ -31,6 +31,7 @@ dependencies {
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("io.vertx:vertx-web-client")
     testImplementation("org.mockito:mockito-core")
+    testImplementation("org.mockito:mockito-junit-jupiter")
 }
 
 application {
