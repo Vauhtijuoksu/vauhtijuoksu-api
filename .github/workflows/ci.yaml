@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
+        with:
+          # Fetch tags to allow constructing version string
+          fetch-depth: 0
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
@@ -23,6 +26,9 @@ jobs:
           curl -vL https://github.com/moparisthebest/static-curl/releases/download/v7.78.0/curl-amd64 -o /tmp/curl
           sudo install /tmp/curl /usr/local/bin/curl
           echo "/usr/local/bin" >> $GITHUB_PATH
+      - name: Set version
+        run: |
+          echo "VERSION=$(./scripts/version.sh)" >> $GITHUB_ENV
       - name: Build and test
         uses: eskatos/gradle-command-action@v1
         with:
@@ -44,7 +50,7 @@ jobs:
           path: api-doc/build/swagger-ui
       - name: Output docker image
         run: |
-          docker image save vauhtijuoksu/vauhtijuoksu-api:dev -o vauhtijuoksu-api.tar
+          docker image save vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} -o vauhtijuoksu-api.tar
       - name: Save Docker image
         uses: actions/upload-artifact@v2
         with:
@@ -58,6 +64,12 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
+        with:
+          # Fetch tags to allow constructing version string
+          fetch-depth: 0
+      - name: Set version
+        run: |
+          echo "VERSION=$(./scripts/version.sh)" >> $GITHUB_ENV
       - uses: actions/download-artifact@v2
         with:
           name: swagger ui
@@ -81,8 +93,8 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
       - name: Push docker image to ACR
         run: |
-          docker tag vauhtijuoksu/vauhtijuoksu-api:dev vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:dev
-          docker push vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:dev
+          docker tag vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
+          docker push vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
       - uses: azure/aks-set-context@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -99,4 +111,4 @@ jobs:
             --set database.address=${{ secrets.DATABASE_ADDRESS }} \
             --set database.user=${{ secrets.DATABASE_USERNAME }} \
             --set database.database=${{ secrets.DATABASE_DATABASE }} \
-            --set image.imagePullPolicy=Always
+            --set image.tag=${{ env.VERSION }}

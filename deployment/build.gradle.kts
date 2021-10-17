@@ -1,5 +1,4 @@
 import fi.vauhtijuoksu.utilities.bashCommand
-import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 
 plugins {
@@ -47,7 +46,6 @@ tasks {
         doLast {
             val res = exec {
                 bashCommand("kind get clusters | grep ^vauhtijuoksu$")
-                standardOutput = ByteArrayOutputStream()
                 isIgnoreExitValue = true
             }
             if (res.exitValue == 0) {
@@ -97,15 +95,18 @@ tasks {
         dependsOn(dockerImage, createCluster)
         doLast {
             exec {
-                bashCommand("kind load docker-image vauhtijuoksu/vauhtijuoksu-api:dev --name vauhtijuoksu")
+                bashCommand("kind load docker-image vauhtijuoksu/vauhtijuoksu-api:${rootProject.version} --name vauhtijuoksu")
             }
             exec {
-                workingDir = File("$projectDir")
-                bashCommand("helm upgrade --install vauhtijuoksu-api api-server -f kind-cluster/vauhtijuoksu-api-values.yaml")
-            }
-            exec {
-                // As there's no versioning yet, delete pods by hand to ensure rollout
-                bashCommand("kubectl delete pod -lapp.kubernetes.io/name=vauhtijuoksu-api")
+                workingDir = projectDir
+                bashCommand(
+                    """
+                helm upgrade --install vauhtijuoksu-api api-server -f kind-cluster/vauhtijuoksu-api-values.yaml --set image.tag=${rootProject.version}
+                # Force restart, because in development pods might have a same dirty version if no commits were made
+                kubectl rollout restart deployment vauhtijuoksu-api
+                kubectl rollout status deployment vauhtijuoksu-api
+                """
+                )
             }
         }
     }

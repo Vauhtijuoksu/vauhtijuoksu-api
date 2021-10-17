@@ -38,3 +38,17 @@ The cluster can be deleted with:
 ```shell
 ./gradlew tearDownCluster
 ```
+
+## Versions
+Get current version by running
+```shell
+./scripts/version.sh
+```
+
+Versions are generated from the latest annotated git tag.
+Feel free to create new tags with `git tag` whenever necessary.
+Example:
+```shell
+git tag -am 0.1 0.1 9de10436d1c097826845679cda1633c90f968fc1
+git push origin 0.1
+```
