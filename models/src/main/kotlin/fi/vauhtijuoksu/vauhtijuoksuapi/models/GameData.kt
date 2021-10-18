@@ -8,7 +8,7 @@ import java.util.Date
 import java.util.UUID
 
 data class GameData(
-    val id: UUID?,
+    override val id: UUID?,
     val game: String?,
     val player: String?,
     @JsonProperty("start_time")
@@ -27,4 +27,4 @@ data class GameData(
     val imgFilename: String?,
     @JsonProperty("player_twitch")
     val playerTwitch: String?,
-)
+) : Model

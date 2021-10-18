@@ -3,6 +3,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
+import com.google.inject.TypeLiteral
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
@@ -45,7 +46,7 @@ class ServerTest {
     private lateinit var client: WebClient
 
     @Mock
-    private lateinit var db: VauhtijuoksuDatabase
+    private lateinit var db: VauhtijuoksuDatabase<GameData>
 
     @TempDir
     lateinit var tmpDir: File
@@ -86,7 +87,7 @@ class ServerTest {
             ApiModule(),
             object : AbstractModule() {
                 override fun configure() {
-                    bind(VauhtijuoksuDatabase::class.java).toInstance(db)
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(db)
                     bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile))
                 }
             }
@@ -122,7 +123,7 @@ class ServerTest {
 
     @Test
     fun testGetGameDataNoData(testContext: VertxTestContext) {
-        `when`(db.getGameData()).thenReturn(Future.succeededFuture(ArrayList()))
+        `when`(db.getAll()).thenReturn(Future.succeededFuture(ArrayList()))
         client.get("/gamedata").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -137,7 +138,7 @@ class ServerTest {
 
     @Test
     fun testGetGameData(testContext: VertxTestContext) {
-        `when`(db.getGameData()).thenReturn(Future.succeededFuture(arrayListOf(gameData1, gameData2)))
+        `when`(db.getAll()).thenReturn(Future.succeededFuture(arrayListOf(gameData1, gameData2)))
         client.get("/gamedata").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -153,7 +154,7 @@ class ServerTest {
 
     @Test
     fun testGameDataDbError(testContext: VertxTestContext) {
-        `when`(db.getGameData()).thenReturn(Future.failedFuture(RuntimeException("DB error")))
+        `when`(db.getAll()).thenReturn(Future.failedFuture(RuntimeException("DB error")))
         client.get("/gamedata").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -166,7 +167,7 @@ class ServerTest {
 
     @Test
     fun testAddingGameData(testContext: VertxTestContext) {
-        `when`(db.addGameData(any())).thenReturn(Future.succeededFuture(gameData1.copy(UUID.randomUUID())))
+        `when`(db.add(any())).thenReturn(Future.succeededFuture(gameData1.copy(UUID.randomUUID())))
         val body = JsonObject.mapFrom(gameData1)
         body.remove("id")
         client.post("/gamedata")
@@ -241,7 +242,7 @@ class ServerTest {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(401, res.statusCode())
-                    verify(db, times(0)).deleteGameData(any())
+                    verify(db, times(0)).delete(any())
                 }
                 testContext.completeNow()
             }
@@ -249,7 +250,7 @@ class ServerTest {
 
     @Test
     fun testGetSingleGameDataNotFound(testContext: VertxTestContext) {
-        `when`(db.getGameDataById(any())).thenReturn(Future.succeededFuture())
+        `when`(db.getById(any())).thenReturn(Future.succeededFuture())
         client.get("/gamedata/${UUID.randomUUID()}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -263,7 +264,7 @@ class ServerTest {
 
     @Test
     fun testGetSingleGameData(testContext: VertxTestContext) {
-        `when`(db.getGameDataById(gameData1.id!!)).thenReturn(Future.succeededFuture(gameData1))
+        `when`(db.getById(gameData1.id!!)).thenReturn(Future.succeededFuture(gameData1))
         client.get("/gamedata/${gameData1.id}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -287,7 +288,7 @@ class ServerTest {
 
     @Test
     fun testSingleGameDataDbError(testContext: VertxTestContext) {
-        `when`(db.getGameDataById(any())).thenReturn(Future.failedFuture(RuntimeException("DB error")))
+        `when`(db.getById(any())).thenReturn(Future.failedFuture(RuntimeException("DB error")))
         client.get("/gamedata/${UUID.randomUUID()}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -301,7 +302,7 @@ class ServerTest {
     @Test
     fun testDeleteGameData(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
-        `when`(db.deleteGameData(any())).thenReturn(Future.succeededFuture(true))
+        `when`(db.delete(any())).thenReturn(Future.succeededFuture(true))
         client.delete("/gamedata/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
@@ -309,7 +310,7 @@ class ServerTest {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(204, res.statusCode())
-                    verify(db).deleteGameData(uuid)
+                    verify(db).delete(uuid)
                 }
                 testContext.completeNow()
             }
@@ -318,7 +319,7 @@ class ServerTest {
     @Test
     fun testDeleteNonExistingGameData(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
-        `when`(db.deleteGameData(any())).thenReturn(Future.succeededFuture(false))
+        `when`(db.delete(any())).thenReturn(Future.succeededFuture(false))
         client.delete("/gamedata/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
@@ -326,7 +327,7 @@ class ServerTest {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(404, res.statusCode())
-                    verify(db).deleteGameData(uuid)
+                    verify(db).delete(uuid)
                 }
                 testContext.completeNow()
             }
@@ -340,7 +341,7 @@ class ServerTest {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(401, res.statusCode())
-                    verify(db, times(0)).deleteGameData(any())
+                    verify(db, times(0)).delete(any())
                 }
                 testContext.completeNow()
             }

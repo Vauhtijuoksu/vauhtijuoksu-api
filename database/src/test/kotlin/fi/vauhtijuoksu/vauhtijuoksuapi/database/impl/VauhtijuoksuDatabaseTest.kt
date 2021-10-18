@@ -2,9 +2,11 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
+import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
 import io.vertx.sqlclient.SqlClient
@@ -20,33 +22,26 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.text.SimpleDateFormat
 import java.util.UUID
-import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData1 as gd1
-import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData2 as gd2
-import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData3 as gd3
 
 @Testcontainers
 @ExtendWith(VertxExtension::class)
-class VauhtijuoksuDatabaseTest {
-    private lateinit var db: VauhtijuoksuDatabaseImpl
+abstract class VauhtijuoksuDatabaseTest<T : Model> {
+    private lateinit var db: VauhtijuoksuDatabase<T>
     private lateinit var sqlClient: SqlClient
-    private val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
     @Container
     var pg: PostgreSQLContainer<Nothing> =
         PostgreSQLContainer<Nothing>("postgres:10").withDatabaseName("vauhtijuoksu-api")
 
-    private fun insertStatement(data: List<GameData>): String {
-        fun valuesStringForGameData(gd: GameData): String {
-            @Suppress("MaxLineLength")
-            return "('${gd.id}', '${gd.game}', '${gd.player}', '${df.format(gd.startTime)}', '${df.format(gd.endTime)}', '${gd.category}', '${gd.device}', '${gd.published}', '${gd.vodLink}', '${gd.imgFilename}', '${gd.playerTwitch}')"
-        }
+    abstract fun insertStatement(data: List<T>): String
 
-        var statement = "INSERT INTO gamedata VALUES "
-        for (gd in data) {
-            statement += "${valuesStringForGameData(gd)},"
-        }
-        return statement.trim(',')
-    }
+    abstract fun existingRecord1(): T
+    abstract fun existingRecord2(): T
+    abstract fun newRecord(): T
+    abstract fun tableName(): String
+    abstract fun copyWithId(oldRecord: T, newId: UUID): T
+    abstract fun getDatabase(injector: Injector): VauhtijuoksuDatabase<T>
 
     @BeforeEach
     fun beforeEach(testContext: VertxTestContext) {
@@ -68,10 +63,10 @@ class VauhtijuoksuDatabaseTest {
             }
         )
 
-        db = injector.getInstance(VauhtijuoksuDatabaseImpl::class.java)
+        db = getDatabase(injector)
         sqlClient = injector.getInstance(SqlClient::class.java)
 
-        sqlClient.query(insertStatement(listOf(gd1, gd2)))
+        sqlClient.query(insertStatement(listOf(existingRecord1(), existingRecord2())))
             .execute()
             .onFailure(testContext::failNow)
             .onSuccess {
@@ -81,11 +76,11 @@ class VauhtijuoksuDatabaseTest {
 
     @Test
     fun testGetAllOnEmptyDatabase(testContext: VertxTestContext) {
-        sqlClient.query("DELETE FROM gamedata")
+        sqlClient.query("DELETE FROM ${tableName()}")
             .execute()
             .onFailure(testContext::failNow)
             .onSuccess {
-                db.getGameData()
+                db.getAll()
                     .onFailure(testContext::failNow)
                     .onSuccess { result ->
                         testContext.verify {
@@ -98,11 +93,11 @@ class VauhtijuoksuDatabaseTest {
 
     @Test
     fun testGetAll(testContext: VertxTestContext) {
-        db.getGameData()
+        db.getAll()
             .onFailure(testContext::failNow)
-            .onSuccess { gamedata ->
+            .onSuccess { records ->
                 testContext.verify {
-                    assertEquals(listOf(gd1, gd2), gamedata)
+                    assertEquals(listOf(existingRecord1(), existingRecord2()), records)
                 }
                 testContext.completeNow()
             }
@@ -110,7 +105,7 @@ class VauhtijuoksuDatabaseTest {
 
     @Test
     fun testGetByNonExistingId(testContext: VertxTestContext) {
-        db.getGameDataById(UUID.randomUUID())
+        db.getById(UUID.randomUUID())
             .onFailure(testContext::failNow)
             .onSuccess { result ->
                 testContext.verify {
@@ -122,28 +117,28 @@ class VauhtijuoksuDatabaseTest {
 
     @Test
     fun testGetById(testContext: VertxTestContext) {
-        db.getGameDataById(gd2.id!!)
+        db.getById(existingRecord1().id!!)
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
-                    assertEquals(gd2, res)
+                    assertEquals(existingRecord1(), res)
                 }
                 testContext.completeNow()
             }
     }
 
     @Test
-    fun testAddGameData(testContext: VertxTestContext) {
-        lateinit var insertedGd: GameData
-        db.addGameData(gd3)
+    fun testAdd(testContext: VertxTestContext) {
+        lateinit var insertedRecord: T
+        db.add(newRecord())
             .onFailure(testContext::failNow)
-            .onSuccess { res -> insertedGd = res }
+            .onSuccess { res -> insertedRecord = res }
             .compose {
-                db.getGameDataById(insertedGd.id!!)
+                db.getById(insertedRecord.id!!)
             }
             .onSuccess { res ->
                 testContext.verify {
-                    assertEquals(gd3.copy(id = insertedGd.id), res)
+                    assertEquals(copyWithId(newRecord(), insertedRecord.id!!), res)
                 }
                 testContext.completeNow()
             }
@@ -153,7 +148,7 @@ class VauhtijuoksuDatabaseTest {
     fun testDeleteExisting(testContext: VertxTestContext) {
         val deletedCp = testContext.checkpoint()
         val verifiedDeletionCp = testContext.checkpoint()
-        db.deleteGameData(gd2.id!!)
+        db.delete(existingRecord1().id!!)
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -161,7 +156,8 @@ class VauhtijuoksuDatabaseTest {
                 }
                 deletedCp.flag()
             }
-            .compose { db.getGameDataById(gd2.id!!) }
+            .compose { db.getById(existingRecord1().id!!) }
+            .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertNull(res)
@@ -172,14 +168,15 @@ class VauhtijuoksuDatabaseTest {
 
     @Test
     fun testDeleteNonExisting(testContext: VertxTestContext) {
-        db.deleteGameData(UUID.randomUUID())
+        db.delete(UUID.randomUUID())
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertFalse(res)
                 }
             }
-            .compose { db.getGameData() }
+            .compose { db.getAll() }
+            .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(2, res.count())

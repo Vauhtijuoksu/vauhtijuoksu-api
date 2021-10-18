@@ -13,7 +13,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 class GameDataRouter @Inject constructor(
-    private val db: VauhtijuoksuDatabase,
+    private val db: VauhtijuoksuDatabase<GameData>,
     private val inputValidator: GameDataInputValidator,
     private val authenticationHandler: AuthenticationHandler
 ) :
@@ -33,7 +33,7 @@ class GameDataRouter @Inject constructor(
             ctx.next()
         }
         router.get("/gamedata").handler { ctx ->
-            db.getGameData()
+            db.getAll()
                 .onFailure { t ->
                     logger.warn { "Failed to retrieve gamedata because of ${t.message}" }
                     ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
@@ -65,7 +65,7 @@ class GameDataRouter @Inject constructor(
                     return@handler
                 }
 
-                db.addGameData(gd)
+                db.add(gd)
                     .onFailure { t ->
                         logger.warn { "Failed to insert gamedata $gd because of ${t.message}" }
                         ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(t.message)
@@ -84,7 +84,7 @@ class GameDataRouter @Inject constructor(
                 ctx.response().setStatusCode(BAD_REQUEST).end(e.message)
                 return@handler
             }
-            db.getGameDataById(id)
+            db.getById(id)
                 .onFailure { t ->
                     logger.warn { "Failed to get gamedata because of ${t.message}" }
                     ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
@@ -108,7 +108,7 @@ class GameDataRouter @Inject constructor(
                     ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(e.message)
                     return@handler
                 }
-                db.deleteGameData(id)
+                db.delete(id)
                     .onFailure { t ->
                         logger.warn { "Failed to delete gamedata with id $id because of ${t.message}" }
                     }

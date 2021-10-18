@@ -1,28 +1,28 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.database.api
 
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import io.vertx.core.Future
 import java.util.UUID
 
-interface VauhtijuoksuDatabase {
+interface VauhtijuoksuDatabase<T : Model> {
     /**
-     * Get all gamedata objects
+     * Get all records
      */
-    fun getGameData(): Future<List<GameData>>
+    fun getAll(): Future<List<T>>
 
     /**
-     * Get gamedata by id
+     * Get a record by id
      *
-     * @return Null if no such gamedata record exists
+     * @return Null if no such record exists
      */
-    fun getGameDataById(id: UUID): Future<GameData?>
+    fun getById(id: UUID): Future<T?>
 
-    fun addGameData(gd: GameData): Future<GameData>
+    fun add(record: T): Future<T>
 
     /**
-     * Delete a gamedata record with given id
+     * Delete a record with given id
      *
      * @return Future<Boolean> indicating whether a record with given id existed, and was therefore deleted
      */
-    fun deleteGameData(id: UUID): Future<Boolean>
+    fun delete(id: UUID): Future<Boolean>
 }
