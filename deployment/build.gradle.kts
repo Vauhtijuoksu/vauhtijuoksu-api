@@ -61,7 +61,15 @@ tasks {
                 }
                 exec {
                     workingDir = projectDir
-                    bashCommand("kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml")
+                    bashCommand(
+                        """
+                        docker pull k8s.gcr.io/ingress-nginx/controller:v1.0.4@sha256:545cff00370f28363dad31e3b59a94ba377854d3a11f18988f5f9e56841ef9ef
+                        docker pull k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
+                        kind load docker-image k8s.gcr.io/ingress-nginx/controller:v1.0.4@sha256:545cff00370f28363dad31e3b59a94ba377854d3a11f18988f5f9e56841ef9ef --name vauhtijuoksu
+                        kind load docker-image k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660 --name vauhtijuoksu
+                        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/14f6b32032b709d3e0f614ca85954c3583c5fe3d/deploy/static/provider/kind/deploy.yaml
+                        """
+                    )
                 }
                 // Utilize the wait time that would otherwise be spent waiting on ingress by installing postgres here
                 exec {
@@ -92,8 +100,7 @@ tasks {
                 // Wait for ingress
                 exec {
                     workingDir = projectDir
-                    // Sleep a bit because the resource is not yet created
-                    bashCommand("sleep 15 && kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s")
+                    bashCommand("kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s")
                 }
             }
         }
