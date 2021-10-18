@@ -1,7 +1,9 @@
 openapi: 3.0.3
 info:
-  version: 0.0.5
+  version: 0.0.7
   title: Vauhtijuoksu API
+servers:
+  - url: https://api.dev.vauhtijuoksu.fi
 paths:
   /donations:
     get:
@@ -14,7 +16,7 @@ paths:
     post:
       description: Add a new donation object.
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       requestBody:
         required: true
         content:
@@ -38,36 +40,23 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/DonationsOk'
-    put:
-      description: Put donation with client specified id (uuid).
-      security:
-        - ApiKeyAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DonationInput'
-      responses:
-        '200':
-          $ref: '#/components/responses/OkEmpty'
     patch:
       description: Patch donation data.
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DonationInput'
+              $ref: '#/components/schemas/DonationPatch'
       responses:
         '200':
           $ref: '#/components/responses/OkEmpty'
     delete:
       description: Delete donation.
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       responses:
         '200':
           $ref: '#/components/responses/OkEmpty'
@@ -82,7 +71,7 @@ paths:
     post:
       description: Add a new gamedata object.
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       requestBody:
         required: true
         content:
@@ -109,20 +98,20 @@ paths:
     patch:
       description: Patch game data.
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameDataInput'
+              $ref: '#/components/schemas/GameDataPatch'
       responses:
         '200':
           $ref: '#/components/responses/OkEmpty'
     delete:
       description: Delete game data.
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       responses:
         '200':
           $ref: '#/components/responses/OkEmpty'
@@ -137,7 +126,7 @@ paths:
     patch:
       description: Patch stream metadata.
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       requestBody:
         required: true
         content:
@@ -158,7 +147,7 @@ paths:
     patch:
       description: Patch player info.
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       requestBody:
         required: true
         content:
@@ -179,7 +168,7 @@ paths:
     post:
       description: Add a new incentive object.
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       requestBody:
         required: true
         content:
@@ -206,20 +195,20 @@ paths:
     patch:
       description: Patch incentive
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IncentiveInput'
+              $ref: '#/components/schemas/IncentivePatch'
       responses:
         '200':
           $ref: '#/components/responses/OkEmpty'
     delete:
       description: Delete incentive
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       responses:
         '200':
           $ref: '#/components/responses/OkEmpty'
@@ -233,8 +222,6 @@ paths:
           $ref: '#/components/responses/IncentiveCodesAllOk'
     post:
       description: Add a new incentive code object.
-      security:
-        - ApiKeyAuth: []
       requestBody:
         required: true
         content:
@@ -257,36 +244,23 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/IncentiveCodesOk'
-    put:
-      description: Put incentive code with client specified code.
-      security:
-        - ApiKeyAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IncentiveCodeInput'
-      responses:
-        '200':
-          $ref: '#/components/responses/OkEmpty'
     patch:
       description: Patch incentive code
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IncentiveCodeInput'
+              $ref: '#/components/schemas/IncentiveCodePatch'
       responses:
         '200':
           $ref: '#/components/responses/OkEmpty'
     delete:
       description: Delete incentive code
       security:
-        - ApiKeyAuth: []
+        - basicAuth: []
       responses:
         '200':
           $ref: '#/components/responses/OkEmpty'
@@ -386,18 +360,22 @@ components:
           type: string
         message:
           type: string
+        read:
+          type: boolean
+          default: false
         amount:
           type: number
       required:
         - id
+        - name
         - timestamp
-        - message
         - amount
       example:
         id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
-        timestamp: '2021-09-21T15:05:47Z'
+        timestamp: '2021-09-21T15:05:47.000+00:00'
         name: jsloth
         message: ota tää :D 🤔🤔
+        read: false
         amount: 10
     Donations:
       type: array
@@ -405,14 +383,16 @@ components:
         $ref: '#/components/schemas/Donation'
       example:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
-          timestamp: '2021-09-21T15:05:47Z'
+          timestamp: '2021-09-21T15:05:47.000+00:00'
           name: jsloth
           message: ota tää :D 🤔🤔
+          read: true
           amount: 10
         - id: 7c28df04-b9d2-4ebe-bd33-58c9b290d930
-          timestamp: '2021-09-21T15:05:50Z'
+          timestamp: '2021-09-21T15:05:50.000+00:00'
           name: luuranki
           message: 'mee tänne: töihin :))))))))'
+          read: false
           amount: 5
     DonationInput:
       type: object
@@ -424,17 +404,39 @@ components:
           type: string
         message:
           type: string
+        read:
+          type: boolean
+          default: false
         amount:
           type: number
       required:
         - timestamp
-        - message
+        - name
         - amount
       example:
-        timestamp: '2021-09-21T15:05:47Z'
+        timestamp: '2021-09-21T15:05:47.000+00:00'
         name: jsloth
         message: ota tää :D 🤔🤔
+        read: false
         amount: 10
+    DonationPatch:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        name:
+          type: string
+        message:
+          type: string
+        read:
+          type: boolean
+          default: false
+        amount:
+          type: number
+      example:
+        name: jsloth
+        message: ota tää :D 🤔🤔
     DonationOutput:
       type: object
       properties:
@@ -445,16 +447,20 @@ components:
           type: string
         message:
           type: string
+        read:
+          type: boolean
+          default: false
         amount:
           type: number
       required:
         - timestamp
-        - message
+        - name
         - amount
       example:
-        timestamp: '2021-09-21T15:05:47Z'
+        timestamp: '2021-09-21T15:05:47.000+00:00'
         name: jsloth
         message: ota tää :D 🤔🤔
+        read: false
         amount: 10
     GameData:
       type: object
@@ -497,8 +503,8 @@ components:
         id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
         game: Tetris
         player: jsloth
-        start_time: '2021-09-21T15:05:47Z'
-        end_time: '2021-09-21T16:05:47Z'
+        start_time: '2021-09-21T15:05:47.000+00:00'
+        end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
         device: PC
         published: '1970'
@@ -513,8 +519,8 @@ components:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
           game: Tetris
           player: jsloth
-          start_time: '2021-09-21T15:05:47Z'
-          end_time: '2021-09-21T16:05:47Z'
+          start_time: '2021-09-21T15:05:47.000+00:00'
+          end_time: '2021-09-21T16:05:47.000+00:00'
           category: any%
           device: PC
           published: '1970'
@@ -524,8 +530,8 @@ components:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
           game: Tetris2
           player: jsloth
-          start_time: '2021-09-21T15:07:47Z'
-          end_time: '2021-09-21T16:08:47Z'
+          start_time: '2021-09-21T15:07:47.000+00:00'
+          end_time: '2021-09-21T16:08:47.000+00:00'
           category: any% no t
           device: PC
           published: '1971'
@@ -568,13 +574,43 @@ components:
       example:
         game: Tetris
         player: jsloth
-        start_time: '2021-09-21T15:05:47Z'
-        end_time: '2021-09-21T16:05:47Z'
+        start_time: '2021-09-21T15:05:47.000+00:00'
+        end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
         device: PC
         published: '1970'
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
+        player_twitch: jiisloth
+    GameDataPatch:
+      type: object
+      properties:
+        game:
+          type: string
+        player:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        category:
+          type: string
+        device:
+          type: string
+        published:
+          type: string
+        vod_link:
+          type: string
+        img_filename:
+          type: string
+        player_twitch:
+          type: string
+      example:
+        game: Tetris
+        device: PC
+        published: '1970'
         player_twitch: jiisloth
     GameDataOutput:
       type: object
@@ -612,8 +648,8 @@ components:
       example:
         game: Tetris
         player: jsloth
-        start_time: '2021-09-21T15:05:47Z'
-        end_time: '2021-09-21T16:05:47Z'
+        start_time: '2021-09-21T15:05:47.000+00:00'
+        end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
         device: PC
         published: '1970'
@@ -654,8 +690,6 @@ components:
       properties:
         message:
           type: string
-      required:
-        - message
       example:
         message: Lahjoituksia luettavana!!
     Incentive:
@@ -689,7 +723,7 @@ components:
         id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
         game: Tetris2
         title: Tetrispakikan nimi
-        end_time: '2021-09-21T19:08:47Z'
+        end_time: '2021-09-21T19:08:47.000+00:00'
         type: open
         open_char_limit: 10
         info: Nimeä tetrispalikka poggers
@@ -701,7 +735,7 @@ components:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
           game: Tetris
           title: Ei pyörimistä
-          end_time: '2021-09-21T16:08:47Z'
+          end_time: '2021-09-21T16:08:47.000+00:00'
           type: upgrade
           upgrade_parameters:
             - 200
@@ -710,7 +744,7 @@ components:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
           game: Tetris2
           title: silmät kii
-          end_time: '2021-09-21T19:08:47Z'
+          end_time: '2021-09-21T19:08:47.000+00:00'
           type: option
           option_parameters:
             - kissa
@@ -719,7 +753,7 @@ components:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
           game: Tetris2
           title: Tetrispakikan nimi
-          end_time: '2021-09-21T19:08:47Z'
+          end_time: '2021-09-21T19:08:47.000+00:00'
           type: open
           open_char_limit: 10
           info: Nimeä tetrispalikka poggers
@@ -749,8 +783,32 @@ components:
       example:
         game: Tetris2
         title: Tetrispakikan nimi
-        end_time: '2021-09-21T19:08:47Z'
+        end_time: '2021-09-21T19:08:47.000+00:00'
         type: open
+        open_char_limit: 10
+        info: Nimeä tetrispalikka poggers
+    IncentivePatch:
+      type: object
+      properties:
+        game:
+          type: string
+        title:
+          type: string
+        end_time:
+          type: string
+          format: date-time
+        type:
+          type: string
+        open_char_limit:
+          type: string
+        updrade_parameters:
+          items:
+            type: integer
+        option_parameters:
+          items:
+            type: string
+      example:
+        end_time: '2021-09-21T19:08:47.000+00:00'
         open_char_limit: 10
         info: Nimeä tetrispalikka poggers
     IncentiveOutput:
@@ -779,7 +837,7 @@ components:
       example:
         game: Tetris2
         title: Tetrispakikan nimi
-        end_time: '2021-09-21T19:08:47Z'
+        end_time: '2021-09-21T19:08:47.000+00:00'
         type: open
         open_char_limit: 10
         info: Nimeä tetrispalikka poggers
@@ -820,6 +878,16 @@ components:
       example:
         id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
         parameter: kalle tetr
+    IncentiveCodePatch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        parameters:
+          type: string
+      example:
+        parameter: kalle tetr
     IncentiveCodeOutput:
       type: array
       items:
@@ -846,7 +914,6 @@ components:
           id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
 
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-KEY
+    basicAuth:
+      type: http
+      scheme: basic
