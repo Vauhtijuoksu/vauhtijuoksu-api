@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class GameDataRouter @Inject constructor(
     db: VauhtijuoksuDatabase<GameData>,
-    inputValidator: PostInputValidator<GameData>,
+    postInputValidator: PostInputValidator<GameData>,
     authenticationHandler: AuthenticationHandler
 ) :
     AbstractRouter<GameData>(
@@ -20,5 +20,5 @@ class GameDataRouter @Inject constructor(
         allowPost = true,
         allowDelete = true,
         allowPatch = true,
-        inputValidator
+        postInputValidator
     )
