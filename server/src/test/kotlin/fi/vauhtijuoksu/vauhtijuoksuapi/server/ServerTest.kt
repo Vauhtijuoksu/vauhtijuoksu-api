@@ -18,4 +18,18 @@ class ServerTest : ServerTestBase() {
                 testContext.completeNow()
             }
     }
+
+    @Test
+    fun testServerRespondsWithOrigin(testContext: VertxTestContext) {
+        client.get("/").putHeader("Origin", "https://localhost").send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(404, res.statusCode())
+                    assertEquals(corsHeader, res.getHeader("Access-Control-Allow-Origin"))
+                    verifyNoMoreInteractions(gameDataDb)
+                }
+                testContext.completeNow()
+            }
+    }
 }

@@ -44,6 +44,8 @@ abstract class ServerTestBase {
     protected val username = "vauhtijuoksu"
     protected val password = "vauhtijuoksu"
 
+    protected val corsHeader = "https://localhost"
+
     // Mockito returns null with any(). This fails on non-nullable parameters
     // Stackoverflow taught me a workaround https://stackoverflow.com/questions/30305217/is-it-possible-to-use-mockito-in-kotlin
     @Suppress("UNCHECKED_CAST")
@@ -76,7 +78,7 @@ abstract class ServerTestBase {
                 override fun configure() {
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
-                    bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile))
+                    bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile, corsHeader))
                 }
             }
         )
@@ -85,7 +87,7 @@ abstract class ServerTestBase {
         server = injector.getInstance(Server::class.java)
         server.start()
         // Vertx is too hasty to claim it's listening
-        Thread.sleep(10)
+        Thread.sleep(15)
         client = WebClient.create(vertx, WebClientOptions().setDefaultPort(serverPort))
     }
 

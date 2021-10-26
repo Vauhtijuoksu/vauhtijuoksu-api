@@ -1,2 +1,4 @@
 image:
   registry:
+server:
+  corsHeader: http(s)?://localhost(:\d{1,5})?$
