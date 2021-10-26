@@ -9,6 +9,7 @@ data:
     server:
       port: 8080
       htpasswdFileLocation: /configuration/htpasswd
+      corsHeader: {{ .Values.server.corsHeader }}
     database:
       database: {{ .Values.database.database }}
       address: {{ .Values.database.address }}

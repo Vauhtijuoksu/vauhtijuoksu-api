@@ -19,6 +19,7 @@ import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.BasicAuthHandler
+import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.sstore.LocalSessionStore
 
@@ -63,5 +64,11 @@ class ApiModule : AbstractModule() {
     @Singleton
     fun getAuthenticationHandler(authenticationProvider: AuthenticationProvider): AuthenticationHandler {
         return BasicAuthHandler.create(authenticationProvider)
+    }
+
+    @Provides
+    @Singleton
+    fun getCorsHandler(conf: ServerConfiguration): CorsHandler {
+        return CorsHandler.create(conf.corsHeader)
     }
 }
