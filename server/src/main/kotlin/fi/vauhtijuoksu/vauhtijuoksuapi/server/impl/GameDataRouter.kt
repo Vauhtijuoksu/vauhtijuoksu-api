@@ -19,6 +19,7 @@ class GameDataRouter @Inject constructor(
         authenticationHandler,
         allowPost = true,
         allowDelete = true,
-        allowPatch = true,
-        postInputValidator
+        allowPatch = false,
+        postInputValidator,
+        null
     )

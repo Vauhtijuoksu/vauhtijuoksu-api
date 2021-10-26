@@ -20,6 +20,12 @@ interface VauhtijuoksuDatabase<T : Model> {
     fun add(record: T): Future<T>
 
     /**
+     * Update given record and return the updated record if it exists. Note that full record is expected as input,
+     * i.e. any null values are written to db.
+     */
+    fun update(record: T): Future<T?>
+
+    /**
      * Delete a record with given id
      *
      * @return Future<Boolean> indicating whether a record with given id existed, and was therefore deleted

@@ -26,7 +26,7 @@ import java.util.UUID
 @Testcontainers
 @ExtendWith(VertxExtension::class)
 abstract class VauhtijuoksuDatabaseTest<T : Model> {
-    private lateinit var db: VauhtijuoksuDatabase<T>
+    protected lateinit var db: VauhtijuoksuDatabase<T>
     private lateinit var sqlClient: SqlClient
     val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 

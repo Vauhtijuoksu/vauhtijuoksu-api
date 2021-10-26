@@ -6,8 +6,10 @@ import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationPatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationPostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataPostInputValidator
 import io.vertx.core.Vertx
@@ -28,6 +30,7 @@ class ApiModule : AbstractModule() {
     override fun configure() {
         bind(object : TypeLiteral<PostInputValidator<GameData>>() {}).to(GameDataPostInputValidator::class.java)
         bind(object : TypeLiteral<PostInputValidator<Donation>>() {}).to(DonationPostInputValidator::class.java)
+        bind(object : TypeLiteral<PatchInputValidator<Donation>>() {}).to(DonationPatchInputValidator::class.java)
     }
 
     @Provides

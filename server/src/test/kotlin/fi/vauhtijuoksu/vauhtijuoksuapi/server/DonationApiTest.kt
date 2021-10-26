@@ -192,9 +192,76 @@ class DonationApiTest : ServerTestBase() {
     }
 
     @Test
-    fun testPatchSingleDonation(testContext: VertxTestContext) {
-        // TODO endpoint not yet implemented
-        testContext.completeNow()
+    fun testPatchDonation(testContext: VertxTestContext) {
+        val newDonation = donation1.copy(
+            read = true,
+            message = null,
+        )
+
+        `when`(donationDb.getById(donation1.id!!)).thenReturn(Future.succeededFuture(donation1))
+        `when`(donationDb.update(any())).thenReturn(Future.succeededFuture(newDonation))
+        client.patch("/donations/${donation1.id}")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(JsonObject().put("read", true).put("message", null))
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    println(res.bodyAsString())
+                    assertEquals(200, res.statusCode())
+                    assertEquals(newDonation, res.bodyAsJson(Donation::class.java))
+                    verify(donationDb).update(newDonation)
+                    verifyNoMoreInteractions(donationDb)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testPatchDonationWithIllegalInput(testContext: VertxTestContext) {
+        // Jackson updating modifies the underlying object, even though it's supposed to be immutable
+        // Copy the object here, since otherwise the modified state leaks to other tests
+        `when`(donationDb.getById(donation1.id!!)).thenReturn(Future.succeededFuture(donation1.copy()))
+        client.patch("/donations/${donation1.id}")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(JsonObject().put("name", null))
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    println(res.bodyAsString())
+                    assertEquals(400, res.statusCode())
+                    verifyNoMoreInteractions(donationDb)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testPatchDonationWithUnknownFields(testContext: VertxTestContext) {
+        client.patch("/donations/${donation1.id}")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(JsonObject().put("new_field", "value"))
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(400, res.statusCode())
+                    verifyNoMoreInteractions(donationDb)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testPatchWithoutAuthenticationFails(testContext: VertxTestContext) {
+        client.patch("/donations/${UUID.randomUUID()}")
+            .send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(401, res.statusCode())
+                    verifyNoMoreInteractions(donationDb)
+                }
+                testContext.completeNow()
+            }
     }
 
     @Test

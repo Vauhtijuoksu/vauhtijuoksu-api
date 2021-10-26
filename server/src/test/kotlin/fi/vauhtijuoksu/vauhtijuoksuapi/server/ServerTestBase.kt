@@ -26,8 +26,7 @@ import java.net.ServerSocket
 
 @ExtendWith(MockitoExtension::class)
 @ExtendWith(VertxExtension::class)
-@Suppress("UnnecessaryAbstractClass") // Using abstract as a marker
-abstract class ServerTestBase {
+open class ServerTestBase {
     private lateinit var vertx: Vertx
     private lateinit var server: Server
     protected lateinit var client: WebClient

@@ -47,4 +47,8 @@ class GameDataDatabase @Inject constructor(
                 }
         }
     }
+
+    override fun update(record: GameData): Future<GameData?> {
+        TODO("Not yet implemented")
+    }
 }
