@@ -12,7 +12,7 @@ paths:
         metadata.
       responses:
         '200':
-          $ref: '#/components/responses/DonationsAllOk'
+          $ref: '#/components/responses/AllDonations'
     post:
       description: Add a new donation object.
       security:
@@ -24,8 +24,8 @@ paths:
             schema:
               $ref: '#/components/schemas/DonationInput'
       responses:
-        '200':
-          $ref: '#/components/responses/OkReturnId'
+        '201':
+          $ref: '#/components/responses/Donation'
   /donations/{donationId}:
     parameters:
       - name: donationId
@@ -39,7 +39,7 @@ paths:
       description: Get donation by id.
       responses:
         '200':
-          $ref: '#/components/responses/DonationsOk'
+          $ref: '#/components/responses/Donation'
     patch:
       description: Patch donation data.
       security:
@@ -52,14 +52,14 @@ paths:
               $ref: '#/components/schemas/DonationPatch'
       responses:
         '200':
-          $ref: '#/components/responses/OkEmpty'
+          $ref: '#/components/responses/Donation'
     delete:
       description: Delete donation.
       security:
         - basicAuth: []
       responses:
-        '200':
-          $ref: '#/components/responses/OkEmpty'
+        '204':
+          $ref: '#/components/responses/Empty'
   /gamedata:
     get:
       description: >
@@ -67,7 +67,7 @@ paths:
 
       responses:
         '200':
-          $ref: '#/components/responses/GameDataAllOk'
+          $ref: '#/components/responses/AllGameData'
     post:
       description: Add a new gamedata object.
       security:
@@ -79,8 +79,8 @@ paths:
             schema:
               $ref: '#/components/schemas/GameDataInput'
       responses:
-        '200':
-          $ref: '#/components/responses/OkReturnId'
+        '201':
+          $ref: '#/components/responses/GameData'
   /gamedata/{gamedataId}:
     parameters:
       - name: gamedataId
@@ -94,7 +94,7 @@ paths:
       description: Get game data by id.
       responses:
         '200':
-          $ref: '#/components/responses/GameDataOk'
+          $ref: '#/components/responses/GameData'
     patch:
       description: Patch game data.
       security:
@@ -107,14 +107,14 @@ paths:
               $ref: '#/components/schemas/GameDataPatch'
       responses:
         '200':
-          $ref: '#/components/responses/OkEmpty'
+          $ref: '#/components/responses/GameData'
     delete:
       description: Delete game data.
       security:
         - basicAuth: []
       responses:
-        '200':
-          $ref: '#/components/responses/OkEmpty'
+        '204':
+          $ref: '#/components/responses/Empty'
   /stream_metadata:
     get:
       description: >
@@ -135,7 +135,7 @@ paths:
               $ref: '#/components/schemas/StreamMetadata'
       responses:
         '200':
-          $ref: '#/components/responses/OkEmpty'
+          $ref: '#/components/responses/StreamMetadataOk'
   /player_info:
     get:
       description: >
@@ -156,7 +156,7 @@ paths:
               $ref: '#/components/schemas/PlayerInfo'
       responses:
         '200':
-          $ref: '#/components/responses/OkEmpty'
+          $ref: '#/components/responses/PlayerInfoOk'
   /incentives:
     get:
       description: >
@@ -176,8 +176,8 @@ paths:
             schema:
               $ref: '#/components/schemas/IncentiveInput'
       responses:
-        '200':
-          $ref: '#/components/responses/OkReturnId'
+        '201':
+          $ref: '#/components/responses/IncentiveOk'
   /incentives/{incentiveId}:
     parameters:
       - name: incentiveId
@@ -204,14 +204,14 @@ paths:
               $ref: '#/components/schemas/IncentivePatch'
       responses:
         '200':
-          $ref: '#/components/responses/OkEmpty'
+          $ref: '#/components/responses/IncentiveOk'
     delete:
       description: Delete incentive
       security:
         - basicAuth: []
       responses:
-        '200':
-          $ref: '#/components/responses/OkEmpty'
+        '204':
+          $ref: '#/components/responses/Empty'
   /incentive_codes:
     get:
       description: >
@@ -229,7 +229,7 @@ paths:
             schema:
               $ref: '#/components/schemas/IncentiveCodeInput'
       responses:
-        '200':
+        '201':
           $ref: '#/components/responses/OkReturnCode'
   /incentive_codes/{incentiveCode}:
     parameters:
@@ -256,28 +256,19 @@ paths:
               $ref: '#/components/schemas/IncentiveCodePatch'
       responses:
         '200':
-          $ref: '#/components/responses/OkEmpty'
+          $ref: '#/components/responses/Empty'
     delete:
       description: Delete incentive code
       security:
         - basicAuth: []
       responses:
-        '200':
-          $ref: '#/components/responses/OkEmpty'
+        '204':
+          $ref: '#/components/responses/Empty'
 
 components:
   responses:
-    OkEmpty:
-      description: Return empty 200
-    OkReturnId:
-      description: Return id when POST is successful
-      content:
-        application/json:
-          schema:
-            properties:
-              id:
-                type: string
-                format: uuid
+    Empty:
+      description: An empty response
     OkReturnCode:
       description: Return incentive code when POST is successful
       content:
@@ -286,25 +277,25 @@ components:
             properties:
               code:
                 type: string
-    DonationsAllOk:
+    AllDonations:
       description: List of donations
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Donations'
-    DonationsOk:
+    Donation:
       description: Donation by id
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/DonationOutput'
-    GameDataAllOk:
+    AllGameData:
       description: List of game data
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/GameDataAll'
-    GameDataOk:
+    GameData:
       description: Game data by id
       content:
         application/json:
