@@ -338,40 +338,10 @@ components:
           schema:
             $ref: '#/components/schemas/IncentiveCodeOutput'
   schemas:
-    Donation:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        timestamp:
-          type: string
-          format: date-time
-        name:
-          type: string
-        message:
-          type: string
-        read:
-          type: boolean
-          default: false
-        amount:
-          type: number
-      required:
-        - id
-        - name
-        - timestamp
-        - amount
-      example:
-        id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
-        timestamp: '2021-09-21T15:05:47.000+00:00'
-        name: jsloth
-        message: ota tää :D 🤔🤔
-        read: false
-        amount: 10
     Donations:
       type: array
       items:
-        $ref: '#/components/schemas/Donation'
+        $ref: '#/components/schemas/DonationOutput'
       example:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
           timestamp: '2021-09-21T15:05:47.000+00:00'
@@ -425,12 +395,17 @@ components:
           default: false
         amount:
           type: number
+        external_id:
+          type: string
       example:
         name: jsloth
         message: ota tää :D 🤔🤔
     DonationOutput:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         timestamp:
           type: string
           format: date-time
@@ -444,10 +419,12 @@ components:
         amount:
           type: number
       required:
-        - timestamp
+        - id
         - name
+        - timestamp
         - amount
       example:
+      - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
         timestamp: '2021-09-21T15:05:47.000+00:00'
         name: jsloth
         message: ota tää :D 🤔🤔
