@@ -55,6 +55,20 @@ class GameDataApiTest : ServerTestBase() {
     }
 
     @Test
+    fun testGetGameDataWithOriginHeader(testContext: VertxTestContext) {
+        `when`(gameDataDb.getAll()).thenReturn(Future.succeededFuture(arrayListOf(gameData1, gameData2)))
+        client.get("/gamedata").putHeader("Origin", "http://localhost").send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(200, res.statusCode())
+                    assertEquals("*", res.getHeader("Access-Control-Allow-Origin"))
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
     fun testGameDataDbError(testContext: VertxTestContext) {
         `when`(gameDataDb.getAll()).thenReturn(Future.failedFuture(RuntimeException("DB error")))
         client.get("/gamedata").send()
@@ -88,6 +102,24 @@ class GameDataApiTest : ServerTestBase() {
                     )
                     verify(gameDataDb).add(any())
                     verifyNoMoreInteractions(gameDataDb)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testAddingGameDataWithOriginHeader(testContext: VertxTestContext) {
+        `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture(gameData1.copy(UUID.randomUUID())))
+        val body = JsonObject.mapFrom(gameData1)
+        body.remove("id")
+        client.post("/gamedata").putHeader("Origin", "https://vauhtijuoksu.fi")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(body)
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(201, res.statusCode())
+                    assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
                 }
                 testContext.completeNow()
             }

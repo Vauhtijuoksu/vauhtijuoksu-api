@@ -24,6 +24,7 @@ import io.vertx.ext.web.handler.BasicAuthHandler
 import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.sstore.LocalSessionStore
+import javax.inject.Named
 
 class ApiModule : AbstractModule() {
 
@@ -71,7 +72,15 @@ class ApiModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun getCorsHandler(conf: ServerConfiguration): CorsHandler {
-        return CorsHandler.create(conf.corsHeader)
+    @Named("authenticated")
+    fun getCorsHandlerAuth(conf: ServerConfiguration): CorsHandler {
+        return CorsHandler.create(conf.corsHeader).allowCredentials(true)
+    }
+
+    @Provides
+    @Singleton
+    @Named("public")
+    fun getCorsHandlerPublic(): CorsHandler {
+        return CorsHandler.create()
     }
 }

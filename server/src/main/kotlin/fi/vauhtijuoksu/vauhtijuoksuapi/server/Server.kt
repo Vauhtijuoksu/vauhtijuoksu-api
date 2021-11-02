@@ -6,7 +6,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataRouter
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.SessionHandler
 import mu.KotlinLogging
 import java.util.concurrent.CountDownLatch
@@ -19,12 +18,10 @@ class Server @Inject constructor(
     gameDataRouter: GameDataRouter,
     donationsRouter: DonationsRouter,
     sessionHandler: SessionHandler,
-    corsHandler: CorsHandler
 ) {
     private val logger = KotlinLogging.logger {}
 
     init {
-        router.route().handler(corsHandler)
         gameDataRouter.configure(router)
         donationsRouter.configure(router)
         httpServer.requestHandler(router)

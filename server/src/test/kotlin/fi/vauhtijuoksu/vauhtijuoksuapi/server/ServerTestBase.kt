@@ -43,7 +43,8 @@ open class ServerTestBase {
     protected val username = "vauhtijuoksu"
     protected val password = "vauhtijuoksu"
 
-    protected val corsHeader = "https://localhost"
+    protected val corsHeaderPublic = "*"
+    protected val corsHeaderUrl = "https://vauhtijuoksu.fi"
 
     // Mockito returns null with any(). This fails on non-nullable parameters
     // Stackoverflow taught me a workaround https://stackoverflow.com/questions/30305217/is-it-possible-to-use-mockito-in-kotlin
@@ -77,7 +78,7 @@ open class ServerTestBase {
                 override fun configure() {
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
-                    bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile, corsHeader))
+                    bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile, corsHeaderUrl))
                 }
             }
         )
