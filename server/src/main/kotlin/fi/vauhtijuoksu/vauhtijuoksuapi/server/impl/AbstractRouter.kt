@@ -11,6 +11,7 @@ import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.handler.CorsHandler
 import mu.KotlinLogging
 import java.util.UUID
 
@@ -22,6 +23,8 @@ protected constructor(
     private val mapper: Mapper<T>,
     private val db: VauhtijuoksuDatabase<T>,
     private val authenticationHandler: AuthenticationHandler,
+    private val authenticatedEndpointCorsHandler: CorsHandler,
+    private val publicEndpointCorsHandler: CorsHandler,
     private val allowPost: Boolean,
     private val allowDelete: Boolean,
     private val allowPatch: Boolean,
@@ -80,41 +83,46 @@ protected constructor(
     }
 
     private fun get(router: Router) {
-        router.get(endpoint).handler { ctx ->
-            db.getAll()
-                .onFailure { t ->
-                    logger.warn { "Failed to retrieve record because of ${t.message}" }
-                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
-                }
-                .onSuccess { all -> ctx.response().end(jacksonObjectMapper().writeValueAsString(all)) }
-        }
-
-        router.get("$endpoint/:id").handler { ctx ->
-            val id: UUID
-            try {
-                id = UUID.fromString(ctx.pathParam("id"))
-            } catch (e: IllegalArgumentException) {
-                ctx.response().setStatusCode(BAD_REQUEST).end(e.message)
-                return@handler
-            }
-            db.getById(id)
-                .onFailure { t ->
-                    logger.warn { "Failed to get record because of ${t.message}" }
-                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
-                }
-                .onSuccess { gameData ->
-                    if (gameData == null) {
-                        ctx.response().setStatusCode(NOT_FOUND).end()
-                    } else {
-                        ctx.response().end(jacksonObjectMapper().writeValueAsString(gameData))
+        router.get(endpoint)
+            .handler(publicEndpointCorsHandler)
+            .handler { ctx ->
+                db.getAll()
+                    .onFailure { t ->
+                        logger.warn { "Failed to retrieve record because of ${t.message}" }
+                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
                     }
+                    .onSuccess { all -> ctx.response().end(jacksonObjectMapper().writeValueAsString(all)) }
+            }
+
+        router.get("$endpoint/:id")
+            .handler(publicEndpointCorsHandler)
+            .handler { ctx ->
+                val id: UUID
+                try {
+                    id = UUID.fromString(ctx.pathParam("id"))
+                } catch (e: IllegalArgumentException) {
+                    ctx.response().setStatusCode(BAD_REQUEST).end(e.message)
+                    return@handler
                 }
-        }
+                db.getById(id)
+                    .onFailure { t ->
+                        logger.warn { "Failed to get record because of ${t.message}" }
+                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
+                    }
+                    .onSuccess { gameData ->
+                        if (gameData == null) {
+                            ctx.response().setStatusCode(NOT_FOUND).end()
+                        } else {
+                            ctx.response().end(jacksonObjectMapper().writeValueAsString(gameData))
+                        }
+                    }
+            }
     }
 
     private fun post(router: Router) {
         router.post(endpoint)
             .handler(authenticationHandler)
+            .handler(authenticatedEndpointCorsHandler)
             .handler(BodyHandler.create())
             .handler { ctx ->
                 val record: T
@@ -155,6 +163,7 @@ protected constructor(
     private fun delete(router: Router) {
         router.delete("$endpoint/:id")
             .handler(authenticationHandler)
+            .handler(authenticatedEndpointCorsHandler)
             .handler { ctx ->
                 val id: UUID
                 try {
@@ -181,6 +190,7 @@ protected constructor(
     private fun patch(router: Router) {
         router.patch("$endpoint/:id")
             .handler(authenticationHandler)
+            .handler(authenticatedEndpointCorsHandler)
             .handler(BodyHandler.create())
             .handler { ctx ->
                 val id: UUID
