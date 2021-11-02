@@ -2,6 +2,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.models
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.Date
 import java.util.UUID
 
@@ -14,4 +15,6 @@ data class Donation(
     val message: String?,
     val amount: Float?,
     val read: Boolean = false,
+    @JsonProperty("external_id")
+    val externalId: String?,
 ) : Model

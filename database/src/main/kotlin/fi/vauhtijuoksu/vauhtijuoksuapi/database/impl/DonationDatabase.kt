@@ -30,8 +30,8 @@ class DonationDatabase
             SqlTemplate.forUpdate(
                 client,
                 "INSERT INTO donations " +
-                    "(name, message, timestamp, amount, read) VALUES " +
-                    "(#{name}, #{message}, #{timestamp}, #{amount}, #{read})" +
+                    "(name, message, timestamp, amount, read, external_id) VALUES " +
+                    "(#{name}, #{message}, #{timestamp}, #{amount}, #{read}, #{external_id})" +
                     "RETURNING *"
             )
                 .mapFrom(Donation::class.java)

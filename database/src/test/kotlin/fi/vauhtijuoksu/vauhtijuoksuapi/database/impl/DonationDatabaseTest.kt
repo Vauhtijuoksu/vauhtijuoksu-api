@@ -16,7 +16,7 @@ class DonationDatabaseTest : VauhtijuoksuDatabaseTest<Donation>() {
     override fun insertStatement(data: List<Donation>): String {
         fun valuesStringForDonation(donation: Donation): String {
             @Suppress("MaxLineLength")
-            return "('${donation.id}', '${donation.name}', '${donation.message}', '${df.format(donation.timestamp)}','${donation.amount}', '${donation.read}')"
+            return "('${donation.id}', '${donation.name}', '${donation.message}', '${df.format(donation.timestamp)}','${donation.amount}', '${donation.read}', ${donation.externalId?.run { "'${donation.externalId}'" } ?: "NULL"})"
         }
 
         var statement = "INSERT INTO donations VALUES "

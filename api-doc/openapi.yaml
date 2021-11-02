@@ -349,12 +349,14 @@ components:
           message: ota tää :D 🤔🤔
           read: true
           amount: 10
+          external_id: "a non unique string"
         - id: 7c28df04-b9d2-4ebe-bd33-58c9b290d930
           timestamp: '2021-09-21T15:05:50.000+00:00'
           name: luuranki
           message: 'mee tänne: töihin :))))))))'
           read: false
           amount: 5
+          external_id: "a non unique string"
     DonationInput:
       type: object
       properties:
@@ -380,6 +382,7 @@ components:
         message: ota tää :D 🤔🤔
         read: false
         amount: 10
+        external_id: "a non unique string"
     DonationPatch:
       type: object
       properties:
@@ -430,6 +433,7 @@ components:
         message: ota tää :D 🤔🤔
         read: false
         amount: 10
+        external_id: "a non unique string"
     GameData:
       type: object
       properties:

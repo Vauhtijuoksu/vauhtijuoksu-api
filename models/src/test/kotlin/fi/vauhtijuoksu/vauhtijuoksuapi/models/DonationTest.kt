@@ -35,6 +35,7 @@ class DonationTest {
             .put("message", message)
             .put("amount", 10F)
             .put("read", true)
+            .put("external_id", "an id")
     }
 
     @Test
@@ -45,7 +46,8 @@ class DonationTest {
             name,
             message,
             amount,
-            true
+            true,
+            "an id",
         )
 
         val donationAsJson = JsonObject(jacksonObjectMapper().writeValueAsString(donation))
@@ -61,7 +63,8 @@ class DonationTest {
             name,
             null,
             amount,
-            true
+            true,
+            "an id",
         )
 
         val donationAsJson = JsonObject(jacksonObjectMapper().writeValueAsString(donation))

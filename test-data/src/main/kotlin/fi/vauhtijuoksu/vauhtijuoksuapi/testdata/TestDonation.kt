@@ -19,7 +19,8 @@ class TestDonation private constructor() {
             "jsolth",
             "ota tää :D 🤔🤔",
             10F,
-            false
+            false,
+            null,
         )
         val donation2 = Donation(
             UUID.randomUUID(),
@@ -27,7 +28,8 @@ class TestDonation private constructor() {
             "luuranki",
             "mee tänne: töihin :))))))))",
             5F,
-            true
+            true,
+            "this is an id"
         )
         val donation3 = Donation(
             UUID.randomUUID(),
@@ -36,6 +38,7 @@ class TestDonation private constructor() {
             "nythän on tiistai ja pitäisi olla töissä",
             5000F,
             false,
+            "this is an id also"
         )
     }
 }
