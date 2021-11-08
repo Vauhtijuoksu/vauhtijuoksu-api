@@ -75,6 +75,10 @@ class ApiModule : AbstractModule() {
     @Named("authenticated")
     fun getCorsHandlerAuth(conf: ServerConfiguration): CorsHandler {
         return CorsHandler.create(conf.corsHeader).allowCredentials(true)
+            .allowedMethod(io.vertx.core.http.HttpMethod.GET)
+            .allowedMethod(io.vertx.core.http.HttpMethod.POST)
+            .allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS)
+            .allowedMethod(io.vertx.core.http.HttpMethod.PATCH)
     }
 
     @Provides
