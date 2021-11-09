@@ -2,6 +2,8 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.Mapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
@@ -15,9 +17,9 @@ class DonationsRouter
 constructor(
     db: VauhtijuoksuDatabase<Donation>,
     authenticationHandler: AuthenticationHandler,
-    @Named("authenticated")
+    @Named(AUTHENTICATED_CORS)
     authenticatedEndpointCorsHandler: CorsHandler,
-    @Named("public")
+    @Named(PUBLIC_CORS)
     publicEndpointCorsHandler: CorsHandler,
     postInputValidator: PostInputValidator<Donation>?,
     patchInputValidator: PatchInputValidator<Donation>?,
