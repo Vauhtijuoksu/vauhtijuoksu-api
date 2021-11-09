@@ -5,6 +5,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData2
 import io.vertx.core.Future
+import io.vertx.core.http.HttpMethod
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.junit5.VertxTestContext
@@ -21,6 +22,33 @@ import org.mockito.Mockito.`when`
 import java.util.UUID
 
 class GameDataApiTest : ServerTestBase() {
+
+    @Test
+    fun testGamedataOptions(testContext: VertxTestContext) {
+        client.request(HttpMethod.OPTIONS, "/gamedata").send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
+                    assertEquals(allowedMethods, res.headers().get("Allow").split(", ").toSet())
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testSingleGamedataOptions(testContext: VertxTestContext) {
+        client.request(HttpMethod.OPTIONS, "/gamedata/${UUID.randomUUID()}").send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
+                    assertEquals(allowedMethods, res.headers().get("Allow").split(", ").toSet())
+                }
+                testContext.completeNow()
+            }
+    }
+
     @Test
     fun testGetGameDataNoData(testContext: VertxTestContext) {
         `when`(gameDataDb.getAll()).thenReturn(Future.succeededFuture(ArrayList()))
