@@ -4,6 +4,8 @@ import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataRouter
+import io.vertx.core.http.HttpHeaders
+import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.SessionHandler
@@ -22,6 +24,13 @@ class Server @Inject constructor(
     private val logger = KotlinLogging.logger {}
 
     init {
+        router.options().handler { ctx ->
+            ctx.response().headers().add(
+                HttpHeaders.ALLOW,
+                "${HttpMethod.GET}, ${HttpMethod.POST}, ${HttpMethod.PATCH}, ${HttpMethod.OPTIONS}, ${HttpMethod.DELETE}"
+            )
+            ctx.response().end()
+        }
         gameDataRouter.configure(router)
         donationsRouter.configure(router)
         httpServer.requestHandler(router)

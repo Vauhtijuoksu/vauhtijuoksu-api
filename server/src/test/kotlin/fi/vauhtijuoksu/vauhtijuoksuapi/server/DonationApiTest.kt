@@ -5,6 +5,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation2
 import io.vertx.core.Future
+import io.vertx.core.http.HttpMethod
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.junit5.VertxTestContext
@@ -21,6 +22,32 @@ import org.mockito.Mockito.`when`
 import java.util.UUID
 
 class DonationApiTest : ServerTestBase() {
+    @Test
+    fun testDonationsOptions(testContext: VertxTestContext) {
+        client.request(HttpMethod.OPTIONS, "/donations").send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
+                    assertEquals(allowedMethods, res.headers().get("Allow").split(", ").toSet())
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testSingleDonationOptions(testContext: VertxTestContext) {
+        client.request(HttpMethod.OPTIONS, "/donations/${UUID.randomUUID()}").send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
+                    assertEquals(allowedMethods, res.headers().get("Allow").split(", ").toSet())
+                }
+                testContext.completeNow()
+            }
+    }
+
     @Test
     fun testGetDonationNoData(testContext: VertxTestContext) {
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(ArrayList()))
