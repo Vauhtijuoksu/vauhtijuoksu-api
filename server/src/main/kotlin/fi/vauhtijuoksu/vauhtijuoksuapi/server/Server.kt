@@ -2,16 +2,19 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataRouter
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
+import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.SessionHandler
 import mu.KotlinLogging
 import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.system.exitProcess
 
 class Server @Inject constructor(
@@ -20,10 +23,12 @@ class Server @Inject constructor(
     gameDataRouter: GameDataRouter,
     donationsRouter: DonationsRouter,
     sessionHandler: SessionHandler,
+    @Named(PUBLIC_CORS) corsHandler: CorsHandler,
 ) {
     private val logger = KotlinLogging.logger {}
 
     init {
+        router.options().handler(corsHandler)
         router.options().handler { ctx ->
             ctx.response().headers().add(
                 HttpHeaders.ALLOW,

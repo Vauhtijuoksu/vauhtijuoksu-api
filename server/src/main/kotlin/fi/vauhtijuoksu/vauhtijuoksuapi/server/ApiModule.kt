@@ -6,6 +6,8 @@ import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
@@ -72,7 +74,7 @@ class ApiModule : AbstractModule() {
 
     @Provides
     @Singleton
-    @Named("authenticated")
+    @Named(AUTHENTICATED_CORS)
     fun getCorsHandlerAuth(conf: ServerConfiguration): CorsHandler {
         return CorsHandler.create(conf.corsHeader).allowCredentials(true)
             .allowedMethod(io.vertx.core.http.HttpMethod.GET)
@@ -83,7 +85,7 @@ class ApiModule : AbstractModule() {
 
     @Provides
     @Singleton
-    @Named("public")
+    @Named(PUBLIC_CORS)
     fun getCorsHandlerPublic(): CorsHandler {
         return CorsHandler.create()
     }
