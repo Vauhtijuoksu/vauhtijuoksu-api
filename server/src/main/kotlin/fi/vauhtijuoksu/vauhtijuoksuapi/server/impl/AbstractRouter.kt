@@ -121,8 +121,8 @@ protected constructor(
 
     private fun post(router: Router) {
         router.post(endpoint)
-            .handler(authenticationHandler)
             .handler(authenticatedEndpointCorsHandler)
+            .handler(authenticationHandler)
             .handler(BodyHandler.create())
             .handler { ctx ->
                 val record: T
@@ -162,8 +162,8 @@ protected constructor(
 
     private fun delete(router: Router) {
         router.delete("$endpoint/:id")
-            .handler(authenticationHandler)
             .handler(authenticatedEndpointCorsHandler)
+            .handler(authenticationHandler)
             .handler { ctx ->
                 val id: UUID
                 try {
@@ -189,8 +189,8 @@ protected constructor(
     @Suppress("LongMethod") // This will probably shorten once there is centralized error handling
     private fun patch(router: Router) {
         router.patch("$endpoint/:id")
-            .handler(authenticationHandler)
             .handler(authenticatedEndpointCorsHandler)
+            .handler(authenticationHandler)
             .handler(BodyHandler.create())
             .handler { ctx ->
                 val id: UUID
