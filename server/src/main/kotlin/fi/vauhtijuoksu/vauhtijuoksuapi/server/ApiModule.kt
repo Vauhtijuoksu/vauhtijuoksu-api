@@ -15,6 +15,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationPatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationPostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataPostInputValidator
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerOptions
 import io.vertx.ext.auth.authentication.AuthenticationProvider
@@ -69,10 +70,11 @@ class ApiModule : AbstractModule() {
     @Named(AUTHENTICATED_CORS)
     fun getCorsHandlerAuth(conf: ServerConfiguration): CorsHandler {
         return CorsHandler.create(conf.corsHeader).allowCredentials(true)
-            .allowedMethod(io.vertx.core.http.HttpMethod.GET)
-            .allowedMethod(io.vertx.core.http.HttpMethod.POST)
-            .allowedMethod(io.vertx.core.http.HttpMethod.OPTIONS)
-            .allowedMethod(io.vertx.core.http.HttpMethod.PATCH)
+            .allowedMethod(HttpMethod.GET)
+            .allowedMethod(HttpMethod.POST)
+            .allowedMethod(HttpMethod.OPTIONS)
+            .allowedMethod(HttpMethod.PATCH)
+            .allowedMethod(HttpMethod.DELETE)
     }
 
     @Provides
@@ -80,5 +82,10 @@ class ApiModule : AbstractModule() {
     @Named(PUBLIC_CORS)
     fun getCorsHandlerPublic(): CorsHandler {
         return CorsHandler.create()
+            .allowedMethod(HttpMethod.GET)
+            .allowedMethod(HttpMethod.POST)
+            .allowedMethod(HttpMethod.OPTIONS)
+            .allowedMethod(HttpMethod.PATCH)
+            .allowedMethod(HttpMethod.DELETE)
     }
 }
