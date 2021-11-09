@@ -10,7 +10,6 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler
-import io.vertx.ext.web.handler.SessionHandler
 import mu.KotlinLogging
 import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
@@ -22,7 +21,6 @@ class Server @Inject constructor(
     router: Router,
     gameDataRouter: GameDataRouter,
     donationsRouter: DonationsRouter,
-    sessionHandler: SessionHandler,
     @Named(PUBLIC_CORS) corsHandler: CorsHandler,
 ) {
     private val logger = KotlinLogging.logger {}
@@ -39,7 +37,6 @@ class Server @Inject constructor(
         gameDataRouter.configure(router)
         donationsRouter.configure(router)
         httpServer.requestHandler(router)
-        router.route().handler(sessionHandler)
     }
 
     fun start() {
