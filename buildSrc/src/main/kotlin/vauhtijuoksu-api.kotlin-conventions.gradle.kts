@@ -1,13 +1,7 @@
 plugins {
-    base
-    // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm")
-    id("com.diffplug.spotless")
+    id("vauhtijuoksu-api.common-conventions")
     id("io.gitlab.arturbosch.detekt")
-}
-
-repositories {
-    mavenCentral()
+    jacoco
 }
 
 dependencies {
@@ -79,17 +73,16 @@ tasks {
         isReproducibleFileOrder = true
     }
 
+    jacocoTestReport {
+        dependsOn(test)
+        reports {
+            csv.required.set(true)
+            html.required.set(true)
+        }
+    }
+
     test {
         useJUnitPlatform()
-    }
-}
-
-configure<com.diffplug.gradle.spotless.SpotlessExtension> {
-    val ktLintVersion = "0.42.1"
-    kotlin {
-        ktlint(ktLintVersion)
-    }
-    kotlinGradle {
-        ktlint(ktLintVersion)
+        finalizedBy(jacocoTestReport)
     }
 }
