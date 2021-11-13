@@ -36,12 +36,26 @@ jobs:
           distributions-cache-enabled: true
           dependencies-cache-enabled: true
           configuration-cache-enabled: true
+      - name: Add coverage report to PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: madrapps/jacoco-report@v1.2
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 78 # Current coverage
+          min-coverage-changed-files: 80 # Okay target for now
       - name: Save test results
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: test results
           path: "**/build/reports/tests/test/"
+      - name: Save coverage report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: "build/reports/jacoco/jacocoRootReport"
       - name: Save swagger ui
         if: always()
         uses: actions/upload-artifact@v2

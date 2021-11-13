@@ -1,7 +1,5 @@
 plugins {
-    // Base plugin provides default lifecycle tasks and their dependency order
-    base
-    id("vauhtijuoksu-api.kotlin-common-conventions")
+    id("vauhtijuoksu-api.common-conventions")
     id("org.hidetake.swagger.generator")
 }
 

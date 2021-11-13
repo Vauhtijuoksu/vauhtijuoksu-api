@@ -2,7 +2,7 @@ import fi.vauhtijuoksu.utilities.bashCommand
 import java.io.FileOutputStream
 
 plugins {
-    id("vauhtijuoksu-api.kotlin-common-conventions")
+    id("vauhtijuoksu-api.common-conventions")
 }
 
 val dockerImage: Configuration by configurations.creating {
