@@ -43,7 +43,6 @@ open class ServerTestBase {
     protected val username = "vauhtijuoksu"
     protected val password = "vauhtijuoksu"
 
-    protected val corsHeaderPublic = "*"
     protected val corsHeaderUrl = "https://vauhtijuoksu.fi"
 
     // Mockito returns null with any(). This fails on non-nullable parameters
