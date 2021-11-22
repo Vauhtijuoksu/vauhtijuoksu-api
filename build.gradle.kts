@@ -30,23 +30,48 @@ tasks {
     }
 
     val jacocoRootReport by registering(JacocoReport::class) {
-        subprojects {
+        subprojects.filter {
             // test-data is a special case, as it has code but no tests
-            if (this@subprojects.name == "test-data") {
-                return@subprojects
-            }
+            // feature-tests have a separate report
+            it.name != "test-data" && it.name != "feature-tests"
+        }.forEach { subproject ->
             // Depend on the subproject report so that those are generated those before the combined report
-            this@subprojects.tasks.findByName("jacocoTestReport")?.let {
-                dependsOn(it)
+            subproject.tasks.findByName("jacocoTestReport")?.let { task ->
+                dependsOn(task)
+            }
+            subproject.the<SourceSetContainer>().findByName("main")?.let {
+                sourceSets(it)
             }
             plugins.withType<JacocoPlugin>().configureEach {
-                tasks.matching {
+                subproject.tasks.matching {
                     it.extensions.findByType<JacocoTaskExtension>() != null
                 }.configureEach {
-                    this@subprojects.the<SourceSetContainer>().findByName("main")?.let {
-                        sourceSets(it)
-                        executionData(this)
-                    }
+                    executionData(this)
+                }
+            }
+        }
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+        }
+    }
+
+    register("featureTestReport", JacocoReport::class.java) {
+        subprojects.first { it.name == "feature-tests" }.let { featureTests ->
+            featureTests.tasks.findByName("test")?.let {
+                dependsOn(it)
+            }
+        }
+
+        executionData.setFrom(fileTree("$projectDir/feature-tests/build/jacoco/").include("test-pod-*.exec"))
+
+        subprojects.filter {
+            // test-data is a special case, as it has code but no tests
+            it.name != "test-data"
+        }.forEach { subproject ->
+            plugins.withType<JacocoPlugin>().configureEach {
+                subproject.the<SourceSetContainer>().findByName("main")?.let {
+                    sourceSets(it)
                 }
             }
         }

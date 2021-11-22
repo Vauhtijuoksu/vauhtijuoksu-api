@@ -39,6 +39,15 @@ The cluster can be deleted with:
 ./gradlew tearDownCluster
 ```
 
+## Feature tests
+
+Feature tests are run against a local kind cluster by running \
+`./gradlew featureTestReport` \
+at project root.
+
+The tests generate a Jacoco report file, which can be found at
+`build/reports/jacoco/featureTestReport/html/index.html`.
+
 ## Versions
 Get current version by running
 ```shell
