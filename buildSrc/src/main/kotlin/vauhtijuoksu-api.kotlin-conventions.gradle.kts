@@ -34,7 +34,7 @@ dependencies {
         // Jackson databind required by log4j2 to read yaml configuration files
         runtimeOnly("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
         runtimeOnly("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-        runtimeOnly("org.apache.logging.log4j:log4j-slf4j18-impl:2.15.0")
+        runtimeOnly("org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0")
 
         testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
