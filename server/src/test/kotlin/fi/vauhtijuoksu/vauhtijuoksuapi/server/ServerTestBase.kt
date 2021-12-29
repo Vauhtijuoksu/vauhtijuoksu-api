@@ -3,9 +3,11 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.google.inject.TypeLiteral
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
 import io.vertx.core.Vertx
 import io.vertx.ext.web.client.WebClient
@@ -36,6 +38,9 @@ open class ServerTestBase {
 
     @Mock
     protected lateinit var donationDb: VauhtijuoksuDatabase<Donation>
+
+    @Mock
+    protected lateinit var streamMetadataDb: SingletonDatabase<StreamMetadata>
 
     @TempDir
     lateinit var tmpDir: File
@@ -77,6 +82,7 @@ open class ServerTestBase {
                 override fun configure() {
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
+                    bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).toInstance(streamMetadataDb)
                     bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile, corsHeaderUrl))
                 }
             }

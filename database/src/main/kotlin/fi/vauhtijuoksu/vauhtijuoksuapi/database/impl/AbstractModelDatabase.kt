@@ -1,12 +1,10 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 
-import com.fasterxml.jackson.module.kotlin.kotlinModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import io.vertx.core.Future
 import io.vertx.core.Future.future
-import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.sqlclient.PreparedQuery
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
@@ -14,20 +12,19 @@ import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.Tuple
 import io.vertx.sqlclient.templates.SqlTemplate
 import mu.KotlinLogging
-import org.flywaydb.core.Flyway
 import java.util.Collections
 import java.util.UUID
 
 /**
  * Usable for data that uses an uuid field named id as a primary key
  */
-abstract class AbstractDatabase<T : Model>(
+abstract class AbstractModelDatabase<T : Model>(
     private val client: SqlClient,
     configuration: DatabaseConfiguration,
     tableName: String,
     defaultOrderBy: String?,
     private val mapToType: (() -> Class<T>)
-) : VauhtijuoksuDatabase<T> {
+) : BaseDatabase(configuration), VauhtijuoksuDatabase<T> {
     private val logger = KotlinLogging.logger {}
 
     private val getAllQuery: String
@@ -35,16 +32,6 @@ abstract class AbstractDatabase<T : Model>(
     private val deleteQuery: PreparedQuery<RowSet<Row>>
 
     init {
-        val migrations = Flyway.configure().dataSource(
-            "jdbc:postgresql://${configuration.address}:${configuration.port}/${configuration.database}?sslmode=prefer",
-            configuration.user,
-            configuration.password
-        ).load()
-        migrations.migrate()
-
-        DatabindCodec.mapper().registerModule(kotlinModule())
-        DatabindCodec.prettyMapper().registerModule(kotlinModule())
-
         getAllQuery = if (defaultOrderBy == null) {
             "SELECT * FROM $tableName"
         } else {

@@ -15,7 +15,7 @@ class DonationDatabase
     private val client: SqlClient,
     configuration: DatabaseConfiguration
 ) :
-    AbstractDatabase<Donation>(
+    AbstractModelDatabase<Donation>(
         client,
         configuration,
         "donations",

@@ -5,6 +5,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.StreamMetadataRouter
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
@@ -21,6 +22,7 @@ class Server @Inject constructor(
     router: Router,
     gameDataRouter: GameDataRouter,
     donationsRouter: DonationsRouter,
+    streamMetadataRouter: StreamMetadataRouter,
     @Named(PUBLIC_CORS) corsHandler: CorsHandler,
 ) {
     private val logger = KotlinLogging.logger {}
@@ -36,6 +38,8 @@ class Server @Inject constructor(
         }
         gameDataRouter.configure(router)
         donationsRouter.configure(router)
+        streamMetadataRouter.configure(router)
+
         httpServer.requestHandler(router)
     }
 

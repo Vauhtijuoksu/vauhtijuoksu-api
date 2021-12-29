@@ -115,7 +115,7 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/Empty'
-  /stream_metadata:
+  /stream-metadata:
     get:
       description: >
         Get stream metadata. This is meant for misc information shown on stream

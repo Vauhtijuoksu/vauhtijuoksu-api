@@ -4,6 +4,13 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.BAD_REQUEST
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.CREATED
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.INTERNAL_SERVER_ERROR
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.METHOD_NOT_ALLOWED
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.NOT_FOUND
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.NO_CONTENT
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.OK
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.Mapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
@@ -15,8 +22,7 @@ import io.vertx.ext.web.handler.CorsHandler
 import mu.KotlinLogging
 import java.util.UUID
 
-@Suppress("UnnecessaryAbstractClass") // Abstract is used to indicate the intended usage
-abstract class AbstractRouter<T : Model>
+open class AbstractRouter<T : Model>
 @Suppress("LongParameterList") // I think this is fine as the parameters are independent toggles
 protected constructor(
     private val endpoint: String,
@@ -31,15 +37,6 @@ protected constructor(
     private val postInputValidator: PostInputValidator<T>?,
     private val patchInputValidator: PatchInputValidator<T>?,
 ) {
-    companion object {
-        const val OK = 200
-        const val CREATED = 201
-        const val NO_CONTENT = 204
-        const val BAD_REQUEST = 400
-        const val NOT_FOUND = 404
-        const val METHOD_NOT_ALLOWED = 405
-        const val INTERNAL_SERVER_ERROR = 500
-    }
 
     private val logger = KotlinLogging.logger {}
 

@@ -12,7 +12,7 @@ import javax.inject.Inject
 class GameDataDatabase @Inject constructor(
     private val client: SqlClient,
     configuration: DatabaseConfiguration
-) : AbstractDatabase<GameData>(
+) : AbstractModelDatabase<GameData>(
     client,
     configuration,
     "gamedata",
