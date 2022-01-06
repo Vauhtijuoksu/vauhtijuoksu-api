@@ -10,7 +10,7 @@
 
 ## Generating API
 ```shell
-./gradlew build
+./gradlew :apidoc:build
 ```
 The api is readable after build at api-doc/build/swagger-ui/index.html
 
@@ -25,6 +25,12 @@ Note that since / has no content, the server correctly responds 404.
 The API server is running at https://api.dev.vauhtijuoksu.fi
 
 ## Development
+Run tests with:
+```shell
+./gradlew test -x feature-tests:test
+```
+This skips the slow feature-tests. 
+
 To run latest api server locally:
 ```shell
 ./gradlew runInCluster
@@ -42,7 +48,7 @@ The cluster can be deleted with:
 ## Feature tests
 
 Feature tests are run against a local kind cluster by running \
-`./gradlew featureTestReport` \
+`./gradlew build` \
 at project root.
 
 The tests generate a Jacoco report file, which can be found at

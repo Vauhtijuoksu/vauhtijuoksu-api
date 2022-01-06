@@ -11,6 +11,7 @@ import kotlin.random.Random
 
 plugins {
     id("vauhtijuoksu-api.kotlin-conventions")
+    jacoco
 }
 
 val featureTests: Configuration by configurations.creating {
@@ -159,11 +160,13 @@ tasks {
     test {
         description = "Run feature tests against local cluster and gather coverage with jacoco"
         outputs.upToDateWhen { false }
+        useJUnitPlatform()
         dependsOn(clusterWithJacoco)
-        finalizedBy(dumpJacoco)
+        finalizedBy(dumpJacoco, jacocoTestReport)
     }
 
     jacocoTestReport {
+        dependsOn(test)
         // No source code so no sense in generating a report here
         reports {
             csv.required.set(false)

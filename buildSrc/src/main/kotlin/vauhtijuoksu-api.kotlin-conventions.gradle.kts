@@ -1,7 +1,9 @@
+/**
+ * Configuration for all projects containing Kotlin code, including interfaces and test utils
+ */
 plugins {
     id("vauhtijuoksu-api.common-conventions")
     id("io.gitlab.arturbosch.detekt")
-    jacoco
 }
 
 dependencies {
@@ -71,18 +73,5 @@ tasks {
     withType<AbstractArchiveTask>().configureEach {
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
-    }
-
-    jacocoTestReport {
-        dependsOn(test)
-        reports {
-            csv.required.set(true)
-            html.required.set(true)
-        }
-    }
-
-    test {
-        useJUnitPlatform()
-        finalizedBy(jacocoTestReport)
     }
 }

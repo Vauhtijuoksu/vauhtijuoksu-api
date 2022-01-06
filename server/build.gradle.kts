@@ -4,7 +4,7 @@ import java.io.FileInputStream
 import java.io.IOException
 
 plugins {
-    id("vauhtijuoksu-api.kotlin-conventions")
+    id("vauhtijuoksu-api.implementation-conventions")
     id("application")
 }
 

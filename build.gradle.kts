@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets
 
 plugins {
     id("vauhtijuoksu-api.kotlin-conventions")
+    jacoco
 }
 
 buildscript {
@@ -31,9 +32,8 @@ tasks {
 
     val jacocoRootReport by registering(JacocoReport::class) {
         subprojects.filter {
-            // test-data is a special case, as it has code but no tests
             // feature-tests have a separate report
-            it.name != "test-data" && it.name != "feature-tests"
+            it.name != "feature-tests"
         }.forEach { subproject ->
             // Depend on the subproject report so that those are generated those before the combined report
             subproject.tasks.findByName("jacocoTestReport")?.let { task ->
@@ -56,7 +56,7 @@ tasks {
         }
     }
 
-    register("featureTestReport", JacocoReport::class.java) {
+    val featureTestReport by registering(JacocoReport::class) {
         subprojects.first { it.name == "feature-tests" }.let { featureTests ->
             featureTests.tasks.findByName("test")?.let {
                 dependsOn(it)
@@ -65,10 +65,7 @@ tasks {
 
         executionData.setFrom(fileTree("$projectDir/feature-tests/build/jacoco/").include("test-pod-*.exec"))
 
-        subprojects.filter {
-            // test-data is a special case, as it has code but no tests
-            it.name != "test-data"
-        }.forEach { subproject ->
+        subprojects.forEach { subproject ->
             plugins.withType<JacocoPlugin>().configureEach {
                 subproject.the<SourceSetContainer>().findByName("main")?.let {
                     sourceSets(it)
@@ -82,6 +79,6 @@ tasks {
     }
 
     build {
-        finalizedBy(jacocoRootReport)
+        finalizedBy(jacocoRootReport, featureTestReport)
     }
 }

@@ -32,7 +32,7 @@ jobs:
       - name: Build and test
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: build integrationTest featureTestReport --info
+          arguments: build integrationTest --info
           distributions-cache-enabled: true
           dependencies-cache-enabled: true
           configuration-cache-enabled: true

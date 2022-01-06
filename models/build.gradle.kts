@@ -1,5 +1,5 @@
 plugins {
-    id("vauhtijuoksu-api.kotlin-conventions")
+    id("vauhtijuoksu-api.implementation-conventions")
 }
 
 dependencies {
