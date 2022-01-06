@@ -110,7 +110,12 @@ tasks {
         dependsOn(findJacoco, getByPath(":deployment:runInCluster"))
         doLast {
             exec {
-                bashCommand("kubectl create cm jacoco --from-file  $jacocoPath")
+                bashCommand(
+                    """
+                    kubectl delete cm jacoco --ignore-not-found=true
+                    kubectl create cm jacoco --from-file  "$jacocoPath"
+                    """.trimIndent()
+                )
             }
             DefaultKubernetesClient().use { k8s ->
                 logger.debug("Patching deployment")
