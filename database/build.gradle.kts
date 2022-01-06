@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(path = ":models"))
+    implementation(project(path = ":database-api"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.google.inject:guice")

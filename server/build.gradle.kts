@@ -10,6 +10,7 @@ plugins {
 
 dependencies {
     implementation(project(path = ":models"))
+    implementation(project(path = ":database-api"))
     implementation(project(path = ":database"))
 
     implementation("com.google.inject:guice")
