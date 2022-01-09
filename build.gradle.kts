@@ -39,13 +39,13 @@ tasks {
             subproject.tasks.findByName("jacocoTestReport")?.let { task ->
                 dependsOn(task)
             }
-            subproject.the<SourceSetContainer>().findByName("main")?.let {
-                sourceSets(it)
-            }
             plugins.withType<JacocoPlugin>().configureEach {
                 subproject.tasks.matching {
                     it.extensions.findByType<JacocoTaskExtension>() != null
                 }.configureEach {
+                    subproject.the<SourceSetContainer>().findByName("main")?.let {
+                        sourceSets(it)
+                    }
                     executionData(this)
                 }
             }
@@ -67,8 +67,12 @@ tasks {
 
         subprojects.forEach { subproject ->
             plugins.withType<JacocoPlugin>().configureEach {
-                subproject.the<SourceSetContainer>().findByName("main")?.let {
-                    sourceSets(it)
+                subproject.tasks.matching {
+                    it.extensions.findByType<JacocoTaskExtension>() != null
+                }.configureEach {
+                    subproject.the<SourceSetContainer>().findByName("main")?.let {
+                        sourceSets(it)
+                    }
                 }
             }
         }
