@@ -3,12 +3,13 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.VauhtijuoksuException
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.BAD_REQUEST
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.CREATED
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.INTERNAL_SERVER_ERROR
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.METHOD_NOT_ALLOWED
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.NOT_FOUND
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.NO_CONTENT
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.OK
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.Mapper
@@ -22,8 +23,11 @@ import io.vertx.ext.web.handler.CorsHandler
 import mu.KotlinLogging
 import java.util.UUID
 
+// Throwing as soon as some validation fails is the simplest way
+@Suppress("ThrowsCount")
 open class AbstractRouter<T : Model>
-@Suppress("LongParameterList") // I think this is fine as the parameters are independent toggles
+// I think this is fine as the parameters are independent toggles
+@Suppress("LongParameterList")
 protected constructor(
     private val endpoint: String,
     private val mapper: Mapper<T>,
@@ -85,8 +89,7 @@ protected constructor(
             .handler { ctx ->
                 db.getAll()
                     .onFailure { t ->
-                        logger.warn { "Failed to retrieve record because of ${t.message}" }
-                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
+                        ctx.fail(ServerError("Failed to retrieve record because of ${t.message}"))
                     }
                     .onSuccess { all -> ctx.response().end(jacksonObjectMapper().writeValueAsString(all)) }
             }
@@ -97,18 +100,14 @@ protected constructor(
                 val id: UUID
                 try {
                     id = UUID.fromString(ctx.pathParam("id"))
-                } catch (e: IllegalArgumentException) {
-                    ctx.response().setStatusCode(BAD_REQUEST).end(e.message)
-                    return@handler
+                } catch (_: IllegalArgumentException) {
+                    throw UserError("Not UUID: ${ctx.pathParam("id")}")
                 }
                 db.getById(id)
-                    .onFailure { t ->
-                        logger.warn { "Failed to get record because of ${t.message}" }
-                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
-                    }
+                    .onFailure(ctx::fail)
                     .onSuccess { gameData ->
                         if (gameData == null) {
-                            ctx.response().setStatusCode(NOT_FOUND).end()
+                            ctx.fail(MissingEntityException("No entity with id $id"))
                         } else {
                             ctx.response().end(jacksonObjectMapper().writeValueAsString(gameData))
                         }
@@ -126,29 +125,25 @@ protected constructor(
                 try {
                     val jsonBody = ctx.bodyAsJson
                     if (jsonBody == null) {
-                        ctx.response().setStatusCode(BAD_REQUEST).end("Body is required on POST")
+                        ctx.fail(UserError("Body is required on POST"))
                         return@handler
                     }
                     record = mapper.mapTo(jsonBody)
                     logger.debug { "Inserting a new record object $record" }
                 } catch (e: IllegalArgumentException) {
-                    logger.warn { "Error parsing record object from ${ctx.bodyAsString} because ${e.message}" }
-                    ctx.response().setStatusCode(BAD_REQUEST).end(e.message)
+                    ctx.fail(UserError("Error parsing record object from ${ctx.bodyAsString} because ${e.message}"))
                     return@handler
                 }
 
                 // Asserted to be non-null in init
                 val validationMessage = postInputValidator!!.validate(record)
                 if (validationMessage != null) {
-                    ctx.response().setStatusCode(BAD_REQUEST).end(validationMessage)
+                    ctx.fail(UserError(validationMessage))
                     return@handler
                 }
 
                 db.add(record)
-                    .onFailure { t ->
-                        logger.warn { "Failed to insert record $record because of ${t.message}" }
-                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(t.message)
-                    }
+                    .onFailure(ctx::fail)
                     .onSuccess { insertedGd ->
                         logger.info { "Inserted record $insertedGd" }
                         ctx.response().setStatusCode(CREATED)
@@ -165,25 +160,21 @@ protected constructor(
                 val id: UUID
                 try {
                     id = UUID.fromString(ctx.pathParam("id"))
-                } catch (e: IllegalArgumentException) {
-                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(e.message)
-                    return@handler
+                } catch (_: IllegalArgumentException) {
+                    throw UserError("Not UUID: ${ctx.pathParam("id")}")
                 }
                 db.delete(id)
-                    .onFailure { t ->
-                        logger.warn { "Failed to delete record with id $id because of ${t.message}" }
-                    }
+                    .onFailure(ctx::fail)
                     .onSuccess { res ->
                         if (res) {
                             ctx.response().setStatusCode(NO_CONTENT).end()
                         } else {
-                            ctx.response().setStatusCode(NOT_FOUND).end()
+                            ctx.fail(MissingEntityException("No entity with id $id"))
                         }
                     }
             }
     }
 
-    @Suppress("LongMethod") // This will probably shorten once there is centralized error handling
     private fun patch(router: Router) {
         router.patch("$endpoint/:id")
             .handler(authenticatedEndpointCorsHandler)
@@ -193,34 +184,22 @@ protected constructor(
                 val id: UUID
                 try {
                     id = UUID.fromString(ctx.pathParam("id"))
-                } catch (e: IllegalArgumentException) {
-                    ctx.response().setStatusCode(BAD_REQUEST).end(e.message)
-                    return@handler
+                } catch (_: IllegalArgumentException) {
+                    throw UserError("Not UUID: ${ctx.pathParam("id")}")
                 }
 
-                val record: T
-                try {
-                    val jsonBody = ctx.bodyAsJson
-                    if (jsonBody == null) {
-                        ctx.response().setStatusCode(BAD_REQUEST).end("Body is required on PATCH")
-                        return@handler
-                    }
-                    record = mapper.mapTo(jsonBody)
-                    logger.debug { "Patching a record with object $record" }
+                @Suppress("SwallowedException") // Not swallowed, the message is used in augmented error
+                val record: T = try {
+                    val jsonBody = ctx.bodyAsJson ?: throw VauhtijuoksuException("Body is required on PATCH")
+                    mapper.mapTo(jsonBody)
                 } catch (e: IllegalArgumentException) {
-                    logger.warn { "Error parsing record object from ${ctx.bodyAsString} because ${e.message}" }
-                    ctx.response().setStatusCode(BAD_REQUEST).end(e.message)
-                    return@handler
+                    throw UserError("Error parsing record object from ${ctx.bodyAsString} because ${e.message}")
                 }
+                logger.debug { "Patching a record with object $record" }
                 db.getById(id)
-                    .onFailure { t ->
-                        logger.warn { "Failed to patch record $record because of ${t.message}" }
-                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
-                    }.onSuccess { res ->
+                    .map { res ->
                         if (res == null) {
-                            logger.info { "Could not find record with id $id for update" }
-                            ctx.response().setStatusCode(NOT_FOUND).end()
-                            return@onSuccess
+                            throw MissingEntityException("Could not find record with id $id for update")
                         }
                         val oldData = jacksonObjectMapper().readerForUpdating(res)
                         val mergedData: T = oldData.readValue(ctx.bodyAsString)
@@ -228,27 +207,19 @@ protected constructor(
                         // Asserted to be non-null in init
                         val validationMessage = patchInputValidator!!.validate(mergedData)
                         if (validationMessage != null) {
-                            ctx.response().setStatusCode(BAD_REQUEST).end(validationMessage)
-                            return@onSuccess
+                            throw UserError("Invalid input: $validationMessage")
                         }
-
-                        db.update(mergedData)
-                            .onFailure { t ->
-                                logger.warn { "Failed to insert record $record because of ${t.message}" }
-                                ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(t.message)
-                            }
-                            .onSuccess { updatedRecord ->
-                                if (updatedRecord == null) {
-                                    logger.info { "Could not find record with id $id for update" }
-                                    // Donation was removed after fetching it, before patching
-                                    ctx.response().setStatusCode(NOT_FOUND).end()
-                                    return@onSuccess
-                                }
-                                logger.info { "Patched record $updatedRecord" }
-                                ctx.response().setStatusCode(OK)
-                                    .end(jacksonObjectMapper().writeValueAsString(updatedRecord))
-                            }
+                        return@map mergedData
+                    }.compose { db.update(it) }
+                    .map {
+                        // Donation was removed after fetching it, before patching
+                        return@map it ?: MissingEntityException("Could not find record with id $id for update")
+                    }.onSuccess { updatedRecord ->
+                        logger.info { "Patched record $updatedRecord" }
+                        ctx.response().setStatusCode(OK)
+                            .end(jacksonObjectMapper().writeValueAsString(updatedRecord))
                     }
+                    .onFailure(ctx::fail)
             }
     }
 }

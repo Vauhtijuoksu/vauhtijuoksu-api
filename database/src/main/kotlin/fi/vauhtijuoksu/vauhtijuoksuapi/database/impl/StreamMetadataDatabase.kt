@@ -3,9 +3,9 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.models.StreamMetadataDbModel
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import io.vertx.core.Future
-import io.vertx.core.Future.future
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.Tuple
 import io.vertx.sqlclient.templates.SqlTemplate
@@ -21,15 +21,15 @@ class StreamMetadataDatabase
     SingletonDatabase<StreamMetadata> {
 
     override fun get(): Future<StreamMetadata> {
-        return future { p ->
-            SqlTemplate.forQuery(client, "SELECT * FROM stream_metadata LIMIT 1")
-                .mapTo(StreamMetadataDbModel::class.java)
-                .execute(Collections.emptyMap())
-                .onFailure(p::fail)
-                .onSuccess { rows ->
-                    p.complete(rows.first().toStreamMetadata())
-                }
-        }
+        return SqlTemplate.forQuery(client, "SELECT * FROM stream_metadata LIMIT 1")
+            .mapTo(StreamMetadataDbModel::class.java)
+            .execute(Collections.emptyMap())
+            .recover {
+                throw ServerError("Failed to get stream metadata: ${it.message}")
+            }
+            .map {
+                return@map it.first().toStreamMetadata()
+            }
     }
 
     override fun save(record: StreamMetadata): Future<Void> {
@@ -47,8 +47,8 @@ class StreamMetadataDatabase
                 record.donateBarInfo.toTypedArray(),
                 record.counters.toTypedArray()
             )
-        ).map {
-            return@map null
-        }
+        ).recover {
+            throw ServerError(it)
+        }.mapEmpty()
     }
 }

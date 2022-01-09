@@ -2,6 +2,13 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.VauhtijuoksuException
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.BAD_REQUEST
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.INTERNAL_SERVER_ERROR
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.NOT_FOUND
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataRouter
@@ -11,6 +18,7 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler
+import io.vertx.ext.web.handler.HttpException
 import mu.KotlinLogging
 import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
@@ -39,6 +47,29 @@ class Server @Inject constructor(
         gameDataRouter.configure(router)
         donationsRouter.configure(router)
         streamMetadataRouter.configure(router)
+        router.route().failureHandler { ctx ->
+            when (val cause = ctx.failure()) {
+                is UserError -> {
+                    logger.warn { "Generic error: ${cause.message}" }
+                    ctx.response().setStatusCode(BAD_REQUEST).end(cause.message)
+                }
+                is MissingEntityException -> {
+                    logger.info { "Missing entity: ${cause.message}" }
+                    ctx.response().setStatusCode(NOT_FOUND).end(cause.message)
+                }
+                is ServerError, is VauhtijuoksuException -> {
+                    logger.warn { "ServerError: ${cause.message}" }
+                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(cause.message)
+                }
+                is HttpException -> {
+                    ctx.response().setStatusCode(cause.statusCode).end()
+                }
+                else -> {
+                    logger.warn { "Uncaught error: ${cause.message}" }
+                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
+                }
+            }
+        }
 
         httpServer.requestHandler(router)
     }
