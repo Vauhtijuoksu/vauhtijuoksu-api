@@ -6,6 +6,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.models.DonationDbModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import io.vertx.core.Future
+import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.templates.SqlTemplate
 import mu.KotlinLogging
@@ -21,11 +22,14 @@ class DonationDatabase
         configuration,
         "donations",
         "timestamp",
-        { DonationDbModel::class.java },
         { donationDbModel -> donationDbModel.toDonation() }
     ),
     VauhtijuoksuDatabase<Donation> {
     private val logger = KotlinLogging.logger {}
+
+    override fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<DonationDbModel>> {
+        return template.mapTo(DonationDbModel::class.java)
+    }
 
     override fun add(record: Donation): Future<Donation> {
         return SqlTemplate.forUpdate(

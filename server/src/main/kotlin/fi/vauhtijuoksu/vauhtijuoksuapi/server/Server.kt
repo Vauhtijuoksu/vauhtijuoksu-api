@@ -14,6 +14,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.PlayerInfoRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.StreamMetadataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentivesRouter
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
@@ -26,6 +27,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlin.system.exitProcess
 
+@Suppress("LongParameterList")
 class Server @Inject constructor(
     private val httpServer: HttpServer,
     router: Router,
@@ -33,6 +35,7 @@ class Server @Inject constructor(
     donationsRouter: DonationsRouter,
     streamMetadataRouter: StreamMetadataRouter,
     playerInfoRouter: PlayerInfoRouter,
+    incentivesRouter: IncentivesRouter,
     @Named(PUBLIC_CORS) corsHandler: CorsHandler,
 ) {
     private val logger = KotlinLogging.logger {}
@@ -50,6 +53,7 @@ class Server @Inject constructor(
         donationsRouter.configure(router)
         streamMetadataRouter.configure(router)
         playerInfoRouter.configure(router)
+        incentivesRouter.configure(router)
         router.route().failureHandler { ctx ->
             when (val cause = ctx.failure()) {
                 is UserError -> {

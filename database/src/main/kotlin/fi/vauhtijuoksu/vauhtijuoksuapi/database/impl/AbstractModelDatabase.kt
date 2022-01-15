@@ -1,10 +1,13 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import io.vertx.core.Future
+import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.sqlclient.PreparedQuery
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
@@ -23,12 +26,11 @@ abstract class AbstractModelDatabase<T : Model, DbModel>(
     configuration: DatabaseConfiguration,
     tableName: String,
     defaultOrderBy: String?,
-    private val mapToType: (() -> Class<DbModel>),
     private val toModel: ((DbModel) -> T),
 ) : BaseDatabase(configuration), VauhtijuoksuDatabase<T> {
     private val logger = KotlinLogging.logger {}
 
-    private val getAllQuery: String
+    protected val getAllQuery: String
     private val getByIdQuery: String
     private val deleteQuery: PreparedQuery<RowSet<Row>>
 
@@ -41,12 +43,24 @@ abstract class AbstractModelDatabase<T : Model, DbModel>(
         getByIdQuery = "SELECT * FROM $tableName WHERE id = #{id}"
 
         deleteQuery = client.preparedQuery("DELETE FROM $tableName WHERE id = $1")
+
+        val mapper = DatabindCodec.mapper()
+        mapper.registerModule(JavaTimeModule())
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
+    protected fun <I, R, DbModel> SqlTemplate<I, R>.mapWith(
+        mapper: (SqlTemplate<I, R>) -> SqlTemplate<I, RowSet<DbModel>>
+    ): SqlTemplate<I, RowSet<DbModel>> {
+        return mapper(this)
+    }
+
+    abstract fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<DbModel>>
+
     override fun getAll(): Future<List<T>> {
-        logger.debug { "Get all gamedata objects" }
+        logger.debug { "Get all objects" }
         return SqlTemplate.forQuery(client, getAllQuery)
-            .mapTo(mapToType())
+            .mapWith(this::mapToFunction)
             .execute(Collections.emptyMap())
             .recover {
                 throw ServerError("Failed to retrieve records because ${it.message}")
@@ -59,7 +73,7 @@ abstract class AbstractModelDatabase<T : Model, DbModel>(
     override fun getById(id: UUID): Future<T?> {
         logger.debug { "Get record by id $id" }
         return SqlTemplate.forQuery(client, getByIdQuery)
-            .mapTo(mapToType())
+            .mapWith(this::mapToFunction)
             .execute(Collections.singletonMap("id", id) as Map<String, Any>?)
             .recover {
                 throw ServerError("Failed to retrieve records because ${it.message}")

@@ -60,7 +60,7 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
                     assertEquals(res, newGame)
                 }
             }.compose {
-                db.getById(oldId!!)
+                db.getById(oldId)
             }
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -68,7 +68,7 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
                     assertEquals(res, newGame)
                 }
             }.compose {
-                db.getById(TestGameData.gameData2.id!!)
+                db.getById(TestGameData.gameData2.id)
             }
             .onFailure(testContext::failNow)
             .onSuccess { res ->
