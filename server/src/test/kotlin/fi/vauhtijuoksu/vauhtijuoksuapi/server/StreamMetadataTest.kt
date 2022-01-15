@@ -14,8 +14,6 @@ import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.lenient
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.`when`
-import java.net.http.HttpResponse
 import java.util.UUID
 
 class StreamMetadataTest : ServerTestBase() {

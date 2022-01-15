@@ -11,10 +11,10 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Compa
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationPatchInputValidator
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationPostInputValidator
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataPatchInputValidator
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataPostInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationPatchInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationPostInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataPatchInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataPostInputValidator
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer

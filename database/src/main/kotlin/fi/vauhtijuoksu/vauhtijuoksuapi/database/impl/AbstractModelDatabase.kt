@@ -18,12 +18,13 @@ import java.util.UUID
 /**
  * Usable for data that uses an uuid field named id as a primary key
  */
-abstract class AbstractModelDatabase<T : Model>(
+abstract class AbstractModelDatabase<T : Model, DbModel>(
     private val client: SqlClient,
     configuration: DatabaseConfiguration,
     tableName: String,
     defaultOrderBy: String?,
-    private val mapToType: (() -> Class<T>)
+    private val mapToType: (() -> Class<DbModel>),
+    private val toModel: ((DbModel) -> T),
 ) : BaseDatabase(configuration), VauhtijuoksuDatabase<T> {
     private val logger = KotlinLogging.logger {}
 
@@ -51,7 +52,7 @@ abstract class AbstractModelDatabase<T : Model>(
                 throw ServerError("Failed to retrieve records because ${it.message}")
             }.map {
                 logger.debug { "All records returned" }
-                return@map it.toList()
+                return@map it.toList().map(toModel)
             }
     }
 
@@ -66,7 +67,7 @@ abstract class AbstractModelDatabase<T : Model>(
             .map {
                 if (it.iterator().hasNext()) {
                     logger.debug { "Found record with id $id" }
-                    return@map it.iterator().next()
+                    return@map toModel(it.iterator().next())
                 } else {
                     logger.debug { "No record found by id $id" }
                     return@map null

@@ -1,4 +1,4 @@
-package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl
+package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator

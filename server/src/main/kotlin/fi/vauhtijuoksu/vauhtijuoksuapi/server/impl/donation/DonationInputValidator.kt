@@ -1,4 +1,4 @@
-package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl
+package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 
@@ -11,7 +11,7 @@ open class DonationInputValidator {
         }
 
         // Verified to be non-null above
-        if (input.amount!! < 0) {
+        if (input.amount < 0) {
             return "No stealing from norppas!!"
         }
         return null

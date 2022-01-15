@@ -30,7 +30,7 @@ class StreamMetadataTest {
           ]
         }
     """.trimIndent()
-    lateinit var client: WebClient
+    private lateinit var client: WebClient
 
     @BeforeEach
     fun setup() {

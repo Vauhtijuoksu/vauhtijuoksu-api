@@ -1,7 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation2
 import io.vertx.core.Future
@@ -11,7 +11,6 @@ import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -99,7 +98,7 @@ class DonationApiTest : ServerTestBase() {
     @Test
     fun testAddingDonation(testContext: VertxTestContext) {
         `when`(donationDb.add(any())).thenReturn(Future.succeededFuture(donation1.copy(UUID.randomUUID())))
-        val body = JsonObject.mapFrom(donation1)
+        val body = JsonObject.mapFrom(DonationApiModel.fromDonation(donation1))
         body.remove("id")
         client.post("/donations")
             .authentication(UsernamePasswordCredentials(username, password))
@@ -110,8 +109,8 @@ class DonationApiTest : ServerTestBase() {
                     assertEquals(201, res.statusCode())
                     val resJson = res.bodyAsJsonObject()
                     assertEquals(
-                        donation1.copy(id = UUID.fromString(resJson.getString("id"))),
-                        res.bodyAsJson(Donation::class.java)
+                        DonationApiModel.fromDonation(donation1.copy(id = UUID.fromString(resJson.getString("id")))),
+                        res.bodyAsJson(DonationApiModel::class.java)
                     )
                     verify(donationDb).add(any())
                     verifyNoMoreInteractions(donationDb)
@@ -138,7 +137,7 @@ class DonationApiTest : ServerTestBase() {
     @ParameterizedTest
     @ValueSource(strings = ["name", "amount", "timestamp"])
     fun testMandatoryFieldsAreRequiredWhenAddingDonation(missingField: String, testContext: VertxTestContext) {
-        val json = JsonObject.mapFrom(donation1)
+        val json = JsonObject.mapFrom(DonationApiModel.fromDonation(donation1))
         json.remove("id")
         assertNotNull(json.remove(missingField))
         client.post("/donations")
@@ -148,7 +147,6 @@ class DonationApiTest : ServerTestBase() {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(400, res.statusCode())
-                    assertTrue(res.bodyAsString().contains(missingField))
                     verifyNoMoreInteractions(donationDb)
                 }
                 testContext.completeNow()
@@ -201,7 +199,7 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testGetSingleDonation(testContext: VertxTestContext) {
-        `when`(donationDb.getById(donation1.id!!)).thenReturn(Future.succeededFuture(donation1))
+        `when`(donationDb.getById(donation1.id)).thenReturn(Future.succeededFuture(donation1))
         client.get("/donations/${donation1.id}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -225,7 +223,7 @@ class DonationApiTest : ServerTestBase() {
             message = null,
         )
 
-        `when`(donationDb.getById(donation1.id!!)).thenReturn(Future.succeededFuture(donation1))
+        `when`(donationDb.getById(donation1.id)).thenReturn(Future.succeededFuture(donation1))
         `when`(donationDb.update(any())).thenReturn(Future.succeededFuture(newDonation))
         client.patch("/donations/${donation1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
@@ -235,7 +233,7 @@ class DonationApiTest : ServerTestBase() {
                 testContext.verify {
                     println(res.bodyAsString())
                     assertEquals(200, res.statusCode())
-                    assertEquals(newDonation, res.bodyAsJson(Donation::class.java))
+                    assertEquals(DonationApiModel.fromDonation(newDonation), res.bodyAsJson(DonationApiModel::class.java))
                     verify(donationDb).update(newDonation)
                     verifyNoMoreInteractions(donationDb)
                 }
@@ -247,14 +245,13 @@ class DonationApiTest : ServerTestBase() {
     fun testPatchDonationWithIllegalInput(testContext: VertxTestContext) {
         // Jackson updating modifies the underlying object, even though it's supposed to be immutable
         // Copy the object here, since otherwise the modified state leaks to other tests
-        `when`(donationDb.getById(donation1.id!!)).thenReturn(Future.succeededFuture(donation1.copy()))
+        `when`(donationDb.getById(donation1.id)).thenReturn(Future.succeededFuture(donation1.copy()))
         client.patch("/donations/${donation1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("name", null))
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
-                    println(res.bodyAsString())
                     assertEquals(400, res.statusCode())
                     verifyNoMoreInteractions(donationDb)
                 }
@@ -264,6 +261,7 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testPatchDonationWithUnknownFields(testContext: VertxTestContext) {
+        `when`(donationDb.getById(donation1.id)).thenReturn(Future.succeededFuture(donation1))
         client.patch("/donations/${donation1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("new_field", "value"))

@@ -1,6 +1,6 @@
-package fi.vauhtijuoksu.vauhtijuoksuapi.models
+package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataApiModel
 import io.vertx.core.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.UUID
 
-internal class GameDataTest {
+internal class GameDataApiModelTest {
     private val uuid = UUID.randomUUID()
 
     // Slight variations in input, within ISO 8601
@@ -43,7 +43,7 @@ internal class GameDataTest {
 
     @Test
     fun testGameDataSerialization() {
-        val gameData = GameData(
+        val gameData = GameDataApiModel(
             uuid,
             "Tetris",
             "jsloth",
@@ -57,14 +57,14 @@ internal class GameDataTest {
             "jiisloth"
         )
 
-        val gameDataAsJson = JsonObject(jacksonObjectMapper().writeValueAsString(gameData))
+        val gameDataAsJson = gameData.toJson()
         assertEquals(expectedGameData, gameDataAsJson)
     }
 
     @Test
     fun testGameDataSerializationNoVodLink() {
         expectedGameData.remove("vod_link")
-        val gameData = GameData(
+        val gameDataApiModel = GameDataApiModel(
             uuid,
             "Tetris",
             "jsloth",
@@ -78,7 +78,7 @@ internal class GameDataTest {
             "jiisloth"
         )
 
-        val gameDataAsJson = JsonObject(jacksonObjectMapper().writeValueAsString(gameData))
+        val gameDataAsJson = gameDataApiModel.toJson()
         assertEquals(expectedGameData, gameDataAsJson)
     }
 }
