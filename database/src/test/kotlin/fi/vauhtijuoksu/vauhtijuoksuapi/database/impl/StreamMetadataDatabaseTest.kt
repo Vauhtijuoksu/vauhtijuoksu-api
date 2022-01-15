@@ -81,7 +81,7 @@ class StreamMetadataDatabaseTest {
         lateinit var gameId: UUID
         gamedataDb.add(TestGameData.gameData1)
             .compose {
-                gameId = it.id!!
+                gameId = it.id
                 db.save(someData.copy(currentGameId = it.id, counters = listOf(1, 3, 100)))
             }
             .compose { db.get() }
@@ -99,7 +99,7 @@ class StreamMetadataDatabaseTest {
         lateinit var gameId: UUID
         gamedataDb.add(TestGameData.gameData1)
             .compose {
-                gameId = it.id!!
+                gameId = it.id
                 db.save(someData.copy(currentGameId = it.id))
             }
             .compose { gamedataDb.delete(gameId) }

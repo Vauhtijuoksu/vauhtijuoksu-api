@@ -1,6 +1,6 @@
-package fi.vauhtijuoksu.vauhtijuoksuapi.models
+package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationApiModel
 import io.vertx.core.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.UUID
 
-class DonationTest {
+class DonationApiModelTest {
     private val uuid = UUID.randomUUID()
 
     // Slight variations in input, within ISO 8601
@@ -40,7 +40,7 @@ class DonationTest {
 
     @Test
     fun testDonationSerialization() {
-        val donation = Donation(
+        val donation = DonationApiModel(
             uuid,
             Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(date))),
             name,
@@ -50,14 +50,14 @@ class DonationTest {
             "an id",
         )
 
-        val donationAsJson = JsonObject(jacksonObjectMapper().writeValueAsString(donation))
+        val donationAsJson = donation.toJson()
         assertEquals(expectedDonation, donationAsJson)
     }
 
     @Test
     fun testDonationWithoutMessage() {
         expectedDonation.remove("message")
-        val donation = Donation(
+        val donation = DonationApiModel(
             uuid,
             Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(date))),
             name,
@@ -67,7 +67,7 @@ class DonationTest {
             "an id",
         )
 
-        val donationAsJson = JsonObject(jacksonObjectMapper().writeValueAsString(donation))
+        val donationAsJson = donation.toJson()
 
         assertEquals(expectedDonation, donationAsJson)
     }

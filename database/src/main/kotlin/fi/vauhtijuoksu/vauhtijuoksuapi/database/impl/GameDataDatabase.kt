@@ -2,6 +2,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.models.GameDataDbModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import io.vertx.core.Future
@@ -13,12 +14,13 @@ import javax.inject.Inject
 class GameDataDatabase @Inject constructor(
     private val client: SqlClient,
     configuration: DatabaseConfiguration
-) : AbstractModelDatabase<GameData>(
+) : AbstractModelDatabase<GameData, GameDataDbModel>(
     client,
     configuration,
     "gamedata",
     "start_time",
-    { GameData::class.java }
+    { GameDataDbModel::class.java },
+    { gameDataDbModel -> gameDataDbModel.toGameData() }
 ),
     VauhtijuoksuDatabase<GameData> {
     private val logger = KotlinLogging.logger {}
@@ -32,15 +34,15 @@ class GameDataDatabase @Inject constructor(
                 "(#{game}, #{player}, #{start_time}, #{end_time}, #{category}, #{device}, #{published}, #{vod_link}, #{img_filename}, #{player_twitch} ) " +
                 "RETURNING *"
         )
-            .mapFrom(GameData::class.java)
-            .mapTo(GameData::class.java)
-            .execute(record)
+            .mapFrom(GameDataDbModel::class.java)
+            .mapTo(GameDataDbModel::class.java)
+            .execute(GameDataDbModel.fromGameData(record))
             .recover {
                 throw ServerError("Failed to insert $record because of ${it.message}")
             }
             .map {
                 logger.debug { "Inserted gamedata $record" }
-                return@map it.iterator().next()
+                return@map it.iterator().next().toGameData()
             }
     }
 
@@ -60,16 +62,16 @@ class GameDataDatabase @Inject constructor(
                 "player_twitch = #{player_twitch} " +
                 "WHERE id = #{id} RETURNING *"
         )
-            .mapFrom(GameData::class.java)
-            .mapTo(GameData::class.java)
-            .execute(record)
+            .mapFrom(GameDataDbModel::class.java)
+            .mapTo(GameDataDbModel::class.java)
+            .execute(GameDataDbModel.fromGameData(record))
             .recover {
                 throw ServerError("Failed to update $record because of ${it.message}")
             }
             .map {
                 if (it.iterator().hasNext()) {
                     logger.debug { "Updated GameData into $it" }
-                    return@map it.iterator().next()
+                    return@map it.iterator().next().toGameData()
                 } else {
                     logger.debug { "No GameData with id ${record.id} found" }
                     return@map null

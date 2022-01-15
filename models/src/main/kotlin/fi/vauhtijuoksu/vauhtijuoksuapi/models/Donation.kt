@@ -1,20 +1,14 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.models
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.Date
 import java.util.UUID
 
 data class Donation(
-    override val id: UUID?,
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    val timestamp: Date?,
-    val name: String?,
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    override val id: UUID,
+    val timestamp: Date,
+    val name: String,
     val message: String?,
-    val amount: Float?,
+    val amount: Float,
     val read: Boolean = false,
-    @JsonProperty("external_id")
     val externalId: String?,
 ) : Model

@@ -1,7 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData2
 import io.vertx.core.Future
@@ -114,7 +114,7 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testAddingGameData(testContext: VertxTestContext) {
         `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture(gameData1.copy(UUID.randomUUID())))
-        val body = JsonObject.mapFrom(gameData1)
+        val body = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         body.remove("id")
         client.post("/gamedata")
             .authentication(UsernamePasswordCredentials(username, password))
@@ -125,8 +125,8 @@ class GameDataApiTest : ServerTestBase() {
                     assertEquals(201, res.statusCode())
                     val resJson = res.bodyAsJsonObject()
                     assertEquals(
-                        gameData1.copy(id = UUID.fromString(resJson.getString("id"))),
-                        res.bodyAsJson(GameData::class.java)
+                        GameDataApiModel.fromGameData(gameData1.copy(id = UUID.fromString(resJson.getString("id")))),
+                        res.bodyAsJson(GameDataApiModel::class.java)
                     )
                     verify(gameDataDb).add(any())
                     verifyNoMoreInteractions(gameDataDb)
@@ -138,7 +138,7 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testAddingGameDataWithOriginHeader(testContext: VertxTestContext) {
         `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture(gameData1.copy(UUID.randomUUID())))
-        val body = JsonObject.mapFrom(gameData1)
+        val body = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         body.remove("id")
         client.post("/gamedata").putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
@@ -171,7 +171,7 @@ class GameDataApiTest : ServerTestBase() {
     @ParameterizedTest
     @ValueSource(strings = ["game", "player", "start_time", "end_time", "category", "device", "published"])
     fun testMandatoryFieldsAreRequiredWhenAddingGameData(missingField: String, testContext: VertxTestContext) {
-        val json = JsonObject.mapFrom(gameData1)
+        val json = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         json.remove("id")
         assertNotNull(json.remove(missingField))
         client.post("/gamedata")
@@ -234,7 +234,7 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testGetSingleGameData(testContext: VertxTestContext) {
-        `when`(gameDataDb.getById(gameData1.id!!)).thenReturn(Future.succeededFuture(gameData1))
+        `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1))
         client.get("/gamedata/${gameData1.id}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -256,7 +256,7 @@ class GameDataApiTest : ServerTestBase() {
         val oldId = gameData1.id
         val newGame = gameData2.copy(id = oldId)
 
-        `when`(gameDataDb.getById(gameData1.id!!)).thenReturn(Future.succeededFuture(gameData1))
+        `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1))
         `when`(gameDataDb.update(any())).thenReturn(Future.succeededFuture(newGame))
         client.patch("/gamedata/${gameData1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
@@ -278,7 +278,7 @@ class GameDataApiTest : ServerTestBase() {
                 testContext.verify {
                     println(res.bodyAsString())
                     assertEquals(200, res.statusCode())
-                    assertEquals(newGame, res.bodyAsJson(GameData::class.java))
+                    assertEquals(GameDataApiModel.fromGameData(newGame), res.bodyAsJson(GameDataApiModel::class.java))
                     verify(gameDataDb).update(newGame)
                     verifyNoMoreInteractions(gameDataDb)
                 }
@@ -288,7 +288,7 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testPatchGameDataWithIllegalInput(testContext: VertxTestContext) {
-        `when`(gameDataDb.getById(gameData1.id!!)).thenReturn(Future.succeededFuture(gameData1.copy()))
+        `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1.copy()))
         client.patch("/gamedata/${gameData1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("game", null))
@@ -305,6 +305,7 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testPatchGameDataWithUnknownFields(testContext: VertxTestContext) {
+        `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1))
         client.patch("/gamedata/${gameData1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("wololoo", "ssh"))
@@ -334,6 +335,7 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testPatchWithNoneUrlVodFails(testContext: VertxTestContext) {
+        `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1))
         client.patch("/gamedata/${gameData1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("vod_link", "What is love"))
