@@ -7,7 +7,7 @@ servers:
 paths:
   /donations:
     get:
-      description: >
+      description:
         Get all donations with one request. List of individual donations with
         metadata.
       responses:
@@ -62,7 +62,7 @@ paths:
           $ref: '#/components/responses/Empty'
   /gamedata:
     get:
-      description: >
+      description:
         Get list of all game data. List of games that are scheduled for the event.
 
       responses:
@@ -117,7 +117,7 @@ paths:
           $ref: '#/components/responses/Empty'
   /stream-metadata:
     get:
-      description: >
+      description:
         Get stream metadata. This is meant for misc information shown on stream
         layout
       responses:
@@ -136,9 +136,9 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/StreamMetadataOk'
-  /player_info:
+  /player-info:
     get:
-      description: >
+      description:
         Get player info. This is used for displaying messages for player when they
         are on stream.
       responses:
@@ -159,7 +159,7 @@ paths:
           $ref: '#/components/responses/PlayerInfoOk'
   /incentives:
     get:
-      description: >
+      description:
         Get list of all incentives. These are incentives for donating money to charity for
         exchange to influence what happens on stream.
       responses:
@@ -212,14 +212,7 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/Empty'
-  /incentive_codes:
-    get:
-      description: >
-        Get list of all incentive codes. These codes are used for pasting them on
-        donation message. This links donation to insentive.
-      responses:
-        '200':
-          $ref: '#/components/responses/IncentiveCodesAllOk'
+  /generate-incentive-code:
     post:
       description: Add a new incentive code object.
       requestBody:
@@ -231,39 +224,6 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/OkReturnCode'
-  /incentive_codes/{incentiveCode}:
-    parameters:
-      - name: incentiveCode
-        in: path
-        required: true
-        description: incentive code.
-        schema:
-          type: string
-    get:
-      description: Get incentive codes by code.
-      responses:
-        '200':
-          $ref: '#/components/responses/IncentiveCodesOk'
-    patch:
-      description: Patch incentive code
-      security:
-        - basicAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/IncentiveCodePatch'
-      responses:
-        '200':
-          $ref: '#/components/responses/Empty'
-    delete:
-      description: Delete incentive code
-      security:
-        - basicAuth: []
-      responses:
-        '204':
-          $ref: '#/components/responses/Empty'
 
 components:
   responses:
@@ -679,14 +639,35 @@ components:
           format: date-time
         type:
           type: string
+        info:
+          type: string
+        total_amount:
+          type: number
         open_char_limit:
           type: string
-        updrade_parameters:
+        milestones:
+          type: array
           items:
             type: integer
         option_parameters:
+          type: array
           items:
             type: string
+        status:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              milestone_goal:
+                type: number
+              status:
+                type: string
+              option:
+                type: string
+              amount:
+                type: number
       required:
         - id
         - title
@@ -708,11 +689,19 @@ components:
           game: Tetris
           title: Ei pyörimistä
           end_time: '2021-09-21T16:08:47.000+00:00'
-          type: upgrade
-          upgrade_parameters:
+          type: milestone
+          milestones:
             - 200
             - 300
           info: Ei saa pyörittää palikoita
+          total_amount: 250
+          status:
+            - type: milestone
+              milestone_goal: 200
+              status: completed
+            - type: milestone
+              milestone_goal: 300
+              status: incomplete
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
           game: Tetris2
           title: silmät kii
@@ -722,6 +711,14 @@ components:
             - kissa
             - koira
           info: Saa kattoa vaan kissoja tai koiria
+          total_amount: 250
+          status:
+             - type: option
+               option: kissa
+               amount: 100
+             - type: option
+               option: koira
+               amount: 150
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
           game: Tetris2
           title: Tetrispakikan nimi
@@ -729,6 +726,14 @@ components:
           type: open
           open_char_limit: 10
           info: Nimeä tetrispalikka poggers
+          total_amount: 250
+          status:
+             - type: open
+               option: palikke
+               amount: 100
+             - type: open
+               option: joku_muu
+               amount: 150
     IncentiveInput:
       type: object
       properties:
@@ -743,10 +748,14 @@ components:
           type: string
         open_char_limit:
           type: string
+        info:
+          type: string
         updrade_parameters:
+          type: array
           items:
             type: integer
         option_parameters:
+          type: array
           items:
             type: string
       required:
@@ -774,9 +783,11 @@ components:
         open_char_limit:
           type: string
         updrade_parameters:
+          type: array
           items:
             type: integer
         option_parameters:
+          type: array
           items:
             type: string
       example:
@@ -786,6 +797,8 @@ components:
     IncentiveOutput:
       type: object
       properties:
+        id:
+          type: string
         game:
           type: string
         title:
@@ -798,15 +811,15 @@ components:
         open_char_limit:
           type: string
         updrade_parameters:
+          type: array
           items:
             type: integer
         option_parameters:
+          type: array
           items:
             type: string
-      required:
-        - title
-        - type
       example:
+        id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
         game: Tetris2
         title: Tetrispakikan nimi
         end_time: '2021-09-21T19:08:47.000+00:00'
@@ -850,16 +863,6 @@ components:
       example:
         id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
         parameter: kalle tetr
-    IncentiveCodePatch:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        parameters:
-          type: string
-      example:
-        parameter: kalle tetr
     IncentiveCodeOutput:
       type: array
       items:
@@ -875,15 +878,6 @@ components:
         required:
           - code
           - id
-      example:
-        - code: XY123
-          id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
-          parameter: kalle tetr
-        - code: XY123
-          id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
-          parameter: kissa
-        - code: XY123
-          id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
 
   securitySchemes:
     basicAuth:
