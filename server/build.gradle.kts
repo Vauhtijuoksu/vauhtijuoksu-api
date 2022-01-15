@@ -14,6 +14,7 @@ dependencies {
     implementation(project(path = ":database"))
 
     implementation("com.google.inject:guice")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.sksamuel.hoplite:hoplite-core")
     implementation("com.sksamuel.hoplite:hoplite-yaml")

@@ -8,9 +8,9 @@ plugins {
 
 dependencies {
     constraints {
-        val jacksonVersion = "2.13.1"
+        val jacksonVersion = "2.13.2"
         val hopliteVersion = "1.4.9"
-        val vertxVersion = "4.1.5"
+        val vertxVersion = "4.2.6"
         val testContainersVersion = "1.16.0"
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk17")
         // Codegen components
@@ -19,6 +19,7 @@ dependencies {
 
         implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
         implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
+        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         implementation("com.google.inject:guice:5.0.1")
         implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")

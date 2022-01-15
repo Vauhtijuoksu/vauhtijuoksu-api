@@ -1,5 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.METHOD_NOT_ALLOWED
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PartialRouter
@@ -14,6 +16,8 @@ protected constructor(
     init {
         DatabindCodec.mapper()
             .registerModule(kotlinModule())
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         if (!endpoint.startsWith("/")) {
             throw IllegalArgumentException("Endpoint should start with /")

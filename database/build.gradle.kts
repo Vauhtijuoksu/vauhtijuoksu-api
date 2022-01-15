@@ -6,6 +6,7 @@ dependencies {
     implementation(project(path = ":models"))
     implementation(project(path = ":database-api"))
     implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.google.inject:guice")
     implementation("io.github.microutils:kotlin-logging-jvm")

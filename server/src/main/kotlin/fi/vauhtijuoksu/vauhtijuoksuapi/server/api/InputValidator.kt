@@ -2,7 +2,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.api
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 
-interface InputValidator<T : Model> {
+fun interface InputValidator<T : Model> {
     /**
      * Validate input T and return string describing errors, if any
      */

@@ -6,6 +6,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.models.GameDataDbModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import io.vertx.core.Future
+import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.templates.SqlTemplate
 import mu.KotlinLogging
@@ -19,11 +20,14 @@ class GameDataDatabase @Inject constructor(
     configuration,
     "gamedata",
     "start_time",
-    { GameDataDbModel::class.java },
     { gameDataDbModel -> gameDataDbModel.toGameData() }
 ),
     VauhtijuoksuDatabase<GameData> {
     private val logger = KotlinLogging.logger {}
+
+    override fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<GameDataDbModel>> {
+        return template.mapTo(GameDataDbModel::class.java)
+    }
 
     @Suppress("MaxLineLength") // SQL is prettier without too many splits
     override fun add(record: GameData): Future<GameData> {

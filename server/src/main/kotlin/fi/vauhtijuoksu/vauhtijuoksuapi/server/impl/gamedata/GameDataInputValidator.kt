@@ -35,7 +35,7 @@ open class GameDataInputValidator {
             }
         }
 
-        if (input.startTime?.after(input.endTime) == true) {
+        if (input.startTime.after(input.endTime)) {
             return "Start time must be earlier than end time"
         }
         return null
