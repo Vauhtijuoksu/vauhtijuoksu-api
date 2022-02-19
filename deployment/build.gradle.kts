@@ -86,7 +86,7 @@ tasks {
                 }
                 exec {
                     workingDir = projectDir
-                    bashCommand("helm install postgres bitnami/postgresql -f kind-cluster/psql-values.yaml")
+                    bashCommand("helm install postgres bitnami/postgresql -f kind-cluster/psql-values.yaml --version ^10.15.1")
                 }
                 // Postgres secrets for vauhtijuoksu api. Created manually on production environment
                 exec {
