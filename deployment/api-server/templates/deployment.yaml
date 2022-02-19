@@ -22,6 +22,10 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /gamedata
+              port: http
           volumeMounts:
           - name: configuration
             mountPath: /configuration
