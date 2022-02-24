@@ -630,8 +630,9 @@ components:
         id:
           type: string
           format: uuid
-        game:
-          type: string
+        game_id:
+          format: uuid
+          description: Reference to a gamedata object id
         title:
           type: string
         end_time:
@@ -639,20 +640,27 @@ components:
           format: date-time
         type:
           type: string
+          enum:
+            - milestone
+            - option
+            - open
         info:
           type: string
         total_amount:
           type: number
-        open_char_limit:
-          type: string
         milestones:
           type: array
+          description: Milestone monetary amounts. Required when type is milestone, forbidden otherwise
           items:
             type: integer
         option_parameters:
           type: array
+          description: Parameters to choose from when donating to this incentive. Required when type is option, forbidden otherwise
           items:
             type: string
+        open_char_limit:
+          type: integer
+          description: Max lenght of incentive text. Required when type is open, forbidden otherwise
         status:
           type: array
           items:
@@ -686,7 +694,7 @@ components:
         $ref: '#/components/schemas/Incentive'
       example:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
-          game: Tetris
+          game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
           title: Ei pyörimistä
           end_time: '2021-09-21T16:08:47.000+00:00'
           type: milestone
@@ -703,7 +711,7 @@ components:
               milestone_goal: 300
               status: incomplete
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
-          game: Tetris2
+          game: e356b0a4-cd7f-4b97-ac73-15aee70607dd
           title: silmät kii
           end_time: '2021-09-21T19:08:47.000+00:00'
           type: option
@@ -720,7 +728,7 @@ components:
                option: koira
                amount: 150
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
-          game: Tetris2
+          game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
           title: Tetrispakikan nimi
           end_time: '2021-09-21T19:08:47.000+00:00'
           type: open
@@ -737,8 +745,10 @@ components:
     IncentiveInput:
       type: object
       properties:
-        game:
+        game_id:
           type: string
+          format: uuid
+          description: Reference to a gamedata object id
         title:
           type: string
         end_time:
@@ -746,24 +756,29 @@ components:
           format: date-time
         type:
           type: string
-        open_char_limit:
-          type: string
-        info:
-          type: string
-        updrade_parameters:
+          enum:
+            - milestone
+            - option
+            - open
+        milestones:
           type: array
+          description: Milestone monetary amounts. Required when type is milestone, forbidden otherwise
           items:
             type: integer
         option_parameters:
           type: array
+          description: Parameters to choose from when donating to this incentive. Required when type is option, forbidden otherwise
           items:
             type: string
+        open_char_limit:
+          type: integer
+          description: Max lenght of incentive text. Required when type is open, forbidden otherwise
       required:
         - title
         - type
       example:
-        game: Tetris2
         title: Tetrispakikan nimi
+        game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
         end_time: '2021-09-21T19:08:47.000+00:00'
         type: open
         open_char_limit: 10
@@ -773,6 +788,8 @@ components:
       properties:
         game:
           type: string
+          format: uuid
+          description: Reference to a gamedata object id
         title:
           type: string
         end_time:
@@ -780,12 +797,12 @@ components:
           format: date-time
         type:
           type: string
+          enum:
+            - milestone
+            - option
+            - open
         open_char_limit:
-          type: string
-        updrade_parameters:
-          type: array
-          items:
-            type: integer
+          type: integer
         option_parameters:
           type: array
           items:
@@ -799,8 +816,10 @@ components:
       properties:
         id:
           type: string
-        game:
+        game_id:
           type: string
+          format: uuid
+          description: Reference to a gamedata object id
         title:
           type: string
         end_time:
@@ -808,19 +827,30 @@ components:
           format: date-time
         type:
           type: string
-        open_char_limit:
-          type: string
-        updrade_parameters:
+          enum:
+            - milestone
+            - option
+            - open
+        milestones:
           type: array
+          description: Milestone monetary amounts. Required when type is milestone, forbidden otherwise
           items:
             type: integer
         option_parameters:
           type: array
+          description: Parameters to choose from when donating to this incentive. Required when type is option, forbidden otherwise
           items:
             type: string
+        open_char_limit:
+          type: integer
+          description: Max lenght of incentive text. Required when type is open, forbidden otherwise
+      required:
+        - id
+        - title
+        - type
       example:
         id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
-        game: Tetris2
+        game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
         title: Tetrispakikan nimi
         end_time: '2021-09-21T19:08:47.000+00:00'
         type: open
