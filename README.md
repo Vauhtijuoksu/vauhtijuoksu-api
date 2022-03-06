@@ -1,7 +1,7 @@
 # Vauhtijuoksu API
 
 ## Requirements
-* java 16
+* java 17
 * jq
 * kubectl 1.20
 * helm 3

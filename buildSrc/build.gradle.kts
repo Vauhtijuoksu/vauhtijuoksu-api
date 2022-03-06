@@ -15,7 +15,7 @@ buildscript {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
     implementation("com.diffplug.spotless:spotless-plugin-gradle:5.15.2")
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.18.1")
     // Used by feature tests to gather coverage
@@ -31,6 +31,6 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "16"
+        jvmTarget = "17"
     }
 }

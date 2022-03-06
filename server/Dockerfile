@@ -1,4 +1,4 @@
-FROM docker.io/library/openjdk:16-alpine
+FROM docker.io/library/openjdk:17-alpine
 
 RUN mkdir /vauhtijuoksu-api
 
