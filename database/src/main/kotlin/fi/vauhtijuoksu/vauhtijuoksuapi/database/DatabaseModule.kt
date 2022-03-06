@@ -9,9 +9,11 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.DonationDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.GameDataDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.PlayerInfoDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.StreamMetadataDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.PlayerInfo
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import io.vertx.pgclient.PgConnectOptions
 import io.vertx.pgclient.PgPool
@@ -24,6 +26,7 @@ class DatabaseModule : AbstractModule() {
         bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).to(GameDataDatabase::class.java)
         bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).to(DonationDatabase::class.java)
         bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).to(StreamMetadataDatabase::class.java)
+        bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).to(PlayerInfoDatabase::class.java)
     }
 
     @Provides
