@@ -12,7 +12,7 @@ dependencies {
         val hopliteVersion = "1.4.9"
         val vertxVersion = "4.1.5"
         val testContainersVersion = "1.16.0"
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk16")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk17")
         // Codegen components
         implementation("io.swagger.codegen.v3:swagger-codegen-cli:3.0.26")
         implementation("org.webjars:swagger-ui:3.10.0")
@@ -65,7 +65,7 @@ dependencies {
 tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "16"
+            jvmTarget = "17"
         }
     }
 
