@@ -253,8 +253,98 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testPatchSingleGameData(testContext: VertxTestContext) {
-        // TODO endpoint not yet implemented
-        testContext.completeNow()
+        val oldId = gameData1.id
+        val newGame = gameData2.copy(id = oldId)
+
+        `when`(gameDataDb.getById(gameData1.id!!)).thenReturn(Future.succeededFuture(gameData1))
+        `when`(gameDataDb.update(any())).thenReturn(Future.succeededFuture(newGame))
+        client.patch("/gamedata/${gameData1.id}")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(
+                JsonObject()
+                    .put("game", newGame.game)
+                    .put("player", newGame.player)
+                    .put("start_time", newGame.startTime)
+                    .put("end_time", newGame.endTime)
+                    .put("category", newGame.category)
+                    .put("device", newGame.device)
+                    .put("published", newGame.published)
+                    .put("vod_link", newGame.vodLink)
+                    .put("img_filename", newGame.imgFilename)
+                    .put("player_twitch", newGame.playerTwitch)
+            )
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    println(res.bodyAsString())
+                    assertEquals(200, res.statusCode())
+                    assertEquals(newGame, res.bodyAsJson(GameData::class.java))
+                    verify(gameDataDb).update(newGame)
+                    verifyNoMoreInteractions(gameDataDb)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testPatchGameDataWithIllegalInput(testContext: VertxTestContext) {
+        `when`(gameDataDb.getById(gameData1.id!!)).thenReturn(Future.succeededFuture(gameData1.copy()))
+        client.patch("/gamedata/${gameData1.id}")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(JsonObject().put("game", null))
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    println(res.bodyAsString())
+                    assertEquals(400, res.statusCode())
+                    verifyNoMoreInteractions(gameDataDb)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testPatchGameDataWithUnknownFields(testContext: VertxTestContext) {
+        client.patch("/gamedata/${gameData1.id}")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(JsonObject().put("wololoo", "ssh"))
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(400, res.statusCode())
+                    verifyNoMoreInteractions(gameDataDb)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testPatchWithoutAuthenticationFails(testContext: VertxTestContext) {
+        client.patch("/gamedata/${UUID.randomUUID()}")
+            .send()
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(401, res.statusCode())
+                    verifyNoMoreInteractions(gameDataDb)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testPatchWithNoneUrlVodFails(testContext: VertxTestContext) {
+        client.patch("/gamedata/${gameData1.id}")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(JsonObject().put("vod_link", "What is love"))
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(400, res.statusCode())
+                    verifyNoMoreInteractions(gameDataDb)
+                }
+                testContext.completeNow()
+            }
     }
 
     @Test

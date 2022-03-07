@@ -45,6 +45,35 @@ class GameDataDatabase @Inject constructor(
     }
 
     override fun update(record: GameData): Future<GameData?> {
-        TODO("Not yet implemented")
+        return SqlTemplate.forUpdate(
+            client,
+            "UPDATE gamedata SET " +
+                "game = #{game}, " +
+                "player = #{player}, " +
+                "start_time = #{start_time}, " +
+                "end_time = #{end_time}, " +
+                "category = #{category}, " +
+                "device = #{device}, " +
+                "published = #{published}, " +
+                "vod_link = #{vod_link}, " +
+                "img_filename = #{img_filename}, " +
+                "player_twitch = #{player_twitch} " +
+                "WHERE id = #{id} RETURNING *"
+        )
+            .mapFrom(GameData::class.java)
+            .mapTo(GameData::class.java)
+            .execute(record)
+            .recover {
+                throw ServerError("Failed to update $record because of ${it.message}")
+            }
+            .map {
+                if (it.iterator().hasNext()) {
+                    logger.debug { "Updated GameData into $it" }
+                    return@map it.iterator().next()
+                } else {
+                    logger.debug { "No GameData with id ${record.id} found" }
+                    return@map null
+                }
+            }
     }
 }
