@@ -124,8 +124,6 @@ tasks {
                 vauhtijuoksuApiDeployment.patch(patch)
                 vauhtijuoksuApiDeployment.waitUntilReady(30, TimeUnit.SECONDS)
                 logger.debug("Deployment patched")
-                // Wait for the pods to actually start before resetting. Can be removed if proper health check is implemented
-                Thread.sleep(10000)
             }
         }
     }
