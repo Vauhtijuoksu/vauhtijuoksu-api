@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    swaggerUI("org.webjars:swagger-ui:3.10.0")
+    swaggerUI("org.webjars:swagger-ui:4.5.2")
 }
 
 tasks {
