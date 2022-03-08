@@ -79,8 +79,8 @@ tasks {
                         helm repo update
                         # Download postgres image to docker on host so it's not downloaded for each new cluster
                         # Upgrade version for image tag in deployment/kind-cluster/psql-values.yaml when upgrading this
-                        docker image pull bitnami/postgresql:10.18.0-debian-10-r60
-                        kind load docker-image bitnami/postgresql:10.18.0-debian-10-r60 --name vauhtijuoksu
+                        docker image pull postgres:10.20
+                        kind load docker-image postgres:10.20 --name vauhtijuoksu
                         """
                     )
                 }
