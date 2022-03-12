@@ -39,6 +39,7 @@ jobs:
       - name: Add coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
         uses: madrapps/jacoco-report@v1.2
+        continue-on-error: true # Commenting doesn't work from forked PRs, because those have no access to secrets
         with:
           title: Unit and integration test coverage
           paths: ${{ github.workspace }}/build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
@@ -48,6 +49,7 @@ jobs:
       - name: Add feature test coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
         uses: madrapps/jacoco-report@v1.2
+        continue-on-error: true
         with:
           title: Feature test coverage
           paths: ${{ github.workspace }}/build/reports/jacoco/featureTestReport/featureTestReport.xml
