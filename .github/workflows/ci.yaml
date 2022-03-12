@@ -36,11 +36,24 @@ jobs:
           distributions-cache-enabled: true
           dependencies-cache-enabled: true
           configuration-cache-enabled: true
-      - name: Save coverage reports
-        uses: actions/upload-artifact@v2
+      - name: Add coverage report to PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: madrapps/jacoco-report@v1.2
         with:
-          name: coverage results
-          path: "**/build/reports/jacoco/"
+          title: Unit and integration test coverage
+          paths: ${{ github.workspace }}/build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 78 # Current coverage
+          min-coverage-changed-files: 80 # Okay target for now
+      - name: Add feature test coverage report to PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: madrapps/jacoco-report@v1.2
+        with:
+          title: Feature test coverage
+          paths: ${{ github.workspace }}/build/reports/jacoco/featureTestReport/featureTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 0 # No tests yet
+          min-coverage-changed-files: 0
       - name: Save test results
         if: always()
         uses: actions/upload-artifact@v2
