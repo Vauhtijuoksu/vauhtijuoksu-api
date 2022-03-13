@@ -1,4 +1,4 @@
-FROM docker.io/library/openjdk:17
+FROM eclipse-temurin:17-jre
 
 RUN mkdir /vauhtijuoksu-api
 
