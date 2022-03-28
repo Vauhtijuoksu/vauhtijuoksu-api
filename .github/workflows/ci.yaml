@@ -121,7 +121,7 @@ jobs:
         run: |
           docker tag vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
           docker push vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
-      - uses: azure/aks-set-context@v2.0
+      - uses: azure/aks-set-context@v2.1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           cluster-name: vauhtijuoksu
