@@ -4,6 +4,11 @@ import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
+import io.vertx.junit5.VertxTestContext
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
@@ -42,5 +47,55 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
 
     override fun getDatabase(injector: Injector): VauhtijuoksuDatabase<GameData> {
         return injector.getInstance(GameDataDatabase::class.java)
+    }
+
+    @Test
+    fun testUpdate(testContext: VertxTestContext) {
+        val oldId = TestGameData.gameData1.id
+        val newGame = TestGameData.gameData2.copy(id = oldId)
+        db.update(TestGameData.gameData2.copy(id = oldId))
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(res, newGame)
+                }
+            }.compose {
+                db.getById(oldId!!)
+            }
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(res, newGame)
+                }
+            }.compose {
+                db.getById(TestGameData.gameData2.id!!)
+            }
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(res, TestGameData.gameData2)
+                    assertNotEquals(oldId, TestGameData.gameData2.id)
+                }
+                testContext.completeNow()
+            }
+    }
+
+    @Test
+    fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
+        db.update(TestGameData.gameData3)
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertNull(res)
+                }
+            }
+            .compose { db.getAll() }
+            .onFailure(testContext::failNow)
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(listOf(TestGameData.gameData1, TestGameData.gameData2), res)
+                }
+                testContext.completeNow()
+            }
     }
 }

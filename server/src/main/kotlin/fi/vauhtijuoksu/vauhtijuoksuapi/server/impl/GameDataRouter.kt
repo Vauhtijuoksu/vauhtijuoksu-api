@@ -4,6 +4,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.Mapper
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.CorsHandler
@@ -12,12 +13,13 @@ import javax.inject.Named
 
 class GameDataRouter @Inject constructor(
     db: VauhtijuoksuDatabase<GameData>,
-    postInputValidator: PostInputValidator<GameData>,
     authenticationHandler: AuthenticationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
     authenticatedEndpointCorsHandler: CorsHandler,
     @Named(DependencyInjectionConstants.PUBLIC_CORS)
     publicEndpointCorsHandler: CorsHandler,
+    postInputValidator: PostInputValidator<GameData>?,
+    patchInputValidator: PatchInputValidator<GameData>?,
 ) :
     AbstractRouter<GameData>(
         "/gamedata",
@@ -28,7 +30,7 @@ class GameDataRouter @Inject constructor(
         publicEndpointCorsHandler,
         allowPost = true,
         allowDelete = true,
-        allowPatch = false,
+        allowPatch = true,
         postInputValidator,
-        null
+        patchInputValidator
     )

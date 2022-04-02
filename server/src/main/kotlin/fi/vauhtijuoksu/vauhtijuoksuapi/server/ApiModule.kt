@@ -13,6 +13,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationPatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.DonationPostInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataPatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.GameDataPostInputValidator
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
@@ -31,6 +32,7 @@ class ApiModule : AbstractModule() {
 
     override fun configure() {
         bind(object : TypeLiteral<PostInputValidator<GameData>>() {}).to(GameDataPostInputValidator::class.java)
+        bind(object : TypeLiteral<PatchInputValidator<GameData>>() {}).to(GameDataPatchInputValidator::class.java)
         bind(object : TypeLiteral<PostInputValidator<Donation>>() {}).to(DonationPostInputValidator::class.java)
         bind(object : TypeLiteral<PatchInputValidator<Donation>>() {}).to(DonationPatchInputValidator::class.java)
     }
