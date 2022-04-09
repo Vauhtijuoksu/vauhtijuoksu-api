@@ -285,18 +285,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/IncentiveOutput'
-    IncentiveCodesAllOk:
-      description: List of incentive code data
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/IncentiveCodes'
-    IncentiveCodesOk:
-      description: Incentice data by code
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/IncentiveCodeOutput'
+
   schemas:
     Donations:
       type: array
@@ -604,6 +593,23 @@ components:
           type: array
           items:
             type: integer
+        heart-rates:
+          type: array
+          items:
+            type: integer
+        timers:
+          type: array
+          items:
+            type: object
+            properties:
+              start-time:
+                type: string
+                nullable: true
+                format: date-time
+              end-time:
+                type: string
+                nullable: true
+                format: date-time
       required:
         - donation_goal
       example:
@@ -617,6 +623,11 @@ components:
           - 7
           - 6
           - 9
+        heart-rates:
+          - 69
+          - 96
+          - 150
+          - 300
     PlayerInfo:
       type: object
       properties:
@@ -624,74 +635,10 @@ components:
           type: string
       example:
         message: Lahjoituksia luettavana!!
-    Incentive:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        game_id:
-          format: uuid
-          description: Reference to a gamedata object id
-        title:
-          type: string
-        end_time:
-          type: string
-          format: date-time
-        type:
-          type: string
-          enum:
-            - milestone
-            - option
-            - open
-        info:
-          type: string
-        total_amount:
-          type: number
-        milestones:
-          type: array
-          description: Milestone monetary amounts. Required when type is milestone, forbidden otherwise
-          items:
-            type: integer
-        option_parameters:
-          type: array
-          description: Parameters to choose from when donating to this incentive. Required when type is option, forbidden otherwise
-          items:
-            type: string
-        open_char_limit:
-          type: integer
-          description: Max lenght of incentive text. Required when type is open, forbidden otherwise
-        status:
-          type: array
-          items:
-            type: object
-            properties:
-              type:
-                type: string
-              milestone_goal:
-                type: number
-              status:
-                type: string
-              option:
-                type: string
-              amount:
-                type: number
-      required:
-        - id
-        - title
-        - type
-      example:
-        id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
-        game: Tetris2
-        title: Tetrispakikan nimi
-        end_time: '2021-09-21T19:08:47.000+00:00'
-        type: open
-        open_char_limit: 10
-        info: Nimeä tetrispalikka poggers
     Incentives:
       type: array
       items:
-        $ref: '#/components/schemas/Incentive'
+        $ref: '#/components/schemas/IncentiveOutput'
       example:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
           game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
@@ -751,6 +698,8 @@ components:
           description: Reference to a gamedata object id
         title:
           type: string
+        info:
+          type: string
         end_time:
           type: string
           format: date-time
@@ -786,30 +735,19 @@ components:
     IncentivePatch:
       type: object
       properties:
-        game:
+        game_id:
           type: string
           format: uuid
           description: Reference to a gamedata object id
         title:
           type: string
+        info:
+          type: string
         end_time:
           type: string
           format: date-time
-        type:
-          type: string
-          enum:
-            - milestone
-            - option
-            - open
-        open_char_limit:
-          type: integer
-        option_parameters:
-          type: array
-          items:
-            type: string
       example:
         end_time: '2021-09-21T19:08:47.000+00:00'
-        open_char_limit: 10
         info: Nimeä tetrispalikka poggers
     IncentiveOutput:
       type: object
@@ -821,6 +759,8 @@ components:
           format: uuid
           description: Reference to a gamedata object id
         title:
+          type: string
+        info:
           type: string
         end_time:
           type: string
@@ -844,6 +784,21 @@ components:
         open_char_limit:
           type: integer
           description: Max lenght of incentive text. Required when type is open, forbidden otherwise
+        status:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              milestone_goal:
+                type: number
+              status:
+                type: string
+              option:
+                type: string
+              amount:
+                type: number
       required:
         - id
         - title
@@ -851,63 +806,36 @@ components:
       example:
         id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
         game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
-        title: Tetrispakikan nimi
-        end_time: '2021-09-21T19:08:47.000+00:00'
-        type: open
-        open_char_limit: 10
-        info: Nimeä tetrispalikka poggers
-    IncentiveCodes:
+        title: Ei pyörimistä
+        end_time: '2021-09-21T16:08:47.000+00:00'
+        type: milestone
+        milestones:
+          - 200
+          - 300
+        info: Ei saa pyörittää palikoita
+        total_amount: 250
+        status:
+          - type: milestone
+            milestone_goal: 200
+            status: completed
+          - type: milestone
+            milestone_goal: 300
+    IncentiveCodeInput:
       type: array
       items:
         type: object
         properties:
-          code:
-            type: string
           id:
             type: string
             format: uuid
           parameters:
             type: string
         required:
-          - code
           - id
-      example:
-        - code: XY123
+        example:
           id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
           parameter: kalle tetr
-        - code: XY124
-          id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
-          parameter: kissa
-        - code: XY125
-          id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
-    IncentiveCodeInput:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        parameters:
-          type: string
-      required:
-        - id
-      example:
-        id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
-        parameter: kalle tetr
-    IncentiveCodeOutput:
-      type: array
-      items:
-        type: object
-        properties:
-          code:
-            type: string
-          id:
-            type: string
-            format: uuid
-          parameters:
-            type: string
-        required:
-          - code
-          - id
+
 
   securitySchemes:
     basicAuth:
