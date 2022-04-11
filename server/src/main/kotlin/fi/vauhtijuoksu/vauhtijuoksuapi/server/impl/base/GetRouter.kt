@@ -1,12 +1,13 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PartialRouter
+import io.vertx.core.json.JsonArray
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler
 import java.util.UUID
@@ -14,6 +15,7 @@ import java.util.UUID
 open class GetRouter<M : Model>(
     private val publicEndpointCorsHandler: CorsHandler,
     private val db: VauhtijuoksuDatabase<M>,
+    private val toJson: ((M) -> JsonObject),
 ) : PartialRouter {
     override fun configure(router: Router, basepath: String) {
         configureGetAll(router, basepath)
@@ -28,7 +30,10 @@ open class GetRouter<M : Model>(
                     .onFailure { t ->
                         ctx.fail(ServerError("Failed to retrieve record because of ${t.message}"))
                     }
-                    .onSuccess { all -> ctx.response().end(jacksonObjectMapper().writeValueAsString(all)) }
+                    .onSuccess { all ->
+                        val res = JsonArray(all.map(toJson))
+                        ctx.response().end(res.encode())
+                    }
             }
     }
 
@@ -44,11 +49,11 @@ open class GetRouter<M : Model>(
                 }
                 db.getById(id)
                     .onFailure(ctx::fail)
-                    .onSuccess { gameData ->
-                        if (gameData == null) {
+                    .onSuccess { res ->
+                        if (res == null) {
                             ctx.fail(MissingEntityException("No entity with id $id"))
                         } else {
-                            ctx.response().end(jacksonObjectMapper().writeValueAsString(gameData))
+                            ctx.response().end(toJson(res).encode())
                         }
                     }
             }

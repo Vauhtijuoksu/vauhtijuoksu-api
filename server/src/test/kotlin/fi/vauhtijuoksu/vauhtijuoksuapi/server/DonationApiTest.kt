@@ -72,7 +72,12 @@ class DonationApiTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    val expectedJson = jacksonObjectMapper().writeValueAsString(arrayListOf(donation1, donation2))
+                    val expectedJson = jacksonObjectMapper().writeValueAsString(
+                        arrayListOf(
+                            DonationApiModel.fromDonation(donation1),
+                            DonationApiModel.fromDonation(donation2)
+                        )
+                    )
                     assertEquals(expectedJson, res.bodyAsString())
                     verifyNoMoreInteractions(donationDb)
                 }
@@ -207,7 +212,7 @@ class DonationApiTest : ServerTestBase() {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
                     assertEquals(
-                        JsonObject(jacksonObjectMapper().writeValueAsString(donation1)),
+                        JsonObject(jacksonObjectMapper().writeValueAsString(DonationApiModel.fromDonation(donation1))),
                         JsonObject(res.bodyAsString())
                     )
                     verifyNoMoreInteractions(donationDb)

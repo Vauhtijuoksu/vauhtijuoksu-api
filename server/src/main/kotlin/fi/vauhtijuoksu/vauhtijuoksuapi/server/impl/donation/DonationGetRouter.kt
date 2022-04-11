@@ -15,5 +15,6 @@ class DonationGetRouter
     db: VauhtijuoksuDatabase<Donation>
 ) : GetRouter<Donation>(
     publicEndpointCorsHandler,
-    db
+    db,
+    { donation: Donation -> DonationApiModel.fromDonation(donation).toJson() },
 )
