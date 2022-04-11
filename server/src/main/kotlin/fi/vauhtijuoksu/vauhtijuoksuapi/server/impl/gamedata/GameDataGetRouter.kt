@@ -16,4 +16,5 @@ class GameDataGetRouter
 ) : GetRouter<GameData>(
     publicEndpointCorsHandler,
     db,
+    { gd: GameData -> GameDataApiModel.fromGameData(gd).toJson() },
 )

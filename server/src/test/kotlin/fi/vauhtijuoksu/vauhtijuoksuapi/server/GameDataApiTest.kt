@@ -74,7 +74,12 @@ class GameDataApiTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    val expectedJson = jacksonObjectMapper().writeValueAsString(arrayListOf(gameData1, gameData2))
+                    val expectedJson = jacksonObjectMapper().writeValueAsString(
+                        arrayListOf(
+                            GameDataApiModel.fromGameData(gameData1),
+                            GameDataApiModel.fromGameData(gameData2)
+                        )
+                    )
                     assertEquals(expectedJson, res.bodyAsString())
                     verifyNoMoreInteractions(gameDataDb)
                 }
@@ -242,7 +247,7 @@ class GameDataApiTest : ServerTestBase() {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
                     assertEquals(
-                        JsonObject(jacksonObjectMapper().writeValueAsString(gameData1)),
+                        JsonObject(jacksonObjectMapper().writeValueAsString(GameDataApiModel.fromGameData(gameData1))),
                         JsonObject(res.bodyAsString())
                     )
                     verifyNoMoreInteractions(gameDataDb)
