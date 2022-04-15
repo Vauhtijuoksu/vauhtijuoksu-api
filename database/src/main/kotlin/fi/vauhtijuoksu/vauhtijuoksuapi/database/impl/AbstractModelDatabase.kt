@@ -30,7 +30,7 @@ abstract class AbstractModelDatabase<T : Model, DbModel>(
 ) : BaseDatabase(configuration), VauhtijuoksuDatabase<T> {
     private val logger = KotlinLogging.logger {}
 
-    protected val getAllQuery: String
+    private val getAllQuery: String
     private val getByIdQuery: String
     private val deleteQuery: PreparedQuery<RowSet<Row>>
 
@@ -49,7 +49,7 @@ abstract class AbstractModelDatabase<T : Model, DbModel>(
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    protected fun <I, R, DbModel> SqlTemplate<I, R>.mapWith(
+    private fun <I, R, DbModel> SqlTemplate<I, R>.mapWith(
         mapper: (SqlTemplate<I, R>) -> SqlTemplate<I, RowSet<DbModel>>
     ): SqlTemplate<I, RowSet<DbModel>> {
         return mapper(this)

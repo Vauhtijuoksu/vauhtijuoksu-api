@@ -9,6 +9,19 @@ import io.vertx.core.json.JsonObject
 import java.time.OffsetDateTime
 import java.util.UUID
 
+data class StatusModel(
+    val type: String,
+    @JsonProperty("milestone_goal")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val milestoneGoal: Int?,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val status: MilestoneStatus?,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val option: String?,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val amount: Double?,
+)
+
 data class IncentiveApiModel(
     val id: UUID,
     @JsonProperty("game_id")
@@ -26,6 +39,9 @@ data class IncentiveApiModel(
     @JsonProperty("open_char_limit")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val openCharLimit: Int?,
+    @JsonProperty("total_amount")
+    val totalAmount: Double,
+    val status: List<StatusModel>,
 ) : ApiModel<Incentive> {
     companion object {
         fun fromIncentive(incentive: Incentive): IncentiveApiModel {
@@ -39,6 +55,39 @@ data class IncentiveApiModel(
                 incentive.milestones,
                 incentive.optionParameters,
                 incentive.openCharLimit,
+                0.0,
+                listOf(),
+            )
+        }
+
+        fun fromIncentiveWithStatuses(incentiveWithStatuses: IncentiveWithStatuses): IncentiveApiModel {
+            val incentive = incentiveWithStatuses.incentive
+            return IncentiveApiModel(
+                incentive.id,
+                incentive.gameId,
+                incentive.title,
+                incentive.endTime,
+                incentive.type.name.lowercase(),
+                incentive.info,
+                incentive.milestones,
+                incentive.optionParameters,
+                incentive.openCharLimit,
+                incentiveWithStatuses.total,
+                incentiveWithStatuses.statuses.map {
+                    StatusModel(
+                        it.type,
+                        if (it is MilestoneIncentiveStatus) it.milestoneGoal else null,
+                        if (it is MilestoneIncentiveStatus) it.status else null,
+                        when (it) {
+                            is OptionIncentiveStatus -> it.option
+                            else -> null
+                        },
+                        when (it) {
+                            is OptionIncentiveStatus -> it.amount
+                            else -> null
+                        }
+                    )
+                },
             )
         }
     }

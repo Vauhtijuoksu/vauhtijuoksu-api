@@ -14,6 +14,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.PlayerInfoRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.StreamMetadataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentivecodes.IncentiveCodeRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentivesRouter
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
@@ -36,6 +37,7 @@ class Server @Inject constructor(
     streamMetadataRouter: StreamMetadataRouter,
     playerInfoRouter: PlayerInfoRouter,
     incentivesRouter: IncentivesRouter,
+    incentiveCodeRouter: IncentiveCodeRouter,
     @Named(PUBLIC_CORS) corsHandler: CorsHandler,
 ) {
     private val logger = KotlinLogging.logger {}
@@ -54,6 +56,7 @@ class Server @Inject constructor(
         streamMetadataRouter.configure(router)
         playerInfoRouter.configure(router)
         incentivesRouter.configure(router)
+        incentiveCodeRouter.configure(router)
         router.route().failureHandler { ctx ->
             when (val cause = ctx.failure()) {
                 is UserError -> {

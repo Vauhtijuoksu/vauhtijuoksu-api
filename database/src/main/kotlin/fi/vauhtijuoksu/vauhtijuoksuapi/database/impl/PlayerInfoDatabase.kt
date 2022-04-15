@@ -12,7 +12,7 @@ import io.vertx.sqlclient.templates.SqlTemplate
 import java.util.Collections
 import javax.inject.Inject
 
-class PlayerInfoDatabase
+internal class PlayerInfoDatabase
 @Inject constructor(
     configuration: DatabaseConfiguration,
     private val client: SqlClient,

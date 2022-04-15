@@ -1,6 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation2

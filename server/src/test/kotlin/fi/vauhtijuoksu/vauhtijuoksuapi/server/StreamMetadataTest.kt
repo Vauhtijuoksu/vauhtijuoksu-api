@@ -1,5 +1,6 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
+import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer

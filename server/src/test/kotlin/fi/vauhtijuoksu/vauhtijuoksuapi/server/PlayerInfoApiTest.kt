@@ -1,5 +1,6 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
+import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.PlayerInfo
 import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
@@ -14,8 +15,6 @@ import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.lenient
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.`when`
-import java.net.http.HttpResponse
 
 class PlayerInfoApiTest : ServerTestBase() {
     private val playerInfoEndpoint = "/player-info"

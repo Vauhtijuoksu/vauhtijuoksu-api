@@ -13,7 +13,7 @@ import io.vertx.sqlclient.templates.TupleMapper
 import mu.KotlinLogging
 import javax.inject.Inject
 
-class IncentiveDatabase @Inject constructor(
+internal class IncentiveDatabase @Inject constructor(
     private val client: SqlClient,
     configuration: DatabaseConfiguration
 ) : AbstractModelDatabase<Incentive, IncentiveDbModel>(
