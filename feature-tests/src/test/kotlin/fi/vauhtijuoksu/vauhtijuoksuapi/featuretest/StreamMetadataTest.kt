@@ -27,7 +27,41 @@ class StreamMetadataTest {
             7,
             6,
             9
+          ],
+          "heart_rates": [
+              1,
+              2,
+              3,
+              4
+          ],
+          "timers": [
+                {            
+                    "start_time": "2020-09-21T15:05:47Z",
+                    "end_time": "2020-09-21T16:05:47Z"
+                }
+            ]
+        }
+    """.trimIndent()
+
+    private val someHeartData = """
+        {
+          "heart_rates": [
+              100,
+              130,
+              333,
+              441
           ]
+        }
+    """.trimIndent()
+
+    private val someTimerData = """
+        {
+            "timers": [
+                {            
+                    "start_time": "2021-09-21T15:05:47Z",
+                    "end_time": "2021-09-21T16:05:47Z"
+                }
+            ]
         }
     """.trimIndent()
     private lateinit var client: WebClient
@@ -75,6 +109,59 @@ class StreamMetadataTest {
                     val expectedData = JsonObject(someMetadata)
                         .put("donation_goal", 3000)
                         .put("counters", JsonArray())
+                    assertEquals(expectedData, res.bodyAsJsonObject())
+                }
+                testContext.completeNow()
+            }.onFailure(testContext::failNow)
+    }
+
+    @Test
+    fun `test heart rate update`(testContext: VertxTestContext) {
+        client.patch("/stream-metadata")
+            .putHeader("Origin", "http://localhost")
+            .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+            .sendJson(JsonObject(someMetadata))
+            .compose {
+                client.patch("/stream-metadata")
+                    .putHeader("Origin", "http://localhost")
+                    .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                    .sendJson(JsonObject(someHeartData))
+            }
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(200, res.statusCode())
+                    val expectedData = JsonObject(someMetadata)
+                        .put("heart_rates", listOf(100, 130, 333, 441))
+                    assertEquals(expectedData, res.bodyAsJsonObject())
+                }
+                testContext.completeNow()
+            }.onFailure(testContext::failNow)
+    }
+
+    @Test
+    fun `test timer update`(testContext: VertxTestContext) {
+        client.patch("/stream-metadata")
+            .putHeader("Origin", "http://localhost")
+            .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+            .sendJson(JsonObject(someMetadata))
+            .compose {
+                client.patch("/stream-metadata")
+                    .putHeader("Origin", "http://localhost")
+                    .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                    .sendJson(JsonObject(someTimerData))
+            }
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(200, res.statusCode())
+                    val expectedData = JsonObject(someMetadata)
+                        .put(
+                            "timers",
+                            listOf(
+                                JsonObject()
+                                    .put("start_time", "2021-09-21T15:05:47Z")
+                                    .put("end_time", "2021-09-21T16:05:47Z")
+                            )
+                        )
                     assertEquals(expectedData, res.bodyAsJsonObject())
                 }
                 testContext.completeNow()

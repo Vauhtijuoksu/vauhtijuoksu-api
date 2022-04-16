@@ -5,6 +5,7 @@ import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
@@ -15,12 +16,16 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @Testcontainers
 @ExtendWith(VertxExtension::class)
-class StreamMetadataDatabaseTest {
-    private lateinit var db: StreamMetadataDatabase
+class MetadataTimerDatabaseTest {
+    private lateinit var db: MetadataTimerDatabase
     private lateinit var gamedataDb: GameDataDatabase
 
     private val emptyData = StreamMetadata(
@@ -39,6 +44,12 @@ class StreamMetadataDatabaseTest {
         listOf(10, 100, 3),
         listOf(99, 100, 189, 69, 0),
         listOf()
+    )
+
+    private val timer1 = Timer(
+        UUID.randomUUID(),
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z"))
     )
 
     @Container
@@ -64,7 +75,7 @@ class StreamMetadataDatabaseTest {
                 }
             }
         )
-        db = injector.getInstance(StreamMetadataDatabase::class.java)
+        db = injector.getInstance(MetadataTimerDatabase::class.java)
         gamedataDb = injector.getInstance(GameDataDatabase::class.java)
     }
 
@@ -76,6 +87,7 @@ class StreamMetadataDatabaseTest {
                 testContext.verify {
                     assertEquals(emptyData, it)
                 }
+                System.out.println(it)
                 testContext.completeNow()
             }
     }
@@ -86,13 +98,20 @@ class StreamMetadataDatabaseTest {
         gamedataDb.add(TestGameData.gameData1)
             .compose {
                 gameId = it.id
-                db.save(someData.copy(currentGameId = it.id, counters = listOf(1, 3, 100)))
+                db.save(someData.copy(currentGameId = it.id, counters = listOf(1, 3, 100), timers = listOf(timer1)))
             }
             .compose { db.get() }
             .onFailure(testContext::failNow)
             .onSuccess {
                 testContext.verify {
-                    assertEquals(someData.copy(currentGameId = gameId, counters = listOf(1, 3, 100)), it)
+                    assertEquals(
+                        someData.copy(
+                            currentGameId = gameId,
+                            counters = listOf(1, 3, 100),
+                            timers = listOf(timer1)
+                        ),
+                        it
+                    )
                 }
                 testContext.completeNow()
             }

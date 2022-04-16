@@ -14,14 +14,18 @@ internal data class StreamMetadataDbModel(
     @JsonProperty("donatebar_info")
     val donatebarInfo: List<String>,
     @JsonProperty("counters")
-    val counters: List<Int>
+    val counters: List<Int>,
+    @JsonProperty("heart_rates")
+    val heartRates: List<Int>
 ) {
     fun toStreamMetadata(): StreamMetadata {
         return StreamMetadata(
             donationGoal,
             currentGameId,
             donatebarInfo,
-            counters
+            counters,
+            heartRates,
+            listOf()
         )
     }
 }

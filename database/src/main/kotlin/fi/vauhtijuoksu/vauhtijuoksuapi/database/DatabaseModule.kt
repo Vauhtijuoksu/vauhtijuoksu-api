@@ -14,11 +14,13 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.GeneratedIncentiveCodeDatab
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.IncentiveDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.PlayerInfoDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.StreamMetadataDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.TimerDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.PlayerInfo
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import io.vertx.pgclient.PgConnectOptions
 import io.vertx.pgclient.PgPool
 import io.vertx.pgclient.SslMode
@@ -31,6 +33,7 @@ class DatabaseModule : AbstractModule() {
         bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).to(GameDataDatabase::class.java)
         bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).to(DonationDatabase::class.java)
         bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).to(IncentiveDatabase::class.java)
+        bind(object : TypeLiteral<VauhtijuoksuDatabase<Timer>>() {}).to(TimerDatabase::class.java)
         bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).to(StreamMetadataDatabase::class.java)
         bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).to(PlayerInfoDatabase::class.java)
         bind(GeneratedIncentiveCodeDatabase::class.java).to(GeneratedIncentiveCodeDatabaseImpl::class.java)

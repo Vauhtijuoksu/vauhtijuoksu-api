@@ -38,14 +38,16 @@ class StreamMetadataDatabase
                         donation_goal = $1,
                         current_game_id = $2,
                         donatebar_info = $3,
-                        counters = $4
+                        counters = $4,
+                        heart_rates = $5
                         """
         ).execute(
             Tuple.of(
                 record.donationGoal,
                 record.currentGameId,
                 record.donateBarInfo.toTypedArray(),
-                record.counters.toTypedArray()
+                record.counters.toTypedArray(),
+                record.heartRates.toTypedArray()
             )
         ).recover {
             throw ServerError(it)

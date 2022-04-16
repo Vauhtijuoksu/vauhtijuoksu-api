@@ -6,11 +6,13 @@ import com.google.inject.TypeLiteral
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.GeneratedIncentiveCodeDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.MetadataTimerDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.PlayerInfo
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
 import io.vertx.core.Vertx
 import io.vertx.ext.web.client.WebClient
@@ -42,6 +44,9 @@ open class ServerTestBase {
     protected lateinit var donationDb: VauhtijuoksuDatabase<Donation>
 
     @Mock
+    protected lateinit var timerDb: VauhtijuoksuDatabase<Timer>
+
+    @Mock
     protected lateinit var streamMetadataDb: SingletonDatabase<StreamMetadata>
 
     @Mock
@@ -52,6 +57,9 @@ open class ServerTestBase {
 
     @Mock
     protected lateinit var generatedIncentiveCodeDatabase: GeneratedIncentiveCodeDatabase
+
+    @Mock
+    protected lateinit var metadataTimerDatabase: MetadataTimerDatabase
 
     @TempDir
     lateinit var tmpDir: File
@@ -83,10 +91,12 @@ open class ServerTestBase {
                 override fun configure() {
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Timer>>() {}).toInstance(timerDb)
                     bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).toInstance(streamMetadataDb)
                     bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).toInstance(playerInfoDb)
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
                     bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
+                    bind(object : TypeLiteral<MetadataTimerDatabase>() {}).toInstance(metadataTimerDatabase)
                     bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile, corsHeaderUrl))
                 }
             }
