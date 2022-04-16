@@ -27,6 +27,7 @@ class StreamMetadataDatabaseTest {
         null,
         null,
         listOf(),
+        listOf(),
         listOf()
     )
 
@@ -34,7 +35,8 @@ class StreamMetadataDatabaseTest {
         1000,
         TestGameData.gameData1.id,
         listOf("gotta go fast", "pls give money to norppas"),
-        listOf(10, 100, 3)
+        listOf(10, 100, 3),
+        listOf(99, 100, 189, 69, 0)
     )
 
     @Container

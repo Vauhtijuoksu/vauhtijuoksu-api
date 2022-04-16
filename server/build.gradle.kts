@@ -23,6 +23,7 @@ dependencies {
     implementation("io.vertx:vertx-core")
     implementation("io.vertx:vertx-web")
     implementation("io.vertx:vertx-lang-kotlin")
+    implementation("io.vertx:vertx-pg-client")
 
     runtimeOnly("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
     runtimeOnly("com.fasterxml.jackson.core:jackson-databind")
