@@ -2,8 +2,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
-import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.MetadataTimerDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
@@ -30,8 +29,7 @@ import javax.inject.Named
 @Suppress("ThrowsCount")
 class StreamMetadataRouter
 @Inject constructor(
-    private val dbStream: SingletonDatabase<StreamMetadata>,
-    private val dbTimer: VauhtijuoksuDatabase<Timer>,
+    private val db: MetadataTimerDatabase,
     private val authenticationHandler: AuthenticationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
     private val authenticatedEndpointCorsHandler: CorsHandler,
@@ -48,13 +46,7 @@ class StreamMetadataRouter
             "timers": []
         }"""
     )
-    private val emptyMetaData = StreamMetadata(
-        null,
-        null,
-        listOf(),
-        listOf(),
-        listOf()
-    )
+
     private val logger = KotlinLogging.logger {}
 
     @Suppress("SwallowedException") // Not swallowed, the message is used in augmented error
@@ -72,14 +64,10 @@ class StreamMetadataRouter
         router.get("/stream-metadata")
             .handler(publicEndpointCorsHandler)
             .handler { ctx ->
-                var metaData = emptyMetaData
-                dbStream.get()
-                    .onSuccess { metaData = it }
-                    .onFailure(ctx::fail)
-                    .compose { dbTimer.getAll() }
+                db.get()
                     .onSuccess { res ->
                         ctx.response()
-                            .end(jacksonObjectMapper().writeValueAsString(StreamMetaDataApiModel.from(metaData, res)))
+                            .end(jacksonObjectMapper().writeValueAsString(StreamMetaDataApiModel.from(res)))
                     }.onFailure(ctx::fail)
             }
     }
@@ -91,40 +79,31 @@ class StreamMetadataRouter
             .handler(authenticatedEndpointCorsHandler)
             .handler(authenticationHandler)
             .handler { ctx ->
-                var metaData = emptyMetaData
-                var newTimers: MutableList<Timer> = mutableListOf()
-                var oldTimers: List<Timer> = listOf()
-                dbStream.get()
-                    .onSuccess {
-                        metaData = it
-                    }.onFailure(ctx::fail)
-                    .compose { dbTimer.getAll() }
-                    .flatMap { existingTimers ->
-                        oldTimers = existingTimers
+                db.get()
+                    .flatMap { res ->
                         val body = try { ctx.bodyAsJson } catch (e: DecodeException) {
                             throw UserError("Invalid json ${e.message}")
                         }
-                        newTimers = handleTimers(body, existingTimers)
+                        var newTimers = handleTimers(body, res.timers)
                         val newData = try {
-                            updateStreamFromJson(metaData, ctx.bodyAsJson, existingTimers)
+                            updateStreamFromJson(res, ctx.bodyAsJson)
                         } catch (e: InvalidFormatException) {
                             throw UserError("Invalid request: ${e.message}")
                         }
+                        newData.timers = newTimers
                         return@flatMap future { p: Promise<StreamMetadata> ->
-                            if (newTimers.size > 0) {
-                                dbTimer.addAll(newTimers)
-                                    .compose { dbStream.save(newData) }
-                                    .onSuccess { p.complete(newData) }
-                                    .onFailure(p::fail)
-                            } else
-                                dbStream.save(newData)
-                                    .onSuccess { p.complete(newData) }
-                                    .onFailure(p::fail)
+                            db.save(newData)
+                                .onSuccess {
+                                    // return timers from database if no changes were made
+                                    if (newTimers.size == 0)
+                                        newData.timers = res.timers
+                                    p.complete(newData)
+                                }
+                                .onFailure(p::fail)
                         }
                     }
                     .onSuccess {
-                        val resTimers = if (newTimers.size > 0) newTimers else oldTimers
-                        ctx.response().end(jacksonObjectMapper().writeValueAsString(StreamMetaDataApiModel.from(it, resTimers)))
+                        ctx.response().end(jacksonObjectMapper().writeValueAsString(StreamMetaDataApiModel.from(it)))
                     }.onFailure(ctx::fail)
             }
     }
@@ -171,15 +150,16 @@ class StreamMetadataRouter
         return newTimers
     }
 
-    private fun updateStreamFromJson(data: StreamMetadata, json: JsonObject, timers: List<Timer>): StreamMetadata {
-        val oldData = jacksonObjectMapper().readerForUpdating(StreamMetaDataApiModel.from(data, timers))
+    private fun updateStreamFromJson(data: StreamMetadata, json: JsonObject): StreamMetadata {
+        val oldData = jacksonObjectMapper().readerForUpdating(StreamMetaDataApiModel.from(data))
         val mergedData: StreamMetaDataApiModel = oldData.readValue(json.encode())
         return StreamMetadata(
             mergedData.donationGoal,
             mergedData.currentGameId,
             mergedData.donatebarInfo,
             mergedData.counters,
-            mergedData.heartRates
+            mergedData.heartRates,
+            listOf()
         )
     }
 

@@ -1,6 +1,5 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.database.api
 
-import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import io.vertx.core.Future
 import java.util.UUID
@@ -24,13 +23,6 @@ interface VauhtijuoksuDatabase<T : Model> {
      * Update given record and return the updated record if it exists. Note that full record is expected as input,
      * i.e. any null values are written to db.
      */
-
-    fun addAll(records: List<T>): Future<List<T>?> { throw ServerError("Missing addAll implementation") }
-
-    /**
-     * Add a list of recods
-     */
-
     fun update(record: T): Future<T?>
 
     /**

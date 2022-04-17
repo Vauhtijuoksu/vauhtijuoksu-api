@@ -6,16 +6,11 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.models.TimerDbModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import io.vertx.core.Future
-import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.templates.SqlTemplate
 import mu.KotlinLogging
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.UUID
 import javax.inject.Inject
 
 class TimerDatabase
@@ -55,49 +50,6 @@ class TimerDatabase
                 logger.debug { "Inserted timer $record" }
                 return@map it.iterator().next().toTimer()
             }
-    }
-
-    override fun addAll(records: List<Timer>): Future<List<Timer>?> {
-        fun insertStatement(data: List<Timer>): String {
-            fun valuesStringForTimer(timer: Timer): String {
-                val startTime = if (timer.startTime != null) "'${df.format(timer.startTime)}'" else null
-                val endTime = if (timer.endTime != null) "'${df.format(timer.endTime)}'" else null
-                return "('${timer.id}', $startTime, $endTime)"
-            }
-
-            var statement = "INSERT INTO timers VALUES "
-            for (timer in data) {
-                statement += "${valuesStringForTimer(timer)},"
-            }
-            statement = statement.trim(',')
-            statement += """ ON CONFLICT (id) DO UPDATE 
-                SET start_time = excluded.start_time, 
-                end_time = excluded.end_time;"""
-            return statement
-        }
-
-        return client.query(insertStatement(records))
-            .execute()
-            .recover {
-                throw ServerError("Failed to insert $records because of ${it.message}")
-            }
-            .map {
-                return@map it.toList().map { row -> toTimer(row) }
-            }
-    }
-
-    private fun toTimer(row: Row): Timer {
-        val startTime = if (row.getString("start_time") != null)
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("start_time"))))
-        else null
-        val endTime = if (row.getString("end_time") != null)
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("end_time"))))
-        else null
-        return Timer(
-            UUID.fromString(row.getString("id")),
-            startTime,
-            endTime
-        )
     }
 
     override fun update(record: Timer): Future<Timer?> {

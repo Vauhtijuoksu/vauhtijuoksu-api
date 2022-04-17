@@ -24,7 +24,8 @@ internal data class StreamMetadataDbModel(
             currentGameId,
             donatebarInfo,
             counters,
-            heartRates
+            heartRates,
+            listOf()
         )
     }
 }

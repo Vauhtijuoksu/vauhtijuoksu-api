@@ -117,27 +117,4 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
                 testContext.completeNow()
             }
     }
-
-    @Test
-    fun testAddAllWithOneNewOneUpdate(testContext: VertxTestContext) {
-        val newTimer = timer1.copy(
-            startTime = Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z"))),
-            endTime = Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")))
-        )
-        db.addAll(listOf(newTimer, timer3))
-            .compose {
-                db.getAll()
-            }
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    val list1 = mutableListOf(newTimer, timer2, timer3)
-                    list1.sortBy { it.id }
-                    val results = it.toMutableList()
-                    results.sortBy { it.id }
-                    assertEquals(list1, results)
-                }
-                testContext.completeNow()
-            }
-    }
 }

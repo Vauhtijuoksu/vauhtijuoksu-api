@@ -34,7 +34,14 @@ class StreamMetadataTest : ServerTestBase() {
         Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z"))),
         Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")))
     )
-    private val someMetadata = StreamMetadata(100, someUuid, listOf("save", "norppas"), listOf(1, 0), listOf(100, 120))
+    private val someMetadata = StreamMetadata(
+        100,
+        someUuid,
+        listOf("save", "norppas"),
+        listOf(1, 0),
+        listOf(100, 120),
+        listOf(someTimer)
+    )
     private val someMetadataApi = StreamMetaDataApiModel(
         100,
         someUuid,
@@ -44,13 +51,10 @@ class StreamMetadataTest : ServerTestBase() {
         listOf(someApiTimer)
     )
 
-    private val someMetadataJson = JsonObject()
-        .put("donation_goal", 100)
-        .put("current_game_id", someUuid.toString())
-        .put("donatebar_info", listOf("save", "norppas"))
-        .put("counters", listOf(1, 0))
-        .put("heart_rates", listOf(100, 120))
-        .put("timers", listOf(someApiTimer))
+    private val newTimer = someTimer.copy(
+        startTime = Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2021-09-21T15:05:47.000+00:00"))),
+        endTime = Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2021-09-21T16:05:47.000+00:00")))
+    )
 
     private val jsonTimer = """
             {            
@@ -62,16 +66,15 @@ class StreamMetadataTest : ServerTestBase() {
     @BeforeEach
     fun before() {
         // Mockito is supposed to be lenient with mocks initialized in @BeforeEach, but for some reason is not
-        lenient().`when`(streamMetadataDb.get()).thenReturn(Future.succeededFuture(someMetadata))
-        lenient().`when`(timerDb.getAll()).thenReturn(Future.succeededFuture(listOf(someTimer)))
-        lenient().`when`(streamMetadataDb.save(any())).thenReturn(Future.succeededFuture())
+        lenient().`when`(metadataTimerDatabase.get()).thenReturn(Future.succeededFuture(someMetadata))
+        lenient().`when`(metadataTimerDatabase.save(any())).thenReturn(Future.succeededFuture())
     }
 
     @AfterEach
     fun after() {
         // We don't care about reads
-        verify(streamMetadataDb, atLeast(0)).get()
-        verifyNoMoreInteractions(streamMetadataDb)
+        verify(metadataTimerDatabase, atLeast(0)).get()
+        verifyNoMoreInteractions(metadataTimerDatabase)
     }
 
     private fun patchStreamMetadata(body: JsonObject): Future<io.vertx.ext.web.client.HttpResponse<Buffer>> {
@@ -133,7 +136,7 @@ class StreamMetadataTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
-                    verify(streamMetadataDb).save(someMetadata)
+                    verify(metadataTimerDatabase).save(someMetadata)
                 }
                 testContext.completeNow()
             }
@@ -147,9 +150,10 @@ class StreamMetadataTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    someMetadataJson.put("donation_goal", 1000)
-                    assertEquals(someMetadataJson.toString(), res.bodyAsJsonObject().toString())
-                    verify(streamMetadataDb).save(someMetadata.copy(donationGoal = 1000))
+                    val original = StreamMetaDataApiModel.from(someMetadata.copy(donationGoal = 1000))
+                    val response = res.bodyAsJson(StreamMetaDataApiModel::class.java)
+                    assertEquals(original, response)
+                    verify(metadataTimerDatabase).save(someMetadata.copy(donationGoal = 1000))
                 }
                 testContext.completeNow()
             }
@@ -157,16 +161,16 @@ class StreamMetadataTest : ServerTestBase() {
 
     @Test
     fun `patch updates timers`(testContext: VertxTestContext) {
-        lenient().`when`(timerDb.addAll(listOf(any()))).thenReturn(Future.succeededFuture(listOf(someTimer)))
         patchStreamMetadata(JsonObject().put("timers", listOf(JsonObject(jsonTimer))))
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    someMetadataJson.put("timers", listOf(JsonObject(jsonTimer)))
-                    assertEquals(someMetadataJson.toString(), res.bodyAsJsonObject().toString())
-                    verify(streamMetadataDb).save(someMetadata)
+                    val original = StreamMetaDataApiModel.from(someMetadata.copy(timers = listOf(newTimer)))
+                    val response = res.bodyAsJson(StreamMetaDataApiModel::class.java)
+                    assertEquals(original, response)
+                    verify(metadataTimerDatabase).save(someMetadata.copy(timers = listOf(newTimer)))
                 }
                 testContext.completeNow()
             }

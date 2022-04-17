@@ -5,6 +5,7 @@ import com.google.inject.Guice
 import com.google.inject.TypeLiteral
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.MetadataTimerDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
@@ -54,6 +55,9 @@ open class ServerTestBase {
     @Mock
     protected lateinit var incentiveDatabase: VauhtijuoksuDatabase<Incentive>
 
+    @Mock
+    protected lateinit var metadataTimerDatabase: MetadataTimerDatabase
+
     @TempDir
     lateinit var tmpDir: File
 
@@ -98,6 +102,7 @@ open class ServerTestBase {
                     bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).toInstance(streamMetadataDb)
                     bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).toInstance(playerInfoDb)
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
+                    bind(object : TypeLiteral<MetadataTimerDatabase>() {}).toInstance(metadataTimerDatabase)
                     bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile, corsHeaderUrl))
                 }
             }

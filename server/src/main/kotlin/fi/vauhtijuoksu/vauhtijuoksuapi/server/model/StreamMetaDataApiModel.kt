@@ -2,7 +2,6 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import java.util.UUID
 
 internal data class StreamMetaDataApiModel(
@@ -20,14 +19,14 @@ internal data class StreamMetaDataApiModel(
     val timers: List<TimerApiModel>
 ) {
     companion object {
-        fun from(data: StreamMetadata, timer: List<Timer>): StreamMetaDataApiModel {
+        fun from(data: StreamMetadata): StreamMetaDataApiModel {
             return StreamMetaDataApiModel(
                 data.donationGoal,
                 data.currentGameId,
                 data.donateBarInfo,
                 data.counters,
                 data.heartRates,
-                timer.map {
+                data.timers.map {
                     TimerApiModel.from(it)
                 }
             )
