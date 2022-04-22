@@ -27,6 +27,7 @@ data class NewGameDataApiModel(
     val imgFilename: String?,
     @JsonProperty("player_twitch")
     val playerTwitch: String?,
+    val meta: String?,
 ) {
     fun toGameData(id: UUID): GameData {
         return GameData(
@@ -41,6 +42,7 @@ data class NewGameDataApiModel(
             vodLink,
             imgFilename,
             playerTwitch,
+            meta,
         )
     }
 }

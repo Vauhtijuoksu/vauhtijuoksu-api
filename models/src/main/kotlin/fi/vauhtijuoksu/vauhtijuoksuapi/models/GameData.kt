@@ -16,4 +16,5 @@ data class GameData(
     val vodLink: URL?,
     val imgFilename: String?,
     val playerTwitch: String?,
+    val meta: String?,
 ) : Model

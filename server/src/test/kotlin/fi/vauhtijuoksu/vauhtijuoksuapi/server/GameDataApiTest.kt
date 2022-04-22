@@ -277,6 +277,7 @@ class GameDataApiTest : ServerTestBase() {
                     .put("vod_link", newGame.vodLink)
                     .put("img_filename", newGame.imgFilename)
                     .put("player_twitch", newGame.playerTwitch)
+                    .put("meta", newGame.meta)
             )
             .onFailure(testContext::failNow)
             .onSuccess { res ->

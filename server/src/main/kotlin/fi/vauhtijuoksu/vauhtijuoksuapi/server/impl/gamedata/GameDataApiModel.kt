@@ -31,6 +31,7 @@ data class GameDataApiModel(
     val imgFilename: String?,
     @JsonProperty("player_twitch")
     val playerTwitch: String?,
+    val meta: String?,
 ) : ApiModel<GameData> {
     companion object {
         fun fromGameData(gameData: GameData): GameDataApiModel {
@@ -45,7 +46,8 @@ data class GameDataApiModel(
                 gameData.published,
                 gameData.vodLink,
                 gameData.imgFilename,
-                gameData.playerTwitch
+                gameData.playerTwitch,
+                gameData.meta
             )
         }
     }
@@ -66,7 +68,8 @@ data class GameDataApiModel(
             published,
             vodLink,
             imgFilename,
-            playerTwitch
+            playerTwitch,
+            meta
         )
     }
 }

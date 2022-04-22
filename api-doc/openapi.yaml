@@ -411,6 +411,8 @@ components:
           type: string
         player_twitch:
           type: string
+        meta:
+          type: string
       required:
         - id
         - game
@@ -432,6 +434,7 @@ components:
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
         player_twitch: jiisloth
+        meta: k18
     GameDataAll:
       type: array
       items:
@@ -448,6 +451,7 @@ components:
           vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
           img_filename: tetris.png
           player_twitch: jiisloth
+          meta: k18
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
           game: Tetris2
           player: jsloth
@@ -459,6 +463,7 @@ components:
           vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
           img_filename: tetris.png
           player_twitch: jiisloth
+          meta: k18
     GameDataInput:
       type: object
       properties:
@@ -484,6 +489,8 @@ components:
           type: string
         player_twitch:
           type: string
+        meta:
+          type: string
       required:
         - game
         - player
@@ -503,6 +510,7 @@ components:
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
         player_twitch: jiisloth
+        meta: k18
     GameDataPatch:
       type: object
       properties:
@@ -527,6 +535,8 @@ components:
         img_filename:
           type: string
         player_twitch:
+          type: string
+        meta:
           type: string
       example:
         game: Tetris
@@ -558,6 +568,8 @@ components:
           type: string
         player_twitch:
           type: string
+        meta:
+          type: string
       required:
         - game
         - player
@@ -577,6 +589,7 @@ components:
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
         player_twitch: jiisloth
+        meta: meta
     StreamMetadata:
       type: object
       properties:
