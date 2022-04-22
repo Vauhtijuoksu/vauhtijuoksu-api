@@ -34,8 +34,8 @@ class GameDataDatabase @Inject constructor(
         return SqlTemplate.forUpdate(
             client,
             "INSERT INTO gamedata " +
-                "(game, player, start_time, end_time, category, device, published, vod_link, img_filename, player_twitch) VALUES " +
-                "(#{game}, #{player}, #{start_time}, #{end_time}, #{category}, #{device}, #{published}, #{vod_link}, #{img_filename}, #{player_twitch} ) " +
+                "(game, player, start_time, end_time, category, device, published, vod_link, img_filename, player_twitch, meta) VALUES " +
+                "(#{game}, #{player}, #{start_time}, #{end_time}, #{category}, #{device}, #{published}, #{vod_link}, #{img_filename}, #{player_twitch}, #{meta} ) " +
                 "RETURNING *"
         )
             .mapFrom(GameDataDbModel::class.java)
@@ -63,7 +63,8 @@ class GameDataDatabase @Inject constructor(
                 "published = #{published}, " +
                 "vod_link = #{vod_link}, " +
                 "img_filename = #{img_filename}, " +
-                "player_twitch = #{player_twitch} " +
+                "player_twitch = #{player_twitch}, " +
+                "meta = #{meta} " +
                 "WHERE id = #{id} RETURNING *"
         )
             .mapFrom(GameDataDbModel::class.java)

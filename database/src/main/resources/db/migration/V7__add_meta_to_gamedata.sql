@@ -1,0 +1,1 @@
+ALTER TABLE gamedata ADD COLUMN meta TEXT

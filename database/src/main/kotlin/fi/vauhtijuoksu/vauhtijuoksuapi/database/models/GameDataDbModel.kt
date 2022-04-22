@@ -28,6 +28,7 @@ data class GameDataDbModel(
     val imgFilename: String?,
     @JsonProperty("player_twitch")
     val playerTwitch: String?,
+    val meta: String?,
 ) {
     companion object {
         fun fromGameData(gameData: GameData): GameDataDbModel {
@@ -43,6 +44,7 @@ data class GameDataDbModel(
                 gameData.vodLink,
                 gameData.imgFilename,
                 gameData.playerTwitch,
+                gameData.meta,
             )
         }
     }
@@ -60,6 +62,7 @@ data class GameDataDbModel(
             vodLink,
             imgFilename,
             playerTwitch,
+            meta,
         )
     }
 }

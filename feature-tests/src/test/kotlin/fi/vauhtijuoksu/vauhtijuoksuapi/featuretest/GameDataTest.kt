@@ -26,7 +26,8 @@ class GameDataTest {
             "published": "1970",
             "vod_link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
             "img_filename": "tetris.png",
-            "player_twitch": "jiisloth"
+            "player_twitch": "jiisloth",
+            "meta": "k18"
         }
     """.trimIndent()
 

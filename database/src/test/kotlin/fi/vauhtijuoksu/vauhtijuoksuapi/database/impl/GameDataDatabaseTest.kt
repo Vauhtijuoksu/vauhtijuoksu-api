@@ -15,7 +15,7 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
     override fun insertStatement(data: List<GameData>): String {
         fun valuesStringForGameData(gd: GameData): String {
             @Suppress("MaxLineLength")
-            return "('${gd.id}', '${gd.game}', '${gd.player}', '${df.format(gd.startTime)}', '${df.format(gd.endTime)}', '${gd.category}', '${gd.device}', '${gd.published}', '${gd.vodLink}', '${gd.imgFilename}', '${gd.playerTwitch}')"
+            return "('${gd.id}', '${gd.game}', '${gd.player}', '${df.format(gd.startTime)}', '${df.format(gd.endTime)}', '${gd.category}', '${gd.device}', '${gd.published}', '${gd.vodLink}', '${gd.imgFilename}', '${gd.playerTwitch}', '${gd.meta}')"
         }
 
         var statement = "INSERT INTO gamedata VALUES "

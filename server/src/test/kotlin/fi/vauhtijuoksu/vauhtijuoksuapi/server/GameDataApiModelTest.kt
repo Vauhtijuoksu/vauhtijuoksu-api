@@ -39,6 +39,7 @@ internal class GameDataApiModelTest {
             .put("vod_link", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             .put("img_filename", "tetris.png")
             .put("player_twitch", "jiisloth")
+            .put("meta", "k18")
     }
 
     @Test
@@ -54,7 +55,8 @@ internal class GameDataApiModelTest {
             "1970",
             URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
             "tetris.png",
-            "jiisloth"
+            "jiisloth",
+            "k18"
         )
 
         val gameDataAsJson = gameData.toJson()
@@ -75,7 +77,8 @@ internal class GameDataApiModelTest {
             "1970",
             null,
             "tetris.png",
-            "jiisloth"
+            "jiisloth",
+            "k18"
         )
 
         val gameDataAsJson = gameDataApiModel.toJson()
