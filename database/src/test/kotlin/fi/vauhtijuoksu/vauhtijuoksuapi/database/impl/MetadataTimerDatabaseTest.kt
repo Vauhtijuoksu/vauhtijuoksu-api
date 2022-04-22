@@ -18,7 +18,8 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.Instant
 import java.time.format.DateTimeFormatter
-import java.util.Date
+import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.util.UUID
 
 @Testcontainers
@@ -47,8 +48,8 @@ class MetadataTimerDatabaseTest {
 
     private val timer1 = Timer(
         UUID.randomUUID(),
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z"))),
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z"))
     )
 
     @Container

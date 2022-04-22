@@ -9,32 +9,33 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.format.DateTimeFormatter
-import java.util.Date
+import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.util.UUID
 
 class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
     private val timer1 = Timer(
         UUID.randomUUID(),
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z"))),
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z"))
     )
 
     private val timer2 = Timer(
         UUID.randomUUID(),
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z"))),
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")), ZoneId.of("Z"))
     )
 
     private val timer3 = Timer(
         UUID.randomUUID(),
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z"))),
-        Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-08T16:00:00Z")))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")), ZoneId.of("Z")),
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-08T16:00:00Z")), ZoneId.of("Z"))
     )
 
     override fun insertStatement(data: List<Timer>): String {
         fun valuesStringForTimer(timer: Timer): String {
             @Suppress("MaxLineLength")
-            return "('${timer.id}', '${df.format(timer.startTime)}', '${df.format(timer.endTime)}')"
+            return "('${timer.id}', '${timer.startTime}', '${timer.endTime}')"
         }
 
         var statement = "INSERT INTO timers VALUES "
@@ -71,13 +72,13 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
     @Test
     fun testUpdate(testContext: VertxTestContext) {
         val newTimer = timer1.copy(
-            startTime = Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z"))),
-            endTime = Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")))
+            startTime = OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z")), ZoneId.of("Z")),
+            endTime = OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")), ZoneId.of("Z"))
         )
         db.update(
             timer1.copy(
-                startTime = Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z"))),
-                endTime = Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")))
+                startTime = OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z")), ZoneId.of("Z")),
+                endTime = OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")), ZoneId.of("Z"))
             )
         )
             .onFailure(testContext::failNow)

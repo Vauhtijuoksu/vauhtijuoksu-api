@@ -16,8 +16,9 @@ import io.vertx.sqlclient.templates.SqlTemplate
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.util.Collections
-import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 
@@ -27,6 +28,8 @@ class MetadataTimerDatabase
     private val client: SqlClient,
 ) :
     BaseDatabase(configuration) {
+
+
 
     private fun <I, R, TimerDbModel> SqlTemplate<I, R>.mapWith(
         mapper: (SqlTemplate<I, R>) -> SqlTemplate<I, RowSet<TimerDbModel>>
@@ -94,11 +97,10 @@ class MetadataTimerDatabase
     }
 
     fun addAllTimers(records: List<Timer>): Future<List<Timer>?> {
-        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
         fun insertStatement(data: List<Timer>): String {
             fun valuesStringForTimer(timer: Timer): String {
-                val startTime = if (timer.startTime != null) "'${df.format(timer.startTime)}'" else null
-                val endTime = if (timer.endTime != null) "'${df.format(timer.endTime)}'" else null
+                val startTime = if (timer.startTime != null) "'${timer.startTime}'" else null
+                val endTime = if (timer.endTime != null) "'${timer.endTime}'" else null
                 return "('${timer.id}', $startTime, $endTime)"
             }
 
@@ -125,10 +127,10 @@ class MetadataTimerDatabase
 
     private fun toTimer(row: Row): Timer {
         val startTime = if (row.getString("start_time") != null)
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("start_time"))))
+            OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("start_time"))), ZoneId.of("Z"))
         else null
         val endTime = if (row.getString("end_time") != null)
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("end_time"))))
+            OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("end_time"))), ZoneId.of("Z"))
         else null
         return Timer(
             UUID.fromString(row.getString("id")),

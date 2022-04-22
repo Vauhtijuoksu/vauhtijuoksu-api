@@ -9,6 +9,7 @@ import io.vertx.core.Future
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.templates.SqlTemplate
+import io.vertx.sqlclient.templates.TupleMapper
 import mu.KotlinLogging
 import java.text.SimpleDateFormat
 import javax.inject.Inject
@@ -25,8 +26,7 @@ class TimerDatabase
     { TimerDbModel -> TimerDbModel.toTimer() }
 ),
     VauhtijuoksuDatabase<Timer> {
-    private val logger = KotlinLogging.logger {}
-    val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private val logger = KotlinLogging.logger {}    
 
     override fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<TimerDbModel>> {
         return template.mapTo(TimerDbModel::class.java)
@@ -35,13 +35,20 @@ class TimerDatabase
     override fun add(record: Timer): Future<Timer> {
         return SqlTemplate.forUpdate(
             client,
-            "INSERT INTO timers " +
-                "(start_time, end_time) VALUES " +
-                "(#{start_time}, #{end_time}) " +
+            "INSERT INTO timers VALUES " +
+                "(#{id}, #{start_time}, #{end_time}) " +
                 "RETURNING *"
         )
-            .mapFrom(TimerDbModel::class.java)
-            .mapTo(TimerDbModel::class.java)
+            .mapTo { row -> row.toJson().mapTo(TimerDbModel::class.java) }
+            .mapFrom(
+                TupleMapper.mapper { timer: TimerDbModel ->
+                    mapOf<String, Any?>(
+                        "id" to timer.id,
+                        "start_time" to timer.startTime,
+                        "end_time" to timer.endTime,
+                    )
+                }
+            )
             .execute(TimerDbModel.fromTimer(record))
             .recover {
                 throw ServerError("Failed to insert $record because of ${it.message}")
@@ -56,11 +63,20 @@ class TimerDatabase
         return SqlTemplate.forUpdate(
             client,
             "UPDATE timers SET " +
+                "id = #{id}, " + 
                 "start_time = #{start_time}, " +
                 "end_time = #{end_time} " +
                 "WHERE id = #{id} RETURNING *"
         )
-            .mapFrom(TimerDbModel::class.java)
+            .mapFrom(
+                TupleMapper.mapper { timer: TimerDbModel ->
+                    mapOf<String, Any?>(
+                        "id" to timer.id,
+                        "start_time" to timer.startTime,
+                        "end_time" to timer.endTime,
+                    )
+                }
+            )
             .mapTo(TimerDbModel::class.java)
             .execute(TimerDbModel.fromTimer(record))
             .recover {

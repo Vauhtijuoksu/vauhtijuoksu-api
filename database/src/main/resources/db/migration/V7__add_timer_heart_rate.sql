@@ -4,6 +4,6 @@ UPDATE stream_metadata SET heart_rates = '{}';
 
 CREATE TABLE timers (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    start_time TEXT,
-    end_time TEXT
+    start_time TIMESTAMP WITH TIME ZONE,
+    end_time TIMESTAMP WITH TIME ZONE
 );

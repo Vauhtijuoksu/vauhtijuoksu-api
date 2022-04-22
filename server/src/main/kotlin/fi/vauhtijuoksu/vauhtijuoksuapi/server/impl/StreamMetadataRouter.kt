@@ -20,7 +20,8 @@ import io.vertx.ext.web.handler.CorsHandler
 import mu.KotlinLogging
 import java.time.Instant
 import java.time.format.DateTimeFormatter
-import java.util.Date
+import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
@@ -138,9 +139,9 @@ class StreamMetadataRouter
                         Timer(
                             UUID.randomUUID(),
                             if (startTime != null)
-                                Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(startTime))) else null,
+                                OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(startTime)), ZoneId.of("Z")) else null,
                             if (endTime != null)
-                                Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(endTime))) else null
+                                OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(endTime)), ZoneId.of("Z")) else null
                         )
                     )
                 }

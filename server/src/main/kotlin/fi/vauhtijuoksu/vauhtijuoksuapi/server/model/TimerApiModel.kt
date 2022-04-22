@@ -3,16 +3,14 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.model
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
-import java.util.Date
+import java.time.OffsetDateTime
 import java.util.UUID
 
 data class TimerApiModel(
     @JsonProperty("start_time")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    val startTime: Date?,
+    val startTime: OffsetDateTime?,
     @JsonProperty("end_time")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    val endTime: Date?,
+    val endTime: OffsetDateTime?,
 ) {
     companion object {
         fun from(data: Timer): TimerApiModel {
