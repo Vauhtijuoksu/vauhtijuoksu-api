@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
-import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.VauhtijuoksuException
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
@@ -38,7 +37,7 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
                     throw UserError("Not UUID: ${ctx.pathParam("id")}")
                 }
 
-                val jsonBody = ctx.bodyAsJson ?: throw VauhtijuoksuException("Body is required on PATCH")
+                val jsonBody = ctx.bodyAsJson ?: throw UserError("Body is required on PATCH")
                 logger.debug { "Patching a record with object $jsonBody" }
 
                 db.getById(id)

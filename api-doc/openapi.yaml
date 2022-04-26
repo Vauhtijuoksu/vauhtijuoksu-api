@@ -696,10 +696,10 @@ components:
           info: Nimeä tetrispalikka poggers
           total_amount: 250
           status:
-             - type: open
+             - type: option
                option: palikke
                amount: 100
-             - type: open
+             - type: option
                option: joku_muu
                amount: 150
     IncentiveInput:

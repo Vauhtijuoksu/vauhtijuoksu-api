@@ -1,7 +1,11 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
+import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentiveApiModel
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentiveWithStatuses
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.MilestoneIncentiveStatus
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.MilestoneStatus
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.NewIncentiveApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestIncentive
 import io.vertx.core.Future
@@ -11,7 +15,6 @@ import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.lenient
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import java.util.UUID
@@ -22,7 +25,9 @@ class IncentivesTest : ServerTestBase() {
 
     @Test
     fun `get returns an empty list when db is empty`(testContext: VertxTestContext) {
-        lenient().`when`(incentiveDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(incentiveDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
         client.get(incentivesEndpoint)
             .send()
             .onSuccess {
@@ -39,7 +44,10 @@ class IncentivesTest : ServerTestBase() {
     fun `get returns all incentives in the database`(testContext: VertxTestContext) {
         val incentivesInDb =
             listOf(someIncentive.copy(id = UUID.randomUUID()), someIncentive.copy(id = UUID.randomUUID()))
-        lenient().`when`(incentiveDatabase.getAll()).thenReturn(Future.succeededFuture(incentivesInDb))
+        `when`(incentiveDatabase.getAll()).thenReturn(Future.succeededFuture(incentivesInDb))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
+
         client.get(incentivesEndpoint)
             .send()
             .onSuccess {
@@ -47,7 +55,24 @@ class IncentivesTest : ServerTestBase() {
                     assertEquals(200, it.statusCode())
                     assertEquals("application/json", it.headers().get("Content-Type"))
                     assertEquals(
-                        JsonArray(incentivesInDb.map { IncentiveApiModel.fromIncentive(it) }.map { it.toJson() }),
+                        JsonArray(
+                            incentivesInDb
+                                .map {
+                                    IncentiveApiModel.fromIncentiveWithStatuses(
+                                        IncentiveWithStatuses(
+                                            it,
+                                            0.0,
+                                            listOf(
+                                                MilestoneIncentiveStatus(
+                                                    MilestoneStatus.INCOMPLETE,
+                                                    100
+                                                )
+                                            ),
+                                        )
+                                    )
+                                }
+                                .map { it.toJson() }
+                        ),
                         it.bodyAsJsonArray()
                     )
                 }
@@ -63,6 +88,38 @@ class IncentivesTest : ServerTestBase() {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals("*", res.getHeader("Access-Control-Allow-Origin"))
+                }
+                testContext.completeNow()
+            }.onFailure(testContext::failNow)
+    }
+
+    @Test
+    fun `get by id returns a single incentive`(testContext: VertxTestContext) {
+        `when`(incentiveDatabase.getById(someIncentive.id)).thenReturn(Future.succeededFuture(someIncentive))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
+
+        client.get("$incentivesEndpoint/${someIncentive.id}")
+            .send()
+            .onSuccess {
+                testContext.verify {
+                    assertEquals(200, it.statusCode())
+                    assertEquals("application/json", it.headers().get("Content-Type"))
+                    assertEquals(
+                        IncentiveApiModel.fromIncentiveWithStatuses(
+                            IncentiveWithStatuses(
+                                someIncentive,
+                                0.0,
+                                listOf(
+                                    MilestoneIncentiveStatus(
+                                        MilestoneStatus.INCOMPLETE,
+                                        100
+                                    )
+                                ),
+                            )
+                        ).toJson(),
+                        it.bodyAsJsonObject()
+                    )
                 }
                 testContext.completeNow()
             }.onFailure(testContext::failNow)

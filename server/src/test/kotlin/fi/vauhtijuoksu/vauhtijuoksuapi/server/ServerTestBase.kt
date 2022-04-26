@@ -3,6 +3,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.google.inject.TypeLiteral
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.GeneratedIncentiveCodeDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.io.TempDir
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import java.io.BufferedWriter
 import java.io.File
@@ -50,6 +50,9 @@ open class ServerTestBase {
     @Mock
     protected lateinit var incentiveDatabase: VauhtijuoksuDatabase<Incentive>
 
+    @Mock
+    protected lateinit var generatedIncentiveCodeDatabase: GeneratedIncentiveCodeDatabase
+
     @TempDir
     lateinit var tmpDir: File
 
@@ -57,16 +60,6 @@ open class ServerTestBase {
     protected val password = "vauhtijuoksu"
 
     protected val corsHeaderUrl = "https://vauhtijuoksu.fi"
-
-    // Mockito returns null with any(). This fails on non-nullable parameters
-    // Stackoverflow taught me a workaround https://stackoverflow.com/questions/30305217/is-it-possible-to-use-mockito-in-kotlin
-    @Suppress("UNCHECKED_CAST")
-    private fun <T> uninitialized(): T = null as T
-
-    protected fun <T> any(): T {
-        Mockito.any<T>()
-        return uninitialized()
-    }
 
     private fun getFreePort(): Int {
         val sock = ServerSocket(0)
@@ -93,6 +86,7 @@ open class ServerTestBase {
                     bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).toInstance(streamMetadataDb)
                     bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).toInstance(playerInfoDb)
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
+                    bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
                     bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile, corsHeaderUrl))
                 }
             }

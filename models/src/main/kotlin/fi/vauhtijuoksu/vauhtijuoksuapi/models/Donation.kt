@@ -11,4 +11,11 @@ data class Donation(
     val amount: Float,
     val read: Boolean = false,
     val externalId: String?,
-) : Model
+) : Model {
+    val codes: Set<IncentiveCode> by lazy {
+        if (message == null) {
+            return@lazy setOf()
+        }
+        return@lazy IncentiveCode.codeFormat.findAll(message).map { IncentiveCode(it.value) }.toSet()
+    }
+}

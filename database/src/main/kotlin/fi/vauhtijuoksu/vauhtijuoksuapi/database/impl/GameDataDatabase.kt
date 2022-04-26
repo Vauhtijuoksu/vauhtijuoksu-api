@@ -12,7 +12,7 @@ import io.vertx.sqlclient.templates.SqlTemplate
 import mu.KotlinLogging
 import javax.inject.Inject
 
-class GameDataDatabase @Inject constructor(
+internal class GameDataDatabase @Inject constructor(
     private val client: SqlClient,
     configuration: DatabaseConfiguration
 ) : AbstractModelDatabase<GameData, GameDataDbModel>(

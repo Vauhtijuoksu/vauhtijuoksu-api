@@ -3,6 +3,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.featuretest
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.HttpRequest
@@ -72,6 +73,8 @@ class IncentiveTest {
                     val body = res.bodyAsJsonObject()
                     addedId = UUID.fromString(body.remove("id") as String?)
                     val expectedBody = JsonObject(newIncentive)
+                    expectedBody.put("total_amount", 0.0)
+                    expectedBody.put("status", JsonArray())
 
                     val expectedEndTime = OffsetDateTime.parse(expectedBody.remove("end_time") as String?)
                     val receivedEndTime = OffsetDateTime.parse(body.remove("end_time") as String?)
@@ -108,6 +111,8 @@ class IncentiveTest {
                     val body = res.bodyAsJsonObject()
                     val expected = JsonObject(newIncentive)
                     expected.put("id", addedId.toString())
+                    expected.put("total_amount", 0.0)
+                    expected.put("status", JsonArray())
 
                     val expectedEndTime = OffsetDateTime.parse(expected.remove("end_time") as String?)
                     val receivedEndTime = OffsetDateTime.parse(body.remove("end_time") as String?)
@@ -131,6 +136,8 @@ class IncentiveTest {
                     val expected = JsonObject(newIncentive)
                         .put("id", addedId.toString())
                         .put("title", "new title")
+                        .put("total_amount", 0.0)
+                        .put("status", JsonArray())
 
                     val body = res.bodyAsJsonObject()
 
