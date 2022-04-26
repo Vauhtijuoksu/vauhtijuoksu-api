@@ -13,6 +13,7 @@ import io.vertx.core.Future.future
 import io.vertx.core.Promise
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.JsonObject
+import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.BodyHandler
@@ -68,7 +69,7 @@ class StreamMetadataRouter
                 db.get()
                     .onSuccess { res ->
                         ctx.response()
-                            .end(jacksonObjectMapper().writeValueAsString(StreamMetaDataApiModel.from(res)))
+                            .end(StreamMetaDataApiModel.from(res).toJson().encode())
                     }.onFailure(ctx::fail)
             }
     }
@@ -104,7 +105,7 @@ class StreamMetadataRouter
                         }
                     }
                     .onSuccess {
-                        ctx.response().end(jacksonObjectMapper().writeValueAsString(StreamMetaDataApiModel.from(it)))
+                        ctx.response().end(StreamMetaDataApiModel.from(it).toJson().encode())
                     }.onFailure(ctx::fail)
             }
     }
@@ -152,7 +153,7 @@ class StreamMetadataRouter
     }
 
     private fun updateStreamFromJson(data: StreamMetadata, json: JsonObject): StreamMetadata {
-        val oldData = jacksonObjectMapper().readerForUpdating(StreamMetaDataApiModel.from(data))
+        val oldData = DatabindCodec.mapper().readerForUpdating(StreamMetaDataApiModel.from(data))
         val mergedData: StreamMetaDataApiModel = oldData.readValue(json.encode())
         return StreamMetadata(
             mergedData.donationGoal,
@@ -165,7 +166,7 @@ class StreamMetadataRouter
     }
 
     private fun updateTimersFromJson(data: Timer, json: JsonObject): Timer {
-        val oldData = jacksonObjectMapper().readerForUpdating(TimerApiModel.from(data))
+        val oldData = DatabindCodec.mapper().readerForUpdating(TimerApiModel.from(data))
         val mergedData: TimerApiModel = oldData.readValue(json.encode())
         return Timer(
             data.id,

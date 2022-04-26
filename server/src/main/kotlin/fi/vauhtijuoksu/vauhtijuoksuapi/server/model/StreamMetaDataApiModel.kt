@@ -2,6 +2,8 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
+import io.vertx.core.json.JsonObject
 import java.util.UUID
 
 internal data class StreamMetaDataApiModel(
@@ -31,5 +33,8 @@ internal data class StreamMetaDataApiModel(
                 }
             )
         }
+    }
+    fun toJson(): JsonObject {
+        return JsonObject.mapFrom(this)
     }
 }
