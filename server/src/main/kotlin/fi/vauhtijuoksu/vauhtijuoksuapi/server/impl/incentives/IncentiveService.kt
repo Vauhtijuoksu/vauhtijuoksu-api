@@ -4,6 +4,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.GeneratedIncentiveCodeDataba
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.GeneratedIncentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveCode
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveType
@@ -70,20 +71,38 @@ class IncentiveService
     private val donationDb: VauhtijuoksuDatabase<Donation>,
 ) {
     fun getIncentive(id: UUID): Future<IncentiveWithStatuses> {
-        return incentiveDb.getById(id).flatMap(this::failOnNull).flatMap(this::mapStatuses)
+        val donations = donationDb.getAll()
+        val generatedIncentives = incentiveCodeDb.getAll()
+        return incentiveDb.getById(id).flatMap(this::failOnNull)
+            .flatMap { mapStatuses(it, donations, generatedIncentives) }
     }
 
     fun getIncentives(): Future<List<IncentiveWithStatuses>> {
-        return incentiveDb.getAll().flatMap {
-            CompositeFuture.all(it.map(this::mapStatuses)).map { compositeFuture ->
-                compositeFuture.list()
+        val donations = donationDb.getAll()
+        val generatedIncentives = incentiveCodeDb.getAll()
+        return incentiveDb
+            .getAll()
+            .flatMap {
+                CompositeFuture.all(
+                    it.map { incentive ->
+                        mapStatuses(incentive, donations, generatedIncentives)
+                    }
+                )
+                    .map { compositeFuture ->
+                        compositeFuture.list()
+                    }
             }
-        }
     }
 
-    private fun mapStatuses(incentive: Incentive): Future<IncentiveWithStatuses> {
-        return Future.succeededFuture(incentive).compose(this::getIncentiveCodesForIncentive)
-            .compose(this::fetchDonationSumsForIncentive).compose(this::calculateTotalAndSummary)
+    private fun mapStatuses(
+        incentive: Incentive,
+        donations: Future<List<Donation>>,
+        generatedIncentives: Future<List<GeneratedIncentive>>
+    ): Future<IncentiveWithStatuses> {
+        return Future.succeededFuture(incentive)
+            .compose { getIncentiveCodesForIncentive(incentive, generatedIncentives) }
+            .compose { fetchDonationSumsForIncentive(it, donations) }
+            .compose(this::calculateTotalAndSummary)
     }
 
     private fun failOnNull(incentive: Incentive?): Future<Incentive> {
@@ -94,8 +113,11 @@ class IncentiveService
         }
     }
 
-    private fun getIncentiveCodesForIncentive(incentive: Incentive): Future<IncentiveAndItsCodes> {
-        return incentiveCodeDb.getAll().map {
+    private fun getIncentiveCodesForIncentive(
+        incentive: Incentive,
+        generatedIncentives: Future<List<GeneratedIncentive>>
+    ): Future<IncentiveAndItsCodes> {
+        return generatedIncentives.map {
             val incentiveCodes = it.filter { incentiveWithCode ->
                 incentiveWithCode.chosenIncentives.any { chosenIncentive ->
                     chosenIncentive.incentiveId == incentive.id
@@ -122,7 +144,8 @@ class IncentiveService
     }
 
     private fun fetchDonationSumsForIncentive(
-        incentiveAndItsCodes: IncentiveAndItsCodes
+        incentiveAndItsCodes: IncentiveAndItsCodes,
+        donations: Future<List<Donation>>,
     ): Future<IncentiveAndItsParameterDonations> {
         if (incentiveAndItsCodes.codes.isEmpty()) {
             return Future.succeededFuture(
@@ -131,7 +154,7 @@ class IncentiveService
                 )
             )
         }
-        return donationDb.getAll().map { donationList ->
+        return donations.map { donationList ->
             donationList.flatMap { donation ->
                 val foundCodes = incentiveAndItsCodes.codes.filter {
                     donation.codes.contains(it.code)
@@ -139,16 +162,13 @@ class IncentiveService
                 if (foundCodes.isEmpty()) {
                     listOf()
                 } else {
-                    donation.codes.mapNotNull { code ->
-                        val codeAndShare = incentiveAndItsCodes.codes.find {
+                    donation.codes.flatMap { code ->
+                        incentiveAndItsCodes.codes.filter {
                             it.code == code
-                        }
-                        if (codeAndShare == null) {
-                            null
-                        } else {
+                        }.map {
                             ParameterDonation(
-                                (donation.amount / donation.codes.size).toDouble() * codeAndShare.share,
-                                codeAndShare.parameter,
+                                (donation.amount / donation.codes.size).toDouble() * it.share,
+                                it.parameter,
                             )
                         }
                     }
@@ -176,7 +196,7 @@ class IncentiveService
                 for (milestone in incentive.milestones!!.sorted()) {
                     statuses.add(
                         MilestoneIncentiveStatus(
-                            if (milestone.toDouble() < sum) MilestoneStatus.COMPLETED else MilestoneStatus.INCOMPLETE,
+                            if (milestone.toDouble() <= sum) MilestoneStatus.COMPLETED else MilestoneStatus.INCOMPLETE,
                             milestone,
                         )
                     )

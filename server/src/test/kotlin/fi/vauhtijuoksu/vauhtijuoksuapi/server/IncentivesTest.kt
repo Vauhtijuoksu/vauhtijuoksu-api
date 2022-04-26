@@ -15,7 +15,6 @@ import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.lenient
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import java.util.UUID
@@ -26,7 +25,9 @@ class IncentivesTest : ServerTestBase() {
 
     @Test
     fun `get returns an empty list when db is empty`(testContext: VertxTestContext) {
-        lenient().`when`(incentiveDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(incentiveDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
         client.get(incentivesEndpoint)
             .send()
             .onSuccess {
@@ -44,6 +45,7 @@ class IncentivesTest : ServerTestBase() {
         val incentivesInDb =
             listOf(someIncentive.copy(id = UUID.randomUUID()), someIncentive.copy(id = UUID.randomUUID()))
         `when`(incentiveDatabase.getAll()).thenReturn(Future.succeededFuture(incentivesInDb))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
 
         client.get(incentivesEndpoint)
@@ -94,6 +96,7 @@ class IncentivesTest : ServerTestBase() {
     @Test
     fun `get by id returns a single incentive`(testContext: VertxTestContext) {
         `when`(incentiveDatabase.getById(someIncentive.id)).thenReturn(Future.succeededFuture(someIncentive))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
 
         client.get("$incentivesEndpoint/${someIncentive.id}")

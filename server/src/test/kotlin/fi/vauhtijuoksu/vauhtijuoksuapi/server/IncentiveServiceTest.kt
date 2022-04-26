@@ -128,7 +128,7 @@ class IncentiveServiceTest {
     )
 
     private val openGeneratedIncentive2 = GeneratedIncentive(
-        incentiveCode,
+        IncentiveCode.random(),
         listOf(
             ChosenIncentive(
                 openIncentive.id,
@@ -167,6 +167,34 @@ class IncentiveServiceTest {
     fun `a milestone incentive shows incomplete status when there are no codes`(testContext: VertxTestContext) {
         `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(milestoneIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
+        incentiveService.getIncentive(UUID.randomUUID())
+            .verifyAndCompleteTest(testContext) {
+                assertEquals(milestoneIncentive, it.incentive)
+                assertEquals(0.0, it.total)
+                assertEquals(
+                    listOf(
+                        MilestoneIncentiveStatus(
+                            MilestoneStatus.INCOMPLETE,
+                            100,
+                        ),
+                        MilestoneIncentiveStatus(
+                            MilestoneStatus.INCOMPLETE,
+                            200,
+                        )
+                    ),
+                    it.statuses
+                )
+            }
+    }
+
+    @Test
+    fun `a milestone incentive shows status when there are no donations with codes`(testContext: VertxTestContext) {
+        `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(milestoneIncentive))
+        `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf(milestoneGeneratedIncentive)))
+        `when`(donationDb.getAll()).thenReturn(
+            Future.succeededFuture(listOf(donationWithIncentiveCode.copy(message = "No code")))
+        )
         incentiveService.getIncentive(UUID.randomUUID())
             .verifyAndCompleteTest(testContext) {
                 assertEquals(milestoneIncentive, it.incentive)
@@ -191,6 +219,7 @@ class IncentiveServiceTest {
     fun `an option incentive shows 0 statuses for options when there are no codes`(testContext: VertxTestContext) {
         `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(optionIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         incentiveService.getIncentive(UUID.randomUUID())
             .verifyAndCompleteTest(testContext) {
                 assertEquals(optionIncentive, it.incentive)
@@ -215,6 +244,7 @@ class IncentiveServiceTest {
     fun `an open incentive shows no statuses when there are no codes`(testContext: VertxTestContext) {
         `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(openIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         incentiveService.getIncentive(UUID.randomUUID())
             .verifyAndCompleteTest(testContext) {
                 assertEquals(openIncentive, it.incentive)
@@ -229,13 +259,11 @@ class IncentiveServiceTest {
     @Test
     fun `a milestone incentive status changes to complete when there are enough donations`(testContext: VertxTestContext) {
         `when`(incentiveDb.getById(milestoneIncentive.id)).thenReturn(Future.succeededFuture(milestoneIncentive))
-        `when`(incentiveCodeDb.getAll()).thenReturn(
-            Future.succeededFuture(listOf(milestoneGeneratedIncentive))
-        )
+        `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf(milestoneGeneratedIncentive)))
         `when`(donationDb.getAll()).thenReturn(
             Future.succeededFuture(
                 listOf(
-                    donationWithIncentiveCode,
+                    donationWithIncentiveCode.copy(amount = 40.0f),
                     donationWithIncentiveCode.copy(id = UUID.randomUUID())
                 )
             )
@@ -244,7 +272,7 @@ class IncentiveServiceTest {
         incentiveService.getIncentive(milestoneIncentive.id)
             .verifyAndCompleteTest(testContext) {
                 assertEquals(milestoneIncentive, it.incentive)
-                assertEquals(120.0, it.total)
+                assertEquals(100.0, it.total)
                 assertEquals(
                     listOf(
                         MilestoneIncentiveStatus(
@@ -415,8 +443,80 @@ class IncentiveServiceTest {
     }
 
     @Test
+    fun `multiple options for one incentive with one code works`(testContext: VertxTestContext) {
+        `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(optionIncentive))
+        `when`(incentiveCodeDb.getAll()).thenReturn(
+            Future.succeededFuture(
+                listOf(
+                    optionGeneratedIncentive.copy(
+                        chosenIncentives = listOf(
+                            ChosenIncentive(optionIncentive.id, "kissa"),
+                            ChosenIncentive(optionIncentive.id, "koira"),
+                        )
+                    )
+                )
+            )
+        )
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
+        incentiveService.getIncentive(optionIncentive.id)
+            .verifyAndCompleteTest(testContext) {
+                assertEquals(60.0, it.total)
+                assertEquals(
+                    listOf(
+                        OptionIncentiveStatus(
+                            "kissa",
+                            30.0,
+                        ),
+                        OptionIncentiveStatus(
+                            "koira",
+                            30.0,
+                        ),
+                    ),
+                    it.statuses
+                )
+            }
+    }
+
+    @Test
+    fun `multiple open choices for one incentive with one code works`(testContext: VertxTestContext) {
+        `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(openIncentive))
+        `when`(incentiveCodeDb.getAll()).thenReturn(
+            Future.succeededFuture(
+                listOf(
+                    openGeneratedIncentive1.copy(
+                        chosenIncentives = listOf(
+                            ChosenIncentive(openIncentive.id, "kissa"),
+                            ChosenIncentive(openIncentive.id, "koira"),
+                        )
+                    )
+                )
+            )
+        )
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
+        incentiveService.getIncentive(openIncentive.id)
+            .verifyAndCompleteTest(testContext) {
+                assertEquals(60.0, it.total)
+                assertEquals(
+                    listOf(
+                        OptionIncentiveStatus(
+                            "kissa",
+                            30.0,
+                        ),
+                        OptionIncentiveStatus(
+                            "koira",
+                            30.0,
+                        ),
+                    ),
+                    it.statuses
+                )
+            }
+    }
+
+    @Test
     fun `getIncentives returns empty list when there are no incentives`(testContext: VertxTestContext) {
         `when`(incentiveDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         incentiveService.getIncentives()
             .onFailure(testContext::failNow)
             .onSuccess {
@@ -438,6 +538,7 @@ class IncentiveServiceTest {
             )
         )
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         incentiveService.getIncentives()
             .onFailure(testContext::failNow)
             .onSuccess {
