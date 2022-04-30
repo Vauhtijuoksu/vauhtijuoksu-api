@@ -370,6 +370,22 @@ components:
           default: false
         amount:
           type: number
+        incentives:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              chosen_incentives:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    incentive_id:
+                      type: string
+                    parameter:
+                      type: string
       required:
         - id
         - name
@@ -379,10 +395,15 @@ components:
       - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
         timestamp: '2021-09-21T15:05:47.000+00:00'
         name: jsloth
-        message: ota tää :D 🤔🤔
+        message: 'ota tää :D 🤔🤔 {Vj#2020}'
         read: false
         amount: 10
         external_id: "a non unique string"
+        incentives:
+        - code: '{Vj#2020}'
+          chosen_incentives:
+          - incentive_id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+            parameter: kissa
     GameData:
       type: object
       properties:
@@ -849,10 +870,8 @@ components:
           id:
             type: string
             format: uuid
-          parameters:
+          parameter:
             type: string
-        required:
-          - id
         example:
           id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
           parameter: kalle tetr

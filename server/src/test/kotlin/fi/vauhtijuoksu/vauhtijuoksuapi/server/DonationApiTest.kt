@@ -2,11 +2,15 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.ChosenIncentive
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.GeneratedIncentive
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveCode
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation2
 import io.vertx.core.Future
 import io.vertx.core.http.HttpMethod
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.junit5.VertxTestContext
@@ -51,6 +55,7 @@ class DonationApiTest : ServerTestBase() {
     @Test
     fun testGetDonationNoData(testContext: VertxTestContext) {
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(ArrayList()))
+        `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
         client.get("/donations").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -67,6 +72,7 @@ class DonationApiTest : ServerTestBase() {
     @Test
     fun testGetDonation(testContext: VertxTestContext) {
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(arrayListOf(donation1, donation2)))
+        `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
         client.get("/donations").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -106,6 +112,7 @@ class DonationApiTest : ServerTestBase() {
         `when`(donationDb.add(any())).thenReturn(Future.succeededFuture(donation1.copy(UUID.randomUUID())))
         val body = JsonObject.mapFrom(DonationApiModel.fromDonation(donation1))
         body.remove("id")
+        body.remove("incentives")
         client.post("/donations")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
@@ -205,15 +212,42 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testGetSingleDonation(testContext: VertxTestContext) {
-        `when`(donationDb.getById(donation1.id)).thenReturn(Future.succeededFuture(donation1))
+        val code = IncentiveCode.random()
+        val incentiveId = UUID.randomUUID()
+        `when`(donationDb.getById(donation1.id)).thenReturn(Future.succeededFuture(donation1.copy(message = code.code)))
+        `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(
+            Future.succeededFuture(
+                listOf(
+                    GeneratedIncentive(
+                        code,
+                        listOf(
+                            ChosenIncentive(
+                                incentiveId,
+                                "kissa"
+                            )
+                        )
+                    )
+                )
+            )
+        )
         client.get("/donations/${donation1.id}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
+                    val donationIncentive =
+                        JsonObject().put("incentive_id", incentiveId.toString()).put("parameter", "kissa")
+                    val incentive = JsonObject()
+                        .put("code", code.code)
+                        .put("chosen_incentives", JsonArray().add(donationIncentive))
+                    val incentives = JsonArray().add(incentive)
+                    val expectedDonation =
+                        JsonObject(jacksonObjectMapper().writeValueAsString(DonationApiModel.fromDonation(donation1)))
+                            .put("message", code.code)
+                            .put("incentives", incentives)
                     assertEquals(
-                        JsonObject(jacksonObjectMapper().writeValueAsString(DonationApiModel.fromDonation(donation1))),
+                        expectedDonation,
                         JsonObject(res.bodyAsString())
                     )
                     verifyNoMoreInteractions(donationDb)
@@ -239,7 +273,10 @@ class DonationApiTest : ServerTestBase() {
                 testContext.verify {
                     println(res.bodyAsString())
                     assertEquals(200, res.statusCode())
-                    assertEquals(DonationApiModel.fromDonation(newDonation), res.bodyAsJson(DonationApiModel::class.java))
+                    assertEquals(
+                        DonationApiModel.fromDonation(newDonation),
+                        res.bodyAsJson(DonationApiModel::class.java)
+                    )
                     verify(donationDb).update(newDonation)
                     verifyNoMoreInteractions(donationDb)
                 }
