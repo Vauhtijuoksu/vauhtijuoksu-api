@@ -1,6 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationApiModel
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -36,6 +37,7 @@ class DonationApiModelTest {
             .put("amount", 10F)
             .put("read", true)
             .put("external_id", "an id")
+            .put("incentives", JsonArray())
     }
 
     @Test
@@ -48,6 +50,7 @@ class DonationApiModelTest {
             amount,
             true,
             "an id",
+            listOf(),
         )
 
         val donationAsJson = donation.toJson()
@@ -65,6 +68,7 @@ class DonationApiModelTest {
             amount,
             true,
             "an id",
+            listOf()
         )
 
         val donationAsJson = donation.toJson()
