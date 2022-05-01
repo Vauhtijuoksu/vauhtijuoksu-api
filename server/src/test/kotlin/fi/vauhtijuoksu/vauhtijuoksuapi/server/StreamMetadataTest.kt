@@ -42,7 +42,8 @@ class StreamMetadataTest : ServerTestBase() {
         listOf("save", "norppas"),
         listOf(1, 0),
         listOf(100, 120),
-        listOf(someTimer)
+        listOf(someTimer),
+        "Deerboy - Biisi"
     )
     private val someMetadataApi = StreamMetaDataApiModel(
         100,
@@ -50,7 +51,8 @@ class StreamMetadataTest : ServerTestBase() {
         listOf("save", "norppas"),
         listOf(1, 0),
         listOf(100, 120),
-        listOf(someApiTimer)
+        listOf(someApiTimer),
+        "Deerboy - Biisi"
     )
 
     private val newTimer = someTimer.copy(

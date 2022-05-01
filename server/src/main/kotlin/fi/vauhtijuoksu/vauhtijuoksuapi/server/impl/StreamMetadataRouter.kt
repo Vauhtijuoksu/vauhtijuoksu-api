@@ -40,6 +40,7 @@ class StreamMetadataRouter
     private val streamMetadata = JsonObject(
         """{
             "donation_goal": null,
+            "now_playing": null,
             "current_game_id": null,
             "donatebar_info": [],
             "counters": [],
@@ -169,7 +170,8 @@ class StreamMetadataRouter
             mergedData.donatebarInfo,
             mergedData.counters,
             mergedData.heartRates,
-            listOf()
+            listOf(),
+            mergedData.nowPlaying
         )
     }
 

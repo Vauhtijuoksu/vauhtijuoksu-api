@@ -17,7 +17,9 @@ internal data class StreamMetaDataApiModel(
     @JsonProperty("heart_rates")
     val heartRates: List<Int>,
     @JsonProperty("timers")
-    val timers: List<TimerApiModel>
+    val timers: List<TimerApiModel>,
+    @JsonProperty("now_playing")
+    val nowPlaying: String?
 ) {
     companion object {
         fun from(data: StreamMetadata): StreamMetaDataApiModel {
@@ -29,7 +31,8 @@ internal data class StreamMetaDataApiModel(
                 data.heartRates,
                 data.timers.map {
                     TimerApiModel.from(it)
-                }
+                },
+                data.nowPlaying
             )
         }
     }

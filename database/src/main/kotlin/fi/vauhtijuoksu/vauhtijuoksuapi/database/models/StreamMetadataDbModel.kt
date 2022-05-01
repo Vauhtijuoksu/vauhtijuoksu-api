@@ -9,6 +9,8 @@ internal data class StreamMetadataDbModel(
     private val id: Boolean = true,
     @JsonProperty("donation_goal")
     val donationGoal: Int?,
+    @JsonProperty("now_playing")
+    val nowPlaying: String?,
     @JsonProperty("current_game_id")
     val currentGameId: UUID?,
     @JsonProperty("donatebar_info")
@@ -25,7 +27,8 @@ internal data class StreamMetadataDbModel(
             donatebarInfo,
             counters,
             heartRates,
-            listOf()
+            listOf(),
+            nowPlaying
         )
     }
 }

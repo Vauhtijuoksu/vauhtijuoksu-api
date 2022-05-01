@@ -18,6 +18,7 @@ class StreamMetadataTest {
         {
           "donation_goal": 10000,
           "current_game_id": null,
+          "now_playing": null,
           "donatebar_info": [
             "lahjota rahhaa",
             "mee töihi :D"
