@@ -402,7 +402,7 @@ class IncentiveServiceTest {
         `when`(donationDb.getAll()).thenReturn(
             Future.succeededFuture(
                 listOf(
-                    donationWithIncentiveCode.copy(message = "two codes: $incentiveCode and {#Vj2020}"),
+                    donationWithIncentiveCode.copy(message = "two codes: $incentiveCode and ${IncentiveCode.random()}"),
                 )
             )
         )
