@@ -58,7 +58,8 @@ open class MetadataTimerDatabase
                         current_game_id = $2,
                         donatebar_info = $3,
                         counters = $4,
-                        heart_rates = $5
+                        heart_rates = $5,
+                        now_playing = $6
                         """
         ).execute(
             Tuple.of(
@@ -66,7 +67,8 @@ open class MetadataTimerDatabase
                 record.currentGameId,
                 record.donateBarInfo.toTypedArray(),
                 record.counters.toTypedArray(),
-                record.heartRates.toTypedArray()
+                record.heartRates.toTypedArray(),
+                record.nowPlaying
             )
         ).recover {
             throw ServerError(it)

@@ -29,7 +29,8 @@ class StreamMetadataDatabaseTest {
         listOf(),
         listOf(),
         listOf(),
-        listOf()
+        listOf(),
+        null
     )
 
     private val someData = StreamMetadata(
@@ -38,7 +39,8 @@ class StreamMetadataDatabaseTest {
         listOf("gotta go fast", "pls give money to norppas"),
         listOf(10, 100, 3),
         listOf(99, 100, 189, 69, 0),
-        listOf()
+        listOf(),
+        "Deerboy - Boiiii"
     )
 
     @Container
