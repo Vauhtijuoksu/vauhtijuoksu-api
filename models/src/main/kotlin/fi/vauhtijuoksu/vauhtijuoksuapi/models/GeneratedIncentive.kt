@@ -19,7 +19,7 @@ data class IncentiveCode constructor(
     }
 
     companion object {
-        private const val CODE_LENGTH = 4
+        private const val CODE_LENGTH = 6
         private const val BITS_IN_HEX_DIGIT = 4
 
         val codeFormat = Regex("""\{#Vj[A-F0-9]{$CODE_LENGTH}\}""")
