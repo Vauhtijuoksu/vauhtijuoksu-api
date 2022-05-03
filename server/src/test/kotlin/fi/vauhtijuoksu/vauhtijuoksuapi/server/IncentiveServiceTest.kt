@@ -16,6 +16,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentiveWithStatu
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.MilestoneIncentiveStatus
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.MilestoneStatus
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.OptionIncentiveStatus
+import fi.vauhtijuoksu.vauhtijuoksuapi.verify
 import fi.vauhtijuoksu.vauhtijuoksuapi.verifyAndCompleteTest
 import io.vertx.core.Future
 import io.vertx.junit5.VertxExtension
@@ -509,6 +510,58 @@ class IncentiveServiceTest {
                     ),
                     it.statuses
                 )
+            }
+    }
+
+    @Test
+    fun `a mix of option and open choices with one code works`(testContext: VertxTestContext) {
+        `when`(incentiveDb.getById(openIncentive.id)).thenReturn(Future.succeededFuture(openIncentive))
+        `when`(incentiveDb.getById(optionIncentive.id)).thenReturn(Future.succeededFuture(optionIncentive))
+        `when`(incentiveCodeDb.getAll()).thenReturn(
+            Future.succeededFuture(
+                listOf(
+                    openGeneratedIncentive1.copy(
+                        chosenIncentives = listOf(
+                            ChosenIncentive(openIncentive.id, "kissa"),
+                            ChosenIncentive(optionIncentive.id, "koira"),
+                        )
+                    )
+                )
+            )
+        )
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
+        val cp = testContext.checkpoint(2)
+        incentiveService.getIncentive(openIncentive.id)
+            .verify(testContext) {
+                assertEquals(30.0, it.total)
+                assertEquals(
+                    listOf(
+                        OptionIncentiveStatus(
+                            "kissa",
+                            30.0,
+                        ),
+                    ),
+                    it.statuses
+                )
+                cp.flag()
+            }
+        incentiveService.getIncentive(optionIncentive.id)
+            .verify(testContext) {
+                assertEquals(30.0, it.total)
+                assertEquals(
+                    listOf(
+                        OptionIncentiveStatus(
+                            "kissa",
+                            0.0,
+                        ),
+                        OptionIncentiveStatus(
+                            "koira",
+                            30.0,
+                        ),
+                    ),
+                    it.statuses
+                )
+                cp.flag()
             }
     }
 
