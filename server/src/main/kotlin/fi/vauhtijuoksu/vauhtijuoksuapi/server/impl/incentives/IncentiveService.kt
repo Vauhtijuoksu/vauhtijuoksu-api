@@ -123,23 +123,24 @@ class IncentiveService
                     chosenIncentive.incentiveId == incentive.id
                 }
             }
-            val inc = IncentiveAndItsCodes(
+            return@map IncentiveAndItsCodes(
                 incentive,
                 incentiveCodes.flatMap { incentiveCode ->
                     val incentiveCodesWithShares = mutableListOf<IncentiveCodeAndShare>()
-                    for (chosenIncentive in incentiveCode.chosenIncentives) {
-                        incentiveCodesWithShares.add(
-                            IncentiveCodeAndShare(
-                                incentiveCode.generatedCode,
-                                1.0 / incentiveCode.chosenIncentives.size,
-                                chosenIncentive.parameter,
+                    incentiveCode.chosenIncentives
+                        .filter { chosenIncentive -> chosenIncentive.incentiveId == incentive.id }
+                        .forEach { chosenIncentive ->
+                            incentiveCodesWithShares.add(
+                                IncentiveCodeAndShare(
+                                    incentiveCode.generatedCode,
+                                    1.0 / incentiveCode.chosenIncentives.size,
+                                    chosenIncentive.parameter,
+                                )
                             )
-                        )
-                    }
+                        }
                     incentiveCodesWithShares
                 }.toSet(),
             )
-            return@map inc
         }
     }
 
