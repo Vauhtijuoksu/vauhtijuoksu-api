@@ -1,6 +1,5 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
@@ -8,6 +7,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PartialRouter
+import io.vertx.core.json.jackson.DatabindCodec.mapper
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.BodyHandler
@@ -45,7 +45,8 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
                         if (res == null) {
                             throw MissingEntityException("Could not find record with id $id for update")
                         }
-                        val oldData = jacksonObjectMapper().readerForUpdating(toApiRepresentation(res))
+
+                        val oldData = mapper().readerForUpdating(toApiRepresentation(res))
                         val mergedData: M = try {
                             oldData.readValue<ApiRepresentation>(ctx.bodyAsString).toModel()
                         } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {

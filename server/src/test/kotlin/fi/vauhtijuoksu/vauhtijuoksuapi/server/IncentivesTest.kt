@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.util.UUID
 
 class IncentivesTest : ServerTestBase() {
@@ -225,6 +227,30 @@ class IncentivesTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+                    assertEquals(
+                        JsonObject.mapFrom(IncentiveApiModel.fromIncentive(expectedIncentive)),
+                        res.bodyAsJsonObject()
+                    )
+                    verify(incentiveDatabase).update(expectedIncentive)
+                }
+                testContext.completeNow()
+            }.onFailure(testContext::failNow)
+    }
+
+    @Test
+    fun `patching incentive end time works`(testContext: VertxTestContext) {
+        val id = someIncentive.id
+        val newTime = OffsetDateTime.now(ZoneId.of("Z"))
+        val expectedIncentive = someIncentive.copy(endTime = newTime)
+        `when`(incentiveDatabase.getById(id)).thenReturn(Future.succeededFuture(someIncentive))
+        `when`(incentiveDatabase.update(any())).thenReturn(Future.succeededFuture(expectedIncentive))
+        client.patch("$incentivesEndpoint/$id")
+            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .authentication(UsernamePasswordCredentials(username, password))
+            .sendJson(JsonObject().put("end_time", newTime.toString()))
+            .onSuccess { res ->
+                testContext.verify {
+                    assertEquals(200, res.statusCode())
                     assertEquals(
                         JsonObject.mapFrom(IncentiveApiModel.fromIncentive(expectedIncentive)),
                         res.bodyAsJsonObject()
