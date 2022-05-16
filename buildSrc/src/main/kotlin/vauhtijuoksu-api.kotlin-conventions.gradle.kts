@@ -15,7 +15,7 @@ dependencies {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk17")
         // Codegen components
         implementation("io.swagger.codegen.v3:swagger-codegen-cli:3.0.34")
-        implementation("org.webjars:swagger-ui:3.10.0")
+        implementation("org.webjars:swagger-ui:3.52.5")
 
         implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
         implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
