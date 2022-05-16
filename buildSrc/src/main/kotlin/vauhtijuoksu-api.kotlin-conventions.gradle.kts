@@ -21,7 +21,7 @@ dependencies {
         implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-        implementation("com.google.inject:guice:5.0.1")
+        implementation("com.google.inject:guice:5.1.0")
         implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
         implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
         implementation("io.github.microutils:kotlin-logging-jvm:2.1.21")
