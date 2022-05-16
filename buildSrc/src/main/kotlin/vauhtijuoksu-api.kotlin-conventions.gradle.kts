@@ -9,7 +9,7 @@ plugins {
 dependencies {
     constraints {
         val jacksonVersion = "2.13.3"
-        val hopliteVersion = "1.4.16"
+        val hopliteVersion = "2.1.4"
         val vertxVersion = "4.2.6"
         val testContainersVersion = "1.17.1"
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk17")
