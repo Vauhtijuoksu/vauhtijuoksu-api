@@ -50,14 +50,14 @@ class PlayerInfoRouter
                     }.onFailure(ctx::fail)
             }
         router.patch("/player-info")
-            .handler(BodyHandler.create())
             .handler(authenticatedEndpointCorsHandler)
+            .handler(BodyHandler.create())
             .handler(authenticationHandler)
             .handler { ctx ->
                 db.get()
                     .flatMap { existingPlayerInfo ->
                         val body = try {
-                            ctx.bodyAsJson
+                            ctx.body().asJsonObject()
                         } catch (e: DecodeException) {
                             throw UserError("Invalid json ${e.message}")
                         }

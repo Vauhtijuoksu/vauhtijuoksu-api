@@ -32,7 +32,7 @@ class IncentiveCodePostRouter @Inject constructor(
             .handler(publicEndpointCorsHandler)
             .handler(BodyHandler.create())
             .handler { ctx ->
-                val codes = ctx.bodyAsJsonArray
+                val codes = ctx.body().asJsonArray()
                     .map { (it as JsonObject).mapTo(ChosenIncentiveApiModel::class.java) }
                     .map { ChosenIncentive(it.id, it.parameter) }
                 incentiveCodeService.generateCode(codes)

@@ -27,8 +27,8 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
     override fun configure(router: Router, basepath: String) {
         router.patch("$basepath/:id")
             .handler(authenticatedEndpointCorsHandler)
-            .handler(authenticationHandler)
             .handler(BodyHandler.create())
+            .handler(authenticationHandler)
             .handler { ctx ->
                 val id: UUID
                 try {
@@ -37,7 +37,7 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
                     throw UserError("Not UUID: ${ctx.pathParam("id")}")
                 }
 
-                val jsonBody = ctx.bodyAsJson ?: throw UserError("Body is required on PATCH")
+                val jsonBody = ctx.body().asJsonObject() ?: throw UserError("Body is required on PATCH")
                 logger.debug { "Patching a record with object $jsonBody" }
 
                 db.getById(id)
@@ -48,7 +48,7 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
 
                         val oldData = mapper().readerForUpdating(toApiRepresentation(res))
                         val mergedData: M = try {
-                            oldData.readValue<ApiRepresentation>(ctx.bodyAsString).toModel()
+                            oldData.readValue<ApiRepresentation>(ctx.body().asString()).toModel()
                         } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
                             throw UserError("Error patching object: ${e.message}", e)
                         }

@@ -26,16 +26,16 @@ open class PostRouter<M : Model>(
     override fun configure(router: Router, basepath: String) {
         router.post(basepath)
             .handler(authenticatedEndpointCorsHandler)
-            .handler(authenticationHandler)
             .handler(BodyHandler.create())
+            .handler(authenticationHandler)
             .handler { ctx ->
                 val record: M
                 try {
-                    val jsonBody = ctx.bodyAsJson ?: throw UserError("Body is required on POST")
+                    val jsonBody = ctx.body().asJsonObject() ?: throw UserError("Body is required on POST")
                     record = toModel(jsonBody)
                     logger.debug { "Inserting a new record object $record" }
                 } catch (e: IllegalArgumentException) {
-                    throw UserError("Error parsing record object from ${ctx.bodyAsString} because ${e.message}", e)
+                    throw UserError("Error parsing record object from ${ctx.body().asString()} because ${e.message}", e)
                 }
 
                 val validationMessage = postInputValidator.validate(record)
