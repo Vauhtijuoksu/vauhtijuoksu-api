@@ -77,19 +77,19 @@ class StreamMetadataRouter
     @Suppress("SwallowedException")
     private fun handlePatch(router: Router) {
         router.patch("/stream-metadata")
-            .handler(BodyHandler.create())
             .handler(authenticatedEndpointCorsHandler)
+            .handler(BodyHandler.create())
             .handler(authenticationHandler)
             .handler { ctx ->
                 db.get()
                     .flatMap { res ->
-                        val body = try { ctx.bodyAsJson } catch (e: DecodeException) {
+                        val body = try { ctx.body().asJsonObject() } catch (e: DecodeException) {
                             throw UserError("Invalid json ${e.message}")
                         }
                         var newTimers = handleTimers(body, res.timers)
                         logger.info("Update stream from json $newTimers")
                         val newData = try {
-                            updateStreamFromJson(res, ctx.bodyAsJson)
+                            updateStreamFromJson(res, ctx.body().asJsonObject())
                         } catch (e: InvalidFormatException) {
                             throw UserError("Invalid request: ${e.message}")
                         }
