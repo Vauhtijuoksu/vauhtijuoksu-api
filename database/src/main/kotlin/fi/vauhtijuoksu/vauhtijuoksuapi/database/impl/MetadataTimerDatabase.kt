@@ -74,12 +74,13 @@ open class MetadataTimerDatabase
             throw ServerError(it)
         }
             .compose {
-                if (record.timers.size > 0)
+                if (record.timers.isNotEmpty()) {
                     addAllTimers(record.timers)
-                else
+                } else {
                     future { p ->
                         p.complete()
                     }
+                }
             }
             .mapEmpty()
     }
@@ -114,16 +115,20 @@ open class MetadataTimerDatabase
     }
 
     private fun toTimer(row: Row): Timer {
-        val startTime = if (row.getString("start_time") != null)
+        val startTime = if (row.getString("start_time") != null) {
             OffsetDateTime.ofInstant(
                 Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("start_time"))), ZoneId.of("Z")
             )
-        else null
-        val endTime = if (row.getString("end_time") != null)
+        } else {
+            null
+        }
+        val endTime = if (row.getString("end_time") != null) {
             OffsetDateTime.ofInstant(
                 Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("end_time"))), ZoneId.of("Z")
             )
-        else null
+        } else {
+            null
+        }
         return Timer(
             UUID.fromString(row.getString("id")),
             startTime,

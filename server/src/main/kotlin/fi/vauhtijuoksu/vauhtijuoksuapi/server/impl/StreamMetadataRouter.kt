@@ -83,10 +83,12 @@ class StreamMetadataRouter
             .handler { ctx ->
                 db.get()
                     .flatMap { res ->
-                        val body = try { ctx.body().asJsonObject() } catch (e: DecodeException) {
+                        val body = try {
+                            ctx.body().asJsonObject()
+                        } catch (e: DecodeException) {
                             throw UserError("Invalid json ${e.message}")
                         }
-                        var newTimers = handleTimers(body, res.timers)
+                        val newTimers = handleTimers(body, res.timers)
                         logger.info("Update stream from json $newTimers")
                         val newData = try {
                             updateStreamFromJson(res, ctx.body().asJsonObject())
@@ -99,8 +101,9 @@ class StreamMetadataRouter
                             db.save(newData)
                                 .onSuccess {
                                     // return timers from database if no changes were made
-                                    if (newTimers.size == 0)
+                                    if (newTimers.size == 0) {
                                         newData.timers = res.timers
+                                    }
                                     p.complete(newData)
                                 }
                                 .onFailure(p::fail)
@@ -125,18 +128,19 @@ class StreamMetadataRouter
         if (timerBody != null) {
             val timerSize = timerBody.size()
             val updatedTimers = existingTimers.mapIndexed { index, timer ->
-                if (index < timerSize)
+                if (index < timerSize) {
                     try {
                         logger.info("Update timer from json")
                         updateTimersFromJson(timer, timerBody.getJsonObject(index))
                     } catch (e: InvalidFormatException) {
                         throw UserError("Invalid request: ${e.message}")
                     }
-                else
+                } else {
                     timer
+                }
             }
             if (timerSize > updatedTimers.size) {
-                for (i in updatedTimers.size..timerSize - 1) {
+                for (i in updatedTimers.size until timerSize) {
                     val bt = timerBody.getJsonObject(i)
                     val startTime = bt.getString("start_time")
                     val endTime = bt.getString("end_time")
@@ -144,14 +148,20 @@ class StreamMetadataRouter
                     newTimers.add(
                         Timer(
                             UUID.randomUUID(),
-                            if (startTime != null)
+                            if (startTime != null) {
                                 OffsetDateTime.ofInstant(
                                     Instant.from(DateTimeFormatter.ISO_INSTANT.parse(startTime)), ZoneId.of("Z")
-                                ) else null,
-                            if (endTime != null)
+                                )
+                            } else {
+                                null
+                            },
+                            if (endTime != null) {
                                 OffsetDateTime.ofInstant(
                                     Instant.from(DateTimeFormatter.ISO_INSTANT.parse(endTime)), ZoneId.of("Z")
-                                ) else null
+                                )
+                            } else {
+                                null
+                            }
                         )
                     )
                 }
