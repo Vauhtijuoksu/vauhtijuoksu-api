@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
     constraints {
-        val jacksonVersion = "2.13.2"
+        val jacksonVersion = "2.13.3"
         val hopliteVersion = "1.4.9"
         val vertxVersion = "4.2.6"
         val testContainersVersion = "1.16.0"
