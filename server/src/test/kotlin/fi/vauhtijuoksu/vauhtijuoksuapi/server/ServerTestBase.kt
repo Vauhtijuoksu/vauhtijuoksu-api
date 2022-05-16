@@ -97,7 +97,13 @@ open class ServerTestBase {
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
                     bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
                     bind(object : TypeLiteral<MetadataTimerDatabase>() {}).toInstance(metadataTimerDatabase)
-                    bind(ServerConfiguration::class.java).toInstance(ServerConfiguration(serverPort, htpasswdFile, corsHeaderUrl))
+                    bind(ServerConfiguration::class.java).toInstance(
+                        ServerConfiguration(
+                            serverPort,
+                            htpasswdFile,
+                            corsHeaderUrl
+                        )
+                    )
                 }
             }
         )

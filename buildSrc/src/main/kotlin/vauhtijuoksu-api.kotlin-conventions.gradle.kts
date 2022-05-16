@@ -49,6 +49,7 @@ dependencies {
         testImplementation("org.mockito:mockito-core:3.+")
         testImplementation("org.mockito:mockito-junit-jupiter:3.+")
     }
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.20.0")
 
     // Align versions of all Kotlin components
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))

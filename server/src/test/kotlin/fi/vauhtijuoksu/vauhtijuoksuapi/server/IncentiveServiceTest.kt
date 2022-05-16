@@ -258,7 +258,9 @@ class IncentiveServiceTest {
     }
 
     @Test
-    fun `a milestone incentive status changes to complete when there are enough donations`(testContext: VertxTestContext) {
+    fun `a milestone incentive status changes to complete when there are enough donations`(
+        testContext: VertxTestContext
+    ) {
         `when`(incentiveDb.getById(milestoneIncentive.id)).thenReturn(Future.succeededFuture(milestoneIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf(milestoneGeneratedIncentive)))
         `when`(donationDb.getAll()).thenReturn(
