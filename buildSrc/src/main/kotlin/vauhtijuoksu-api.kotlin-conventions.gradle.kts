@@ -31,7 +31,7 @@ dependencies {
         implementation("io.vertx:vertx-lang-kotlin:$vertxVersion")
         implementation("io.vertx:vertx-pg-client:$vertxVersion")
         implementation("io.vertx:vertx-sql-client-templates:$vertxVersion")
-        implementation("org.flywaydb:flyway-core:8.5.10")
+        implementation("org.flywaydb:flyway-core:8.5.11")
         implementation("org.postgresql:postgresql:42.3.5")
 
         // Jackson databind required by log4j2 to read yaml configuration files
