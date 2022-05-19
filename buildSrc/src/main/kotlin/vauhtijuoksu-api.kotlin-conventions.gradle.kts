@@ -11,7 +11,7 @@ dependencies {
         val jacksonVersion = "2.13.3"
         val hopliteVersion = "2.1.4"
         val vertxVersion = "4.3.0"
-        val testContainersVersion = "1.17.1"
+        val testContainersVersion = "1.17.2"
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk17")
         // Codegen components
         implementation("io.swagger.codegen.v3:swagger-codegen-cli:3.0.34")
