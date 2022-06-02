@@ -76,4 +76,8 @@ tasks {
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
     }
+
+    build {
+        dependsOn(tasks.getByPath("pitest"))
+    }
 }
