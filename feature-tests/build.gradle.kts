@@ -21,10 +21,8 @@ val featureTests: Configuration by configurations.creating {
 val buildId = Random.nextInt(0, Int.MAX_VALUE)
 
 dependencies {
-    testImplementation("io.vertx:vertx-junit5")
-    testImplementation("io.vertx:vertx-web-client")
-
-    featureTests("org.jacoco:org.jacoco.agent:0.8.8:runtime")
+    testImplementation(libs.vertx.junit5)
+    testImplementation(libs.vertx.web.client)
 }
 
 val jacocoPath = "$buildDir/tmp/jacocoagent.jar"

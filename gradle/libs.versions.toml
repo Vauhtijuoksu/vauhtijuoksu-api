@@ -1,0 +1,53 @@
+[versions]
+jackson = "2.14.1"
+hoplite = "2.7.0"
+vertx = "4.3.6"
+
+[libraries]
+# Used in buildSrc
+kotlin-plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.22"
+spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:6.12.0"
+detekt-plugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.22.0"
+# Used by feature tests to gather coverage
+jacoco-core = "org.jacoco:org.jacoco.core:0.8.8"
+jacoco-agent = { group  = "org.jacoco", name = "org.jacoco.agent", version = "0.8.8" }
+kubernetes-client = "io.fabric8:kubernetes-client:6.3.1"
+swagger-generator-plugin = "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.19.2"
+
+# Codegen components
+swagger-ui = "org.webjars:swagger-ui:4.15.5"
+
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
+jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
+jackson-module-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
+guice = "com.google.inject:guice:5.1.0"
+hoplite-core = { group = "com.sksamuel.hoplite", name = "hoplite-core", version.ref = "hoplite" }
+hoplite-yaml = { group = "com.sksamuel.hoplite", name = "hoplite-yaml", version.ref = "hoplite" }
+mu-logging = "io.github.microutils:kotlin-logging-jvm:3.0.4"
+vertx-auth-htpasswd = { group = "io.vertx", name = "vertx-auth-htpasswd", version.ref = "vertx" }
+vertx-core = { group = "io.vertx", name = "vertx-core", version.ref = "vertx" }
+vertx-web-core = { group = "io.vertx", name = "vertx-web", version.ref = "vertx" }
+vertx-lang-kotlin = { group = "io.vertx", name = "vertx-lang-kotlin", version.ref = "vertx" }
+vertx-pg-client = { group = "io.vertx", name = "vertx-pg-client", version.ref = "vertx" }
+vertx-sql-client-templates = { group = "io.vertx", name = "vertx-sql-client-templates", version.ref = "vertx" }
+flyway-core = "org.flywaydb:flyway-core:9.10.1"
+postgresql = "org.postgresql:postgresql:42.5.1"
+
+log4j-slf4j18-impl = "org.apache.logging.log4j:log4j-slf4j18-impl:2.18.0"
+# Jackson databind required by log4j2 to read yaml configuration files
+jackson-dataformat-yaml = { group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-yaml", version.ref = "jackson" }
+
+# Test
+junit-bom = "org.junit:junit-bom:5.9.1"
+junit-jupiter-api = { group ="org.junit.jupiter", name = "junit-jupiter-api" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine" }
+testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version = "1.17.6" }
+testcontainers-core = { group = "org.testcontainers", name = "testcontainers" }
+testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter" }
+testcontainers-postgresql = { group = "org.testcontainers", name = "postgresql" }
+vertx-junit5 = { group = "io.vertx", name = "vertx-junit5", version.ref = "vertx" }
+vertx-web-client = { group = "io.vertx", name = "vertx-web-client", version.ref = "vertx" }
+mockito-bom = { group = "org.mockito", name = "mockito-bom", version = "4.3.1" }
+mockito-core = { group = "org.mockito", name = "mockito-core" }
+mockito-junit-jupiter = { group = "org.mockito", name = "mockito-junit-jupiter" }
