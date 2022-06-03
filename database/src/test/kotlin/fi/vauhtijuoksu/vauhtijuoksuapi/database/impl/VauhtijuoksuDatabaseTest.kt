@@ -7,6 +7,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
+import io.vertx.junit5.Timeout
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
 import io.vertx.sqlclient.SqlClient
@@ -25,6 +26,7 @@ import java.util.UUID
 
 @Testcontainers
 @ExtendWith(VertxExtension::class)
+@Timeout(1000)
 abstract class VauhtijuoksuDatabaseTest<T : Model> {
     protected lateinit var db: VauhtijuoksuDatabase<T>
     private lateinit var sqlClient: SqlClient

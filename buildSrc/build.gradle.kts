@@ -27,6 +27,8 @@ dependencies {
     // Used by the plugin
     implementation("com.github.fge:json-schema-validator:2.2.6")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.3")
+
+    implementation("info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.7.4")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

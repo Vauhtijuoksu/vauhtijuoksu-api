@@ -38,7 +38,7 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
                 }
 
                 val jsonBody = ctx.body().asJsonObject() ?: throw UserError("Body is required on PATCH")
-                logger.debug { "Patching a record with object $jsonBody" }
+                logger.debug ( "Patching a record with object $jsonBody" )
 
                 db.getById(id)
                     .map { res ->

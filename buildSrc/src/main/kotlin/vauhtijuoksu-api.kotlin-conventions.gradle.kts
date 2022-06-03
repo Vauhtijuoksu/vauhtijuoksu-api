@@ -4,6 +4,7 @@
 plugins {
     id("vauhtijuoksu-api.common-conventions")
     id("io.gitlab.arturbosch.detekt")
+    id("info.solidsoft.pitest")
 }
 
 dependencies {
@@ -77,7 +78,18 @@ tasks {
         isReproducibleFileOrder = true
     }
 
+    pitest {
+        junit5PluginVersion.set("0.15")
+        targetClasses.set(listOf("fi.vauhtijuoksu.*"))
+        threads.set(8)
+        avoidCallsTo.add("kotlin.jvm.internal")
+        avoidCallsTo.add("mu")
+    }
+
+    /*
     build {
         dependsOn(tasks.getByPath("pitest"))
     }
+     */
+
 }
