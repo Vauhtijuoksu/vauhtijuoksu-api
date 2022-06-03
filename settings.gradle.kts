@@ -17,3 +17,50 @@ include("feature-tests")
 include("models")
 include("server")
 include("test-data")
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            version("jackson", "2.13.3")
+            version("hoplite", "2.1.5")
+            version("vertx", "4.3.1")
+            version("testcontainers", "1.17.2")
+            version("junit", "5.8.2")
+
+            // Codegen components
+            library("swagger-codegen-cli", "io.swagger.codegen.v3:swagger-codegen-cli:3.0.34")
+            library("swagger-ui", "org.webjars:swagger-ui:4.11.1")
+
+            library("jackson-databind", "com.fasterxml.jackson.core", "jackson-databind").versionRef("jackson")
+            library("jackson-annotations", "com.fasterxml.jackson.core", "jackson-annotations").versionRef("jackson")
+            library("jackson-datatype-jsr310", "com.fasterxml.jackson.datatype", "jackson-datatype-jsr310").versionRef("jackson")
+            library("jackson-module-kotlin", "com.fasterxml.jackson.module", "jackson-module-kotlin").versionRef("jackson")
+            library("guice", "com.google.inject:guice:5.1.0")
+            library("hoplite-core", "com.sksamuel.hoplite", "hoplite-core").versionRef("hoplite")
+            library("hoplite-yaml", "com.sksamuel.hoplite", "hoplite-yaml").versionRef("hoplite")
+            library("mu-logging", "io.github.microutils:kotlin-logging-jvm:2.1.23")
+            library("vertx-auth-htpasswd", "io.vertx", "vertx-auth-htpasswd").versionRef("vertx")
+            library("vertx-core", "io.vertx", "vertx-core").versionRef("vertx")
+            library("vertx-web-core", "io.vertx", "vertx-web").versionRef("vertx")
+            library("vertx-lang-kotlin", "io.vertx", "vertx-lang-kotlin").versionRef("vertx")
+            library("vertx-pg-client", "io.vertx", "vertx-pg-client").versionRef("vertx")
+            library("vertx-sql-client-templates", "io.vertx", "vertx-sql-client-templates").versionRef("vertx")
+            library("flyway-core", "org.flywaydb:flyway-core:8.5.11")
+            library("postgresql", "org.postgresql:postgresql:42.3.6")
+
+            // Jackson databind required by log4j2 to read yaml configuration files
+            library("jackson-dataformat-yaml", "com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml").versionRef("jackson")
+            library("log4j-slf4j18-impl", "org.apache.logging.log4j:log4j-slf4j18-impl:2.17.2")
+
+            library("junit-jupiter-api", "org.junit.jupiter", "junit-jupiter-api").versionRef("junit")
+            library("junit-jupiter-engine", "org.junit.jupiter", "junit-jupiter-engine").versionRef("junit")
+            library("testcontainers.junit", "org.testcontainers", "junit-jupiter").versionRef("testcontainers")
+            library("testcontainers.postgresql", "org.testcontainers", "postgresql").versionRef("testcontainers")
+            library("testcontainers.core", "org.testcontainers", "testcontainers").versionRef("testcontainers")
+            library("vertx-junit5", "io.vertx", "vertx-junit5").versionRef("vertx")
+            library("vertx-web-client", "io.vertx", "vertx-web-client").versionRef("vertx")
+            library("mockito-core", "org.mockito:mockito-core:3.+")
+            library("mockito-junit-jupiter", "org.mockito:mockito-junit-jupiter:3.+")
+        }
+    }
+}
