@@ -3,11 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-annotations")
+    implementation(libs.jackson.annotations)
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    testImplementation("io.vertx:vertx-core")
-
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation(libs.vertx.core)
+    testImplementation(libs.jackson.module.kotlin)
 }
