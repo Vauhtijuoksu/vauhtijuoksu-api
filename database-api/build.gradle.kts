@@ -3,5 +3,5 @@ plugins {
 }
 dependencies {
     api(project(path = ":models"))
-    api("io.vertx:vertx-core")
+    api(libs.vertx.core)
 }
