@@ -10,7 +10,7 @@ dependencies {
     constraints {
         val jacksonVersion = "2.13.3"
         val hopliteVersion = "2.1.5"
-        val vertxVersion = "4.3.1"
+        val vertxVersion = "4.3.6"
         val testContainersVersion = "1.17.6"
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk17")
         // Codegen components
