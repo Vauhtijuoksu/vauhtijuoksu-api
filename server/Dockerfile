@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17.0.5_8-jre
 
 RUN mkdir /vauhtijuoksu-api
 
