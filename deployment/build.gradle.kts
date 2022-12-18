@@ -63,11 +63,11 @@ tasks {
                     workingDir = projectDir
                     bashCommand(
                         """
-                        docker pull k8s.gcr.io/ingress-nginx/controller:v1.0.4@sha256:545cff00370f28363dad31e3b59a94ba377854d3a11f18988f5f9e56841ef9ef
-                        docker pull k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
-                        kind load docker-image k8s.gcr.io/ingress-nginx/controller:v1.0.4@sha256:545cff00370f28363dad31e3b59a94ba377854d3a11f18988f5f9e56841ef9ef --name vauhtijuoksu
-                        kind load docker-image k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660 --name vauhtijuoksu
-                        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/14f6b32032b709d3e0f614ca85954c3583c5fe3d/deploy/static/provider/kind/deploy.yaml
+                        #docker pull registry.k8s.io/ingress-nginx/controller:v1.3.1@sha256:54f7fe2c6c5a9db9a0ebf1131797109bb7a4d91f56b9b362bde2abd237dd1974
+                        #docker pull registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.3.0@sha256:549e71a6ca248c5abd51cdb73dbc3083df62cf92ed5e6147c780e30f7e007a47
+                        #kind load docker-image registry.k8s.io/ingress-nginx/controller:v1.3.1@sha256:54f7fe2c6c5a9db9a0ebf1131797109bb7a4d91f56b9b362bde2abd237dd1974 --name=vauhtijuoksu
+                        #kind load docker-image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.3.0@sha256:549e71a6ca248c5abd51cdb73dbc3083df62cf92ed5e6147c780e30f7e007a47 --name=vauhtijuoksu
+                        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/e079486d4dc40387389adbaed7ec9b80d897d810/deploy/static/provider/kind/deploy.yaml
                         """
                     )
                 }
