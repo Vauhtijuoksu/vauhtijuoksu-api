@@ -20,7 +20,7 @@ dependencies {
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.20.0")
     // Used by feature tests to gather coverage
     implementation("org.jacoco:org.jacoco.core:0.8.8")
-    implementation("io.fabric8:kubernetes-client:5.12.2")
+    implementation("io.fabric8:kubernetes-client:5.12.4")
 
     // The plugin is not released with OAS3 support, even though it exists in master
     implementation(files("${projectDir}/libs/gradle-swagger-generator-plugin-SNAPSHOT.jar"))
