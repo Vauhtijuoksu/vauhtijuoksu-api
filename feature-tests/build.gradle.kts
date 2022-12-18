@@ -23,7 +23,7 @@ dependencies {
     testImplementation("io.vertx:vertx-junit5")
     testImplementation("io.vertx:vertx-web-client")
 
-    featureTests("org.jacoco:org.jacoco.agent:0.8.7:runtime")
+    featureTests("org.jacoco:org.jacoco.agent:0.8.8:runtime")
 }
 
 val jacocoPath = "$buildDir/tmp/jacocoagent.jar"
