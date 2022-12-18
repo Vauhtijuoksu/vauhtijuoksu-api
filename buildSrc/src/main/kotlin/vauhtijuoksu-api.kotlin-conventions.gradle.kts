@@ -43,7 +43,7 @@ dependencies {
         testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
         testImplementation("org.testcontainers:postgresql:$testContainersVersion")
         testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+        testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
         testImplementation("io.vertx:vertx-junit5:$vertxVersion")
         testImplementation("io.vertx:vertx-web-client:$vertxVersion")
         testImplementation("org.mockito:mockito-core:3.+")
