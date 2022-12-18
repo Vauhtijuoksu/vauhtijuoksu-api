@@ -22,11 +22,7 @@ dependencies {
     implementation("org.jacoco:org.jacoco.core:0.8.8")
     implementation("io.fabric8:kubernetes-client:6.3.1")
 
-    // The plugin is not released with OAS3 support, even though it exists in master
-    implementation(files("${projectDir}/libs/gradle-swagger-generator-plugin-SNAPSHOT.jar"))
-    // Used by the plugin
-    implementation("com.github.fge:json-schema-validator:2.2.6")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.1")
+    implementation("gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.19.2")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
