@@ -1,5 +1,5 @@
 import fi.vauhtijuoksu.utilities.bashCommand
-import io.fabric8.kubernetes.client.DefaultKubernetesClient
+import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import io.fabric8.kubernetes.client.LocalPortForward
 import org.jacoco.core.data.ExecutionDataWriter
 import org.jacoco.core.runtime.RemoteControlReader
@@ -50,7 +50,7 @@ tasks {
      * Run block when forwarded to each vauhtijuoksu-api pod created in the current build
      */
     fun forwardToEachVauhtijuoksuPod(port: Int, block: (portForward: LocalPortForward) -> Unit) {
-        DefaultKubernetesClient().use { k8s ->
+        KubernetesClientBuilder().build().use { k8s ->
             k8s.pods().inNamespace("default")
                 .withLabel("app.kubernetes.io/name", "vauhtijuoksu-api")
                 .withLabel("build", "$buildId")
@@ -118,7 +118,7 @@ tasks {
                     """.trimIndent()
                 )
             }
-            DefaultKubernetesClient().use { k8s ->
+            KubernetesClientBuilder().build().use { k8s ->
                 logger.debug("Patching deployment")
                 val vauhtijuoksuApiDeployment = k8s.apps().deployments().inNamespace("default").withName("vauhtijuoksu-api")
                 vauhtijuoksuApiDeployment.patch(patch)
