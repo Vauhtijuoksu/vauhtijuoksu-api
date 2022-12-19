@@ -15,7 +15,7 @@ buildscript {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.22")
     implementation("com.diffplug.spotless:spotless-plugin-gradle:6.12.0")
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.20.0")
     // Used by feature tests to gather coverage
