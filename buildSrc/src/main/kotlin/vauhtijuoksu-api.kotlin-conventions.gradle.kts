@@ -24,7 +24,7 @@ dependencies {
         implementation("com.google.inject:guice:5.1.0")
         implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
         implementation("com.sksamuel.hoplite:hoplite-yaml:$hopliteVersion")
-        implementation("io.github.microutils:kotlin-logging-jvm:2.1.23")
+        implementation("io.github.microutils:kotlin-logging-jvm:3.0.4")
         implementation("io.vertx:vertx-auth-htpasswd:$vertxVersion")
         implementation("io.vertx:vertx-core:$vertxVersion")
         implementation("io.vertx:vertx-web:$vertxVersion")
