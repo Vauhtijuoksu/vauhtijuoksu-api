@@ -39,6 +39,7 @@ jobs:
         continue-on-error: true # Commenting doesn't work from forked PRs, because those have no access to secrets
         with:
           title: Unit and integration test coverage
+          update-comment: true
           paths: ${{ github.workspace }}/build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 78 # Current coverage
@@ -49,6 +50,7 @@ jobs:
         continue-on-error: true
         with:
           title: Feature test coverage
+          update-comment: true
           paths: ${{ github.workspace }}/build/reports/jacoco/featureTestReport/featureTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 0 # No tests yet
