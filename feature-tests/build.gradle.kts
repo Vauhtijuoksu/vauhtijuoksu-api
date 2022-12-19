@@ -1,6 +1,7 @@
 import fi.vauhtijuoksu.utilities.bashCommand
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import io.fabric8.kubernetes.client.LocalPortForward
+import org.jacoco.agent.AgentJar
 import org.jacoco.core.data.ExecutionDataWriter
 import org.jacoco.core.runtime.RemoteControlReader
 import org.jacoco.core.runtime.RemoteControlWriter
@@ -36,12 +37,9 @@ tasks {
         dependsOn(featureTests)
         outputs.file(jacocoPath)
         doLast {
-            val jacocoJarPath = featureTests.resolve().first {
-                // Name org.jacoco.agent-NNN-runtime.jar
-                it.name.matches(Regex("org.jacoco.agent-(\\d[.])+.-runtime.jar"))
-            }.absolutePath
+            val agentJar: File = AgentJar.extractToTempLocation()
             exec {
-                bashCommand("mkdir -p build/tmp && cp \"$jacocoJarPath\" $jacocoPath")
+                bashCommand("mkdir -p build/tmp && cp \"${agentJar.absolutePath}\" $jacocoPath")
             }
         }
     }
