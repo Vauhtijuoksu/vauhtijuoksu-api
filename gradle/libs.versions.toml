@@ -1,7 +1,7 @@
 [versions]
 jackson = "2.14.1"
 hoplite = "2.7.0"
-vertx = "4.3.6"
+vertx = "4.3.7"
 
 [libraries]
 # Used in buildSrc
