@@ -48,6 +48,6 @@ testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter" }
 testcontainers-postgresql = { group = "org.testcontainers", name = "postgresql" }
 vertx-junit5 = { group = "io.vertx", name = "vertx-junit5", version.ref = "vertx" }
 vertx-web-client = { group = "io.vertx", name = "vertx-web-client", version.ref = "vertx" }
-mockito-bom = { group = "org.mockito", name = "mockito-bom", version = "4.3.1" }
+mockito-bom = { group = "org.mockito", name = "mockito-bom", version = "4.10.0" }
 mockito-core = { group = "org.mockito", name = "mockito-core" }
 mockito-junit-jupiter = { group = "org.mockito", name = "mockito-junit-jupiter" }
