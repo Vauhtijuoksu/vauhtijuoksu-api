@@ -15,6 +15,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.client.WebClientOptions
 import io.vertx.junit5.VertxExtension
@@ -77,7 +78,7 @@ open class ServerTestBase {
     }
 
     @BeforeEach
-    fun beforeEach() {
+    fun beforeEach(testContext: VertxTestContext) {
         val htpasswdFile = "${tmpDir.path}/.htpasswd"
         val writer = BufferedWriter(FileWriter(File(htpasswdFile)))
         // Pre-generated credentials vauhtijuoksu / vauhtijuoksu
@@ -111,9 +112,22 @@ open class ServerTestBase {
         vertx = injector.getInstance(Vertx::class.java)
         server = injector.getInstance(Server::class.java)
         server.start()
-        // Vertx is too hasty to claim it's listening
-        Thread.sleep(15)
         client = WebClient.create(vertx, WebClientOptions().setDefaultPort(serverPort))
+        var runs = 0
+        vertx.setPeriodic(0, 5) { timerId ->
+            client.request(HttpMethod.OPTIONS, "/")
+                .send()
+                .onSuccess {
+                    vertx.cancelTimer(timerId)
+                    testContext.completeNow()
+                }
+                .onFailure {
+                    runs += 1
+                    if (runs > 10) {
+                        testContext.failNow("Server not responding after 10 tries")
+                    }
+                }
+        }
     }
 
     @AfterEach
