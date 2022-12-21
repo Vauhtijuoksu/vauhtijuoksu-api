@@ -7,7 +7,6 @@ import org.jacoco.core.runtime.RemoteControlReader
 import org.jacoco.core.runtime.RemoteControlWriter
 import java.io.FileOutputStream
 import java.net.Socket
-import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 plugins {
@@ -118,9 +117,12 @@ tasks {
                 logger.debug("Patching deployment")
                 val vauhtijuoksuApiDeployment = k8s.apps().deployments().inNamespace("default").withName("vauhtijuoksu-api")
                 vauhtijuoksuApiDeployment.patch(patch)
-                vauhtijuoksuApiDeployment.waitUntilReady(30, TimeUnit.SECONDS)
                 logger.debug("Deployment patched")
             }
+            exec {
+                bashCommand("kubectl rollout status deployment vauhtijuoksu-api")
+            }
+            logger.debug("Patched deployment rolled out")
         }
     }
 
