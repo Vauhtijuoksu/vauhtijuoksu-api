@@ -6,6 +6,7 @@ import java.io.IOException
 plugins {
     id("vauhtijuoksu-api.implementation-conventions")
     id("application")
+    `jacoco-report-aggregation`
 }
 
 dependencies {
@@ -73,6 +74,10 @@ val dockerBuild by tasks.registering {
             bashCommand("docker image inspect $imageName:$imageTag | jq '.[0].Id' > build/image-hash")
         }
     }
+}
+
+tasks.check {
+    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
 }
 
 val dockerImageConfiguration: Configuration by configurations.creating {
