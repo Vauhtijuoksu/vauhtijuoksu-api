@@ -32,7 +32,7 @@ jobs:
       - name: Build and test
         uses: eskatos/gradle-command-action@v2.3.3
         with:
-          arguments: build integrationTest --info
+          arguments: build --info
       - name: Add coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
         uses: madrapps/jacoco-report@v1.3
@@ -53,8 +53,8 @@ jobs:
           update-comment: true
           paths: ${{ github.workspace }}/build/reports/jacoco/featureTestReport/featureTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 0 # No tests yet
-          min-coverage-changed-files: 0
+          min-coverage-overall: 75
+          min-coverage-changed-files: 80
       - name: Save test results
         if: always()
         uses: actions/upload-artifact@v3
