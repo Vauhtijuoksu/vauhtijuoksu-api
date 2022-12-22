@@ -31,7 +31,7 @@ vertx-web-core = { group = "io.vertx", name = "vertx-web", version.ref = "vertx"
 vertx-lang-kotlin = { group = "io.vertx", name = "vertx-lang-kotlin", version.ref = "vertx" }
 vertx-pg-client = { group = "io.vertx", name = "vertx-pg-client", version.ref = "vertx" }
 vertx-sql-client-templates = { group = "io.vertx", name = "vertx-sql-client-templates", version.ref = "vertx" }
-flyway-core = "org.flywaydb:flyway-core:9.10.1"
+flyway-core = "org.flywaydb:flyway-core:9.10.2"
 postgresql = "org.postgresql:postgresql:42.5.1"
 
 log4j-slf4j18-impl = "org.apache.logging.log4j:log4j-slf4j18-impl:2.18.0"
