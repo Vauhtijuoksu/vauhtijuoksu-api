@@ -1,4 +1,5 @@
 import fi.vauhtijuoksu.utilities.findLibraryOrThrow
+
 /**
  * Configuration for all projects containing Kotlin code, including interfaces and test utils
  */
@@ -9,7 +10,9 @@ plugins {
 }
 
 dependencies {
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.22.0")
+    val libs: VersionCatalog = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
+
+    detektPlugins(libs.findLibraryOrThrow("detekt-formatting"))
 
     // Align versions of all Kotlin components
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -17,25 +20,15 @@ dependencies {
     // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    val libs: VersionCatalog = project.extensions.getByType<VersionCatalogsExtension>().named("libs")
 
     testImplementation(platform(libs.findLibraryOrThrow("junit-bom")))
     testImplementation(platform(libs.findLibraryOrThrow("mockito-bom")))
     testImplementation(platform(libs.findLibraryOrThrow("testcontainers-bom")))
 
     // Use JUnit Jupiter API for testing.
-    libs.findLibrary("junit-jupiter-api").ifPresentOrElse({
-        testImplementation(it)
-    }, {
-        throw RuntimeException("No junit jupiter api")
-    })
-
+    testImplementation(libs.findLibraryOrThrow("junit-jupiter-api"))
     // Use JUnit Jupiter Engine for testing.
-    libs.findLibrary("junit-jupiter-engine").ifPresentOrElse({
-        testRuntimeOnly(it)
-    }, {
-        throw RuntimeException("No junit jupiter engine")
-    })
+    testRuntimeOnly(libs.findLibraryOrThrow("junit-jupiter-engine"))
 }
 
 tasks {
