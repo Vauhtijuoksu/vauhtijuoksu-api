@@ -1,23 +1,26 @@
-# Vauhtijuoksu API
+# Vauhtijuoksu API server
 
 ## Requirements
-* java 17
+These are required to run all of the commands mentioned here. 
+Some of the commands might work without all of these if you're an adventurous person.
+* java 17 - Install Java and point JAVA_HOME environment variable to your installation directory
 * jq
 * kubectl 1.20
 * helm 3
 * kind
 * bash
 
-## Generating API
+## API documentation
+### Generating the API documentation
 ```shell
-./gradlew :apidoc:build
+./gradlew :api-doc:build
 ```
-The api is readable after build at api-doc/build/swagger-ui/index.html
+The api is readable after build at [api-doc/build/swagger-ui/index.html](api-doc/build/swagger-ui/index.html)
 
-## Browsing the API specification
-The latest API from master is available at https://static.vauhtijuoksu.fi
+### Browsing the API documentation
+The latest API documentation generated from main branch is available for browsing at https://static.vauhtijuoksu.fi
 
-## Testing the API
+### Testing against the API specification
 A mock server using the API specification (from `main` branch) is served at https://mockapi.dev.vauhtijuoksu.fi/.
 Note that since / has no content, the server correctly responds 404.
 
@@ -26,26 +29,26 @@ The mock server can also be deployed locally by running:
 ./gradlew localMockApi
 ```
 
-It's then available at https://mockapi.localhost
+It's then available at http://mockapi.localhos
 
-## Using the API
-The API server is running at https://api.dev.vauhtijuoksu.fi
+### Using the API
+The API server is running at https://api.dev.vauhtijuoksu.fi. Ask around for credentials if you need to modify data.
 
 ## Development
 Run tests with:
 ```shell
 ./gradlew test -x feature-tests:test
 ```
-This skips the slow feature-tests. 
+This skips the slow feature-tests.
 
 To run latest api server locally:
 ```shell
 ./gradlew runInCluster
 ```
-The server is accessible at https://api.localhost. The certificate is self-signed and must be trusted or ignored 
-to access the server.
-
-Note that the server does not restart at the moment on code changes, since the images have the same version.
+The server is accessible at http://api.localhost. 
+It's also available with https, using a self-signed certificate. 
+The certificate must be trusted or ignored to access the server.
+The command can be run again to update the deployment to the latest version.
 
 The cluster can be deleted with:
 ```shell
@@ -54,12 +57,13 @@ The cluster can be deleted with:
 
 ## Feature tests
 
-Feature tests are run against a local kind cluster by running \
-`./gradlew build` \
-at project root.
+Feature tests are run against a local kind cluster by running at project root
+```shell
+./gradlew build
+``` 
 
 The tests generate a Jacoco report file, which can be found at
-`build/reports/jacoco/featureTestReport/html/index.html`.
+[build/reports/jacoco/featureTestReport/html/index.html](build/reports/jacoco/featureTestReport/html/index.html).
 
 ## Versions
 Get current version by running
