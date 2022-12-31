@@ -129,7 +129,7 @@ jobs:
         id: install
       - name: Deploy mock server to AKS
         run: |
-          helm upgrade --install mockserver deployment/mockserver --set commit=${{ github.sha }}
+          helm upgrade --install mockserver deployment/mockserver
       - name: Deploy API server to AKS
         run: |
           helm upgrade --install vauhtijuoksu-api deployment/api-server \

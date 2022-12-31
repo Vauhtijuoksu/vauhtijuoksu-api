@@ -7,5 +7,3 @@ image:
 # if_present
 # exclusively
 use_examples: if_present
-
-commit: "main"

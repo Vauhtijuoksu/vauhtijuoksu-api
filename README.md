@@ -21,6 +21,13 @@ The latest API from master is available at https://static.vauhtijuoksu.fi
 A mock server using the API specification (from `main` branch) is served at https://mockapi.dev.vauhtijuoksu.fi/.
 Note that since / has no content, the server correctly responds 404.
 
+The mock server can also be deployed locally by running:
+```shell
+./gradlew localMockApi
+```
+
+It's then available at https://mockapi.localhost
+
 ## Using the API
 The API server is running at https://api.dev.vauhtijuoksu.fi
 

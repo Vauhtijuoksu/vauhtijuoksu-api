@@ -128,6 +128,18 @@ tasks {
         }
     }
 
+    register("localMockApi") {
+        description = "Create a kind cluster and serve mock api"
+        group = "Application"
+        dependsOn(createCluster)
+        doLast {
+            exec {
+                workingDir = projectDir
+                bashCommand("helm upgrade --install mockserver mockserver")
+            }
+        }
+    }
+
     register("integrationTest") {
         description = "Run integration tests against a local kind cluster"
         group = "Verification"

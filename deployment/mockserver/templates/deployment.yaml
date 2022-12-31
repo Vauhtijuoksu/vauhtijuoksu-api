@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         {{- include "mockserver.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/openapi-cm.yaml") . | sha256sum }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
@@ -26,6 +28,16 @@ spec:
               cpu: 50m
           env:
             - name: OPENAPI_MOCK_SPECIFICATION_URL
-              value: "https://raw.githubusercontent.com/Vauhtijuoksu/vauhtijuoksu-api/{{ .Values.commit }}/api-doc/openapi.yaml"
+              value: "/apidoc/openapi.yaml"
             - name: OPENAPI_MOCK_USE_EXAMPLES
               value: {{ .Values.use_examples }}
+            - name: OPENAPI_MOCK_CORS_ENABLED
+              value: "1"
+          volumeMounts:
+            - name: apidoc
+              mountPath: /apidoc
+              readOnly: true
+      volumes:
+        - name: apidoc
+          configMap:
+            name: {{ include "mockserver.fullname" . }}-openapi-spec

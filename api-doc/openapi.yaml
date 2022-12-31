@@ -4,6 +4,8 @@ info:
   title: Vauhtijuoksu API
 servers:
   - url: https://api.dev.vauhtijuoksu.fi
+  - url: https://mockapi.dev.vauhtijuoksu.fi
+  - url: https://mockapi.localhost/
 paths:
   /donations:
     get:
