@@ -1,18 +1,15 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.featuretest
 
-import io.vertx.core.Vertx
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.WebClient
-import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(VertxExtension::class)
+@FeatureTest
 class StreamMetadataTest {
     private val someMetadata = """
         {
@@ -68,14 +65,14 @@ class StreamMetadataTest {
     private lateinit var client: WebClient
 
     @BeforeEach
-    fun setup() {
-        client = WebClient.create(Vertx.vertx())
+    fun setup(webClient: WebClient) {
+        client = webClient
     }
 
     @Test
     fun `test changing whole stream metadata`(testContext: VertxTestContext) {
         client.patch("/stream-metadata")
-            .putHeader("Origin", "http://localhost")
+            .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
             .sendJson(JsonObject(someMetadata))
             .onFailure(testContext::failNow)
@@ -91,12 +88,12 @@ class StreamMetadataTest {
     @Test
     fun `test partially updating stream metadata`(testContext: VertxTestContext) {
         client.patch("/stream-metadata")
-            .putHeader("Origin", "http://localhost")
+            .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
             .sendJson(JsonObject(someMetadata))
             .compose {
                 client.patch("/stream-metadata")
-                    .putHeader("Origin", "http://localhost")
+                    .putHeader("Origin", "http://api.localhost")
                     .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                     .sendJson(
                         JsonObject()
@@ -119,12 +116,12 @@ class StreamMetadataTest {
     @Test
     fun `test heart rate update`(testContext: VertxTestContext) {
         client.patch("/stream-metadata")
-            .putHeader("Origin", "http://localhost")
+            .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
             .sendJson(JsonObject(someMetadata))
             .compose {
                 client.patch("/stream-metadata")
-                    .putHeader("Origin", "http://localhost")
+                    .putHeader("Origin", "http://api.localhost")
                     .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                     .sendJson(JsonObject(someHeartData))
             }
@@ -142,12 +139,12 @@ class StreamMetadataTest {
     @Test
     fun `test timer update`(testContext: VertxTestContext) {
         client.patch("/stream-metadata")
-            .putHeader("Origin", "http://localhost")
+            .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
             .sendJson(JsonObject(someMetadata))
             .compose {
                 client.patch("/stream-metadata")
-                    .putHeader("Origin", "http://localhost")
+                    .putHeader("Origin", "http://api.localhost")
                     .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                     .sendJson(JsonObject(someTimerData))
             }

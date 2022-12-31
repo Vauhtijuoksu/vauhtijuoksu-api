@@ -35,7 +35,7 @@ To run latest api server locally:
 ```shell
 ./gradlew runInCluster
 ```
-The server is accessible at https://localhost. The certificate is self-signed and must be trusted or ignored 
+The server is accessible at https://api.localhost. The certificate is self-signed and must be trusted or ignored 
 to access the server.
 
 Note that the server does not restart at the moment on code changes, since the images have the same version.

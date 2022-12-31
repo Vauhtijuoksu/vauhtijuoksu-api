@@ -1,13 +1,11 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.featuretest
 
-import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.HttpRequest
 import io.vertx.ext.web.client.WebClient
-import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -15,11 +13,10 @@ import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
-import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-@ExtendWith(VertxExtension::class)
+@FeatureTest
 class DonationFlowTest {
     private val newIncentive = """{
       "game_id": null,
@@ -49,13 +46,13 @@ class DonationFlowTest {
     }
 
     @BeforeEach
-    fun setup() {
-        client = WebClient.create(Vertx.vertx())
+    fun setup(webClient: WebClient) {
+        client = webClient
     }
 
     private fun authenticatedPost(url: String): HttpRequest<Buffer> {
         return client.post(url)
-            .putHeader("Origin", "http://localhost")
+            .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
     }
 
@@ -68,9 +65,9 @@ class DonationFlowTest {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(201, res.statusCode())
+                    incentiveId = UUID.fromString(res.bodyAsJsonObject().getString("id"))
+                    testContext.completeNow()
                 }
-                incentiveId = UUID.fromString(res.bodyAsJsonObject().getString("id"))
-                testContext.completeNow()
             }
     }
 
@@ -78,7 +75,7 @@ class DonationFlowTest {
     @Order(2)
     fun `a user can generate an incentive code for the incentive`(testContext: VertxTestContext) {
         client.post("/generate-incentive-code")
-            .putHeader("Origin", "http://localhost")
+            .putHeader("Origin", "http://api.localhost")
             .sendJson(JsonArray().add(JsonObject().put("id", incentiveId.toString()).put("parameter", "neliö")))
             .onFailure(testContext::failNow)
             .onSuccess {

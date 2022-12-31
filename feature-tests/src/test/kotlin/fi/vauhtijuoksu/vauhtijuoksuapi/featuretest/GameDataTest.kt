@@ -1,17 +1,14 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.featuretest
 
-import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.WebClient
-import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(VertxExtension::class)
+@FeatureTest
 class GameDataTest {
     lateinit var client: WebClient
 
@@ -32,8 +29,8 @@ class GameDataTest {
     """.trimIndent()
 
     @BeforeEach
-    fun setup() {
-        client = WebClient.create(Vertx.vertx())
+    fun setup(webClient: WebClient) {
+        client = webClient
     }
 
     @Test
@@ -55,7 +52,7 @@ class GameDataTest {
             .compose { res ->
                 id = res.bodyAsJsonObject().getString("id")
                 client.patch("/gamedata/$id")
-                    .putHeader("Origin", "http://localhost")
+                    .putHeader("Origin", "http://api.localhost")
                     .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                     .sendJson(
                         JsonObject(gameData1)

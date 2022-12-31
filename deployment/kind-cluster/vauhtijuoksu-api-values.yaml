@@ -1,4 +1,4 @@
 image:
   registry:
 server:
-  corsHeader: http(s)?://localhost(:\d{1,5})?$
+  corsHeader: http(s)?://api.localhost(:\d{1,5})?$

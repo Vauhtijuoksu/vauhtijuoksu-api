@@ -1,6 +1,5 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.featuretest
 
-import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.json.JsonArray
@@ -8,7 +7,6 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.HttpRequest
 import io.vertx.ext.web.client.WebClient
-import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -17,12 +15,11 @@ import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.OffsetDateTime
 import java.util.UUID
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-@ExtendWith(VertxExtension::class)
+@FeatureTest
 class IncentiveTest {
     private val newIncentive = """{
       "game_id": null,
@@ -41,24 +38,24 @@ class IncentiveTest {
     }
 
     @BeforeEach
-    fun setup() {
-        client = WebClient.create(Vertx.vertx())
+    fun setup(webClient: WebClient) {
+        client = webClient
     }
 
     private fun authenticatedRequest(method: HttpMethod, url: String): HttpRequest<Buffer> {
         return client.request(method, url)
-            .putHeader("Origin", "http://localhost")
+            .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
     }
 
     private fun getAll(): HttpRequest<Buffer> {
         return client.get("$incentives/")
-            .putHeader("Origin", "http://localhost")
+            .putHeader("Origin", "http://api.localhost")
     }
 
     private fun get(id: UUID): HttpRequest<Buffer> {
         return client.get("$incentives/$id")
-            .putHeader("Origin", "http://localhost")
+            .putHeader("Origin", "http://api.localhost")
     }
 
     @Test
