@@ -117,6 +117,56 @@ paths:
       responses:
         '204':
           $ref: '#/components/responses/Empty'
+  /players:
+    get:
+      description:
+        Get all players
+      responses:
+        '200':
+          $ref: '#/components/responses/PlayerList'
+    post:
+      description:
+        Add a player
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/PlayerOk'
+  /players/{playerId}:
+    get:
+      description:
+        Get a player by id
+      responses:
+        '200':
+          $ref: '#/components/responses/PlayerOk'
+    patch:
+      description:
+        Modify player info
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/PlayerOk'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerPatch'
+    delete:
+      description:
+        Remove a player by id
+      security:
+        - basicAuth: []
+      responses:
+        '204':
+          $ref: '#/components/responses/Empty'
   /stream-metadata:
     get:
       description:
@@ -263,6 +313,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GameDataOutput'
+    PlayerList:
+      description: A list of players
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PlayerList'
+    PlayerOk:
+      description: A player
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Player'
     StreamMetadataOk:
       description: Stream metadata
       content:
@@ -414,8 +476,11 @@ components:
           format: uuid
         game:
           type: string
-        player:
-          type: string
+        players:
+          type: array
+          items:
+            type: string
+            format: uuid
         start_time:
           type: string
           format: date-time
@@ -432,14 +497,12 @@ components:
           type: string
         img_filename:
           type: string
-        player_twitch:
-          type: string
         meta:
           type: string
       required:
         - id
         - game
-        - player
+        - players
         - start_time
         - end_time
         - category
@@ -448,7 +511,7 @@ components:
       example:
         id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
         game: Tetris
-        player: jsloth
+        players: [1d0215f3-1aac-4d6e-b898-a002528eea4d]
         start_time: '2021-09-21T15:05:47.000+00:00'
         end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
@@ -456,7 +519,6 @@ components:
         published: '1970'
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
-        player_twitch: jiisloth
         meta: k18
     GameDataAll:
       type: array
@@ -465,7 +527,7 @@ components:
       example:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
           game: Tetris
-          player: jsloth
+          players: [3febb953-ee2b-4daa-ac10-a32aa13726cc, 1d0215f3-1aac-4d6e-b898-a002528eea4d]
           start_time: '2021-09-21T15:05:47.000+00:00'
           end_time: '2021-09-21T16:05:47.000+00:00'
           category: any%
@@ -473,11 +535,10 @@ components:
           published: '1970'
           vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
           img_filename: tetris.png
-          player_twitch: jiisloth
           meta: k18
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
           game: Tetris2
-          player: jsloth
+          players: [1d0215f3-1aac-4d6e-b898-a002528eea4d]
           start_time: '2021-09-21T15:07:47.000+00:00'
           end_time: '2021-09-21T16:08:47.000+00:00'
           category: any% no t
@@ -485,15 +546,17 @@ components:
           published: '1971'
           vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
           img_filename: tetris.png
-          player_twitch: jiisloth
           meta: k18
     GameDataInput:
       type: object
       properties:
         game:
           type: string
-        player:
-          type: string
+        players:
+          type: array
+          items:
+            type: string
+            format: uuid
         start_time:
           type: string
           format: date-time
@@ -510,13 +573,11 @@ components:
           type: string
         img_filename:
           type: string
-        player_twitch:
-          type: string
         meta:
           type: string
       required:
         - game
-        - player
+        - players
         - start_time
         - end_time
         - category
@@ -524,7 +585,6 @@ components:
         - published
       example:
         game: Tetris
-        player: jsloth
         start_time: '2021-09-21T15:05:47.000+00:00'
         end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
@@ -532,15 +592,17 @@ components:
         published: '1970'
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
-        player_twitch: jiisloth
         meta: k18
     GameDataPatch:
       type: object
       properties:
         game:
           type: string
-        player:
-          type: string
+        players:
+          type: array
+          items:
+            type: string
+            format: uuid
         start_time:
           type: string
           format: date-time
@@ -556,8 +618,6 @@ components:
         vod_link:
           type: string
         img_filename:
-          type: string
-        player_twitch:
           type: string
         meta:
           type: string
@@ -565,14 +625,16 @@ components:
         game: Tetris
         device: PC
         published: '1970'
-        player_twitch: jiisloth
     GameDataOutput:
       type: object
       properties:
         game:
           type: string
-        player:
-          type: string
+        players:
+          type: array
+          items:
+            type: string
+            format: uuid
         start_time:
           type: string
           format: date-time
@@ -589,13 +651,11 @@ components:
           type: string
         img_filename:
           type: string
-        player_twitch:
-          type: string
         meta:
           type: string
       required:
         - game
-        - player
+        - players
         - start_time
         - end_time
         - category
@@ -603,7 +663,7 @@ components:
         - published
       example:
         game: Tetris
-        player: jsloth
+        players: [faab43be-85d8-4f64-a3d4-c4302336fc9b]
         start_time: '2021-09-21T15:05:47.000+00:00'
         end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
@@ -611,8 +671,69 @@ components:
         published: '1970'
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
-        player_twitch: jiisloth
         meta: meta
+    PlayerList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Player'
+      example:
+        - id: 1d0215f3-1aac-4d6e-b898-a002528eea4d
+          display_name: glukoosi
+          twitch_channel: hluposti
+          discord_nick: sakkaroosi#9898
+        - id: 3febb953-ee2b-4daa-ac10-a32aa13726cc
+          display_name: jiisloth
+          twitch_channel: jeesloth
+          discord_nick: jooosloth#1234
+    Player:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        twitch_channel:
+          type: string
+        discord_nick:
+          type: string
+      required:
+        - id
+        - display_name
+      example:
+        id: 3febb953-ee2b-4daa-ac10-a32aa13726cc
+        display_name: jiisloth
+        twitch_channel: jeesloth
+        discord_nick: jooosloth#1234
+    PlayerInput:
+      type: object
+      properties:
+        display_name:
+          type: string
+        twitch_channel:
+          type: string
+        discord_nick:
+          type: string
+      required:
+        - display_name
+      example:
+        display_name: jiisloth
+        twitch_channel: jeesloth
+        discord_nick: jooosloth#1234
+    PlayerPatch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        twitch_channel:
+          type: string
+        discord_nick:
+          type: string
+      example:
+        discord_nick: juusloth#4321
     StreamMetadata:
       type: object
       properties:
@@ -827,7 +948,7 @@ components:
             type: string
         open_char_limit:
           type: integer
-          description: Max lenght of incentive text. Required when type is open, forbidden otherwise
+          description: Max length of incentive text. Required when type is open, forbidden otherwise
         status:
           type: array
           items:
