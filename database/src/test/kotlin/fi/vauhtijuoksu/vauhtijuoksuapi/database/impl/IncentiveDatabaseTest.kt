@@ -39,11 +39,11 @@ class IncentiveDatabaseTest : VauhtijuoksuDatabaseTest<Incentive>() {
                 ${intArrayOrNull(incentive.milestones)},
                 ${arrayOrNull(incentive.optionParameters)},
                 ${
-            if (incentive.openCharLimit == null){
-                "NULL"
-            } else {
-                "${incentive.openCharLimit}"
-            }
+                if (incentive.openCharLimit == null){
+                    "NULL"
+                } else {
+                    "${incentive.openCharLimit}"
+                }
             }
                 )"""
         }

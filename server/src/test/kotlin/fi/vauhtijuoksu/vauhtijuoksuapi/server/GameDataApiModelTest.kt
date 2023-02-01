@@ -56,7 +56,7 @@ internal class GameDataApiModelTest {
             URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
             "tetris.png",
             "jiisloth",
-            "k18"
+            "k18",
         )
 
         val gameDataAsJson = gameData.toJson()
@@ -78,7 +78,7 @@ internal class GameDataApiModelTest {
             null,
             "tetris.png",
             "jiisloth",
-            "k18"
+            "k18",
         )
 
         val gameDataAsJson = gameDataApiModel.toJson()

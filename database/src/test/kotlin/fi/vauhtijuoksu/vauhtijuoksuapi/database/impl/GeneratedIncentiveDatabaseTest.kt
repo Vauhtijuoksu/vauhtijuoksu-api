@@ -39,11 +39,16 @@ class GeneratedIncentiveDatabaseTest {
                 override fun configure() {
                     bind(DatabaseConfiguration::class.java).toInstance(
                         DatabaseConfiguration(
-                            pg.host, pg.firstMappedPort, "vauhtijuoksu-api", pg.username, pg.password, 6
-                        )
+                            pg.host,
+                            pg.firstMappedPort,
+                            "vauhtijuoksu-api",
+                            pg.username,
+                            pg.password,
+                            6,
+                        ),
                     )
                 }
-            }
+            },
         )
 
         db = injector.getInstance(GeneratedIncentiveCodeDatabase::class.java)
@@ -58,14 +63,15 @@ class GeneratedIncentiveDatabaseTest {
         val generatedIncentive1 = GeneratedIncentive(
             IncentiveCode.random(),
             listOf(
-                ChosenIncentive(incentiveId1, null), ChosenIncentive(incentiveId2, null)
-            )
+                ChosenIncentive(incentiveId1, null),
+                ChosenIncentive(incentiveId2, null),
+            ),
         )
         val generatedIncentive2 = GeneratedIncentive(
             IncentiveCode.random(),
             listOf(
                 ChosenIncentive(incentiveId2, "some param"),
-            )
+            ),
         )
         incentiveDb.add(TestIncentive.incentive1)
             .compose { incentiveDb.add(TestIncentive.incentive2) }

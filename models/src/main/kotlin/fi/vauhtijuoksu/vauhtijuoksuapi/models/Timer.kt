@@ -6,5 +6,5 @@ import java.util.UUID
 data class Timer(
     override val id: UUID,
     val startTime: OffsetDateTime?,
-    val endTime: OffsetDateTime?
+    val endTime: OffsetDateTime?,
 ) : Model

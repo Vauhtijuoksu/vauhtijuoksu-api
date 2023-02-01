@@ -17,5 +17,5 @@ constructor(
         postRouter,
         patchRouter,
         deleteRouter,
-    )
+    ),
 )

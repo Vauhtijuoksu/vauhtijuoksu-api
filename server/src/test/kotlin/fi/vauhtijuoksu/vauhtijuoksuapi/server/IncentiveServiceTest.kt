@@ -60,7 +60,7 @@ class IncentiveServiceTest {
         "Noobelit on tulisia",
         listOf(100, 200),
         null,
-        null
+        null,
     )
 
     private val incentiveCode = IncentiveCode.random()
@@ -70,8 +70,8 @@ class IncentiveServiceTest {
             ChosenIncentive(
                 milestoneIncentive.id,
                 null,
-            )
-        )
+            ),
+        ),
     )
 
     private val donationWithIncentiveCode = Donation(
@@ -93,7 +93,7 @@ class IncentiveServiceTest {
         "Noobelit on tulisia",
         null,
         listOf("kissa", "koira"),
-        null
+        null,
     )
 
     private val optionGeneratedIncentive = GeneratedIncentive(
@@ -102,8 +102,8 @@ class IncentiveServiceTest {
             ChosenIncentive(
                 optionIncentive.id,
                 "kissa",
-            )
-        )
+            ),
+        ),
     )
 
     private val openIncentive = Incentive(
@@ -115,7 +115,7 @@ class IncentiveServiceTest {
         "Noobelit on tulisia",
         null,
         null,
-        10
+        10,
     )
 
     private val openGeneratedIncentive1 = GeneratedIncentive(
@@ -124,8 +124,8 @@ class IncentiveServiceTest {
             ChosenIncentive(
                 openIncentive.id,
                 "kissa",
-            )
-        )
+            ),
+        ),
     )
 
     private val openGeneratedIncentive2 = GeneratedIncentive(
@@ -134,8 +134,8 @@ class IncentiveServiceTest {
             ChosenIncentive(
                 openIncentive.id,
                 "koira",
-            )
-        )
+            ),
+        ),
     )
 
     @BeforeEach
@@ -149,7 +149,7 @@ class IncentiveServiceTest {
 
     @Test
     fun `getIncentive returns a future failed with an instance of VauhtijuoksuException when there are no incentives`(
-        testContext: VertxTestContext
+        testContext: VertxTestContext,
     ) {
         `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(null))
         incentiveService.getIncentive(UUID.randomUUID())
@@ -182,9 +182,9 @@ class IncentiveServiceTest {
                         MilestoneIncentiveStatus(
                             MilestoneStatus.INCOMPLETE,
                             200,
-                        )
+                        ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
@@ -194,7 +194,7 @@ class IncentiveServiceTest {
         `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(milestoneIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf(milestoneGeneratedIncentive)))
         `when`(donationDb.getAll()).thenReturn(
-            Future.succeededFuture(listOf(donationWithIncentiveCode.copy(message = "No code")))
+            Future.succeededFuture(listOf(donationWithIncentiveCode.copy(message = "No code"))),
         )
         incentiveService.getIncentive(UUID.randomUUID())
             .verifyAndCompleteTest(testContext) {
@@ -209,9 +209,9 @@ class IncentiveServiceTest {
                         MilestoneIncentiveStatus(
                             MilestoneStatus.INCOMPLETE,
                             200,
-                        )
+                        ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
@@ -234,9 +234,9 @@ class IncentiveServiceTest {
                         OptionIncentiveStatus(
                             "koira",
                             0.0,
-                        )
+                        ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
@@ -252,14 +252,14 @@ class IncentiveServiceTest {
                 assertEquals(0.0, it.total)
                 assertEquals(
                     listOf<IncentiveStatus>(),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
 
     @Test
     fun `a milestone incentive status changes to complete when there are enough donations`(
-        testContext: VertxTestContext
+        testContext: VertxTestContext,
     ) {
         `when`(incentiveDb.getById(milestoneIncentive.id)).thenReturn(Future.succeededFuture(milestoneIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf(milestoneGeneratedIncentive)))
@@ -267,9 +267,9 @@ class IncentiveServiceTest {
             Future.succeededFuture(
                 listOf(
                     donationWithIncentiveCode.copy(amount = 40.0f),
-                    donationWithIncentiveCode.copy(id = UUID.randomUUID())
-                )
-            )
+                    donationWithIncentiveCode.copy(id = UUID.randomUUID()),
+                ),
+            ),
         )
 
         incentiveService.getIncentive(milestoneIncentive.id)
@@ -285,9 +285,9 @@ class IncentiveServiceTest {
                         MilestoneIncentiveStatus(
                             MilestoneStatus.INCOMPLETE,
                             200,
-                        )
+                        ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
@@ -300,9 +300,9 @@ class IncentiveServiceTest {
             Future.succeededFuture(
                 listOf(
                     donationWithIncentiveCode,
-                    donationWithIncentiveCode.copy(id = UUID.randomUUID())
-                )
-            )
+                    donationWithIncentiveCode.copy(id = UUID.randomUUID()),
+                ),
+            ),
         )
 
         incentiveService.getIncentive(optionIncentive.id)
@@ -318,9 +318,9 @@ class IncentiveServiceTest {
                         OptionIncentiveStatus(
                             "koira",
                             0.0,
-                        )
+                        ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
@@ -332,17 +332,17 @@ class IncentiveServiceTest {
             Future.succeededFuture(
                 listOf(
                     openGeneratedIncentive1,
-                    openGeneratedIncentive2
-                )
-            )
+                    openGeneratedIncentive2,
+                ),
+            ),
         )
         `when`(donationDb.getAll()).thenReturn(
             Future.succeededFuture(
                 listOf(
                     donationWithIncentiveCode,
-                    donationWithIncentiveCode.copy(id = UUID.randomUUID())
-                )
-            )
+                    donationWithIncentiveCode.copy(id = UUID.randomUUID()),
+                ),
+            ),
         )
 
         incentiveService.getIncentive(openIncentive.id)
@@ -354,9 +354,9 @@ class IncentiveServiceTest {
                         OptionIncentiveStatus(
                             "kissa",
                             120.0,
-                        )
+                        ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
@@ -369,17 +369,17 @@ class IncentiveServiceTest {
             Future.succeededFuture(
                 listOf(
                     openGeneratedIncentive1,
-                    openGeneratedIncentive1.copy(generatedCode = incentiveCode2)
-                )
-            )
+                    openGeneratedIncentive1.copy(generatedCode = incentiveCode2),
+                ),
+            ),
         )
         `when`(donationDb.getAll()).thenReturn(
             Future.succeededFuture(
                 listOf(
                     donationWithIncentiveCode,
-                    donationWithIncentiveCode.copy(id = UUID.randomUUID(), message = "Monies for cats $incentiveCode2")
-                )
-            )
+                    donationWithIncentiveCode.copy(id = UUID.randomUUID(), message = "Monies for cats $incentiveCode2"),
+                ),
+            ),
         )
 
         incentiveService.getIncentive(openIncentive.id)
@@ -391,9 +391,9 @@ class IncentiveServiceTest {
                         OptionIncentiveStatus(
                             "kissa",
                             120.0,
-                        )
+                        ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
@@ -406,8 +406,8 @@ class IncentiveServiceTest {
             Future.succeededFuture(
                 listOf(
                     donationWithIncentiveCode.copy(message = "two codes: $incentiveCode and ${IncentiveCode.random()}"),
-                )
-            )
+                ),
+            ),
         )
 
         incentiveService.getIncentive(milestoneIncentive.id)
@@ -431,11 +431,11 @@ class IncentiveServiceTest {
                             ChosenIncentive(
                                 milestoneIncentive.id,
                                 null,
-                            )
-                        )
-                    )
-                )
-            )
+                            ),
+                        ),
+                    ),
+                ),
+            ),
         )
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
 
@@ -455,10 +455,10 @@ class IncentiveServiceTest {
                         chosenIncentives = listOf(
                             ChosenIncentive(optionIncentive.id, "kissa"),
                             ChosenIncentive(optionIncentive.id, "koira"),
-                        )
-                    )
-                )
-            )
+                        ),
+                    ),
+                ),
+            ),
         )
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
         incentiveService.getIncentive(optionIncentive.id)
@@ -475,7 +475,7 @@ class IncentiveServiceTest {
                             30.0,
                         ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
@@ -490,10 +490,10 @@ class IncentiveServiceTest {
                         chosenIncentives = listOf(
                             ChosenIncentive(openIncentive.id, "kissa"),
                             ChosenIncentive(openIncentive.id, "koira"),
-                        )
-                    )
-                )
-            )
+                        ),
+                    ),
+                ),
+            ),
         )
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
         incentiveService.getIncentive(openIncentive.id)
@@ -510,7 +510,7 @@ class IncentiveServiceTest {
                             30.0,
                         ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
             }
     }
@@ -526,10 +526,10 @@ class IncentiveServiceTest {
                         chosenIncentives = listOf(
                             ChosenIncentive(openIncentive.id, "kissa"),
                             ChosenIncentive(optionIncentive.id, "koira"),
-                        )
-                    )
-                )
-            )
+                        ),
+                    ),
+                ),
+            ),
         )
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
         val cp = testContext.checkpoint(2)
@@ -543,7 +543,7 @@ class IncentiveServiceTest {
                             30.0,
                         ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
                 cp.flag()
             }
@@ -561,7 +561,7 @@ class IncentiveServiceTest {
                             30.0,
                         ),
                     ),
-                    it.statuses
+                    it.statuses,
                 )
                 cp.flag()
             }
@@ -589,8 +589,8 @@ class IncentiveServiceTest {
                 listOf(
                     milestoneIncentive,
                     optionIncentive,
-                )
-            )
+                ),
+            ),
         )
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
@@ -627,9 +627,9 @@ class IncentiveServiceTest {
                                         0.0,
                                     ),
                                 ),
-                            )
+                            ),
                         ),
-                        it
+                        it,
                     )
                 }
                 testContext.completeNow()

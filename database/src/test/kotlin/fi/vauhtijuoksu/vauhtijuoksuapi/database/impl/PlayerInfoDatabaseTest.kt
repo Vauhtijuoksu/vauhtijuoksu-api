@@ -21,11 +21,11 @@ class PlayerInfoDatabaseTest {
     private lateinit var db: PlayerInfoDatabase
 
     private val emptyData = PlayerInfo(
-        null
+        null,
     )
 
     private val someData = PlayerInfo(
-        "We gots some moneey"
+        "We gots some moneey",
     )
 
     @Container
@@ -45,11 +45,11 @@ class PlayerInfoDatabaseTest {
                             "vauhtijuoksu-api",
                             pg.username,
                             pg.password,
-                            6
-                        )
+                            6,
+                        ),
                     )
                 }
-            }
+            },
         )
         db = injector.getInstance(PlayerInfoDatabase::class.java)
     }

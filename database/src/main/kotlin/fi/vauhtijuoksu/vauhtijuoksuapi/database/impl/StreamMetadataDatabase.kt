@@ -41,7 +41,7 @@ class StreamMetadataDatabase
                         counters = $4,
                         heart_rates = $5,
                         now_playing = $6
-                        """
+                        """,
         ).execute(
             Tuple.of(
                 record.donationGoal,
@@ -49,8 +49,8 @@ class StreamMetadataDatabase
                 record.donateBarInfo.toTypedArray(),
                 record.counters.toTypedArray(),
                 record.heartRates.toTypedArray(),
-                record.nowPlaying
-            )
+                record.nowPlaying,
+            ),
         ).recover {
             throw ServerError(it)
         }.mapEmpty()

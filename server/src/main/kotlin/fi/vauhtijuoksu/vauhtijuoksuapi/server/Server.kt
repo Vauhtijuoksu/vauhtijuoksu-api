@@ -47,7 +47,7 @@ class Server @Inject constructor(
         router.options().handler { ctx ->
             ctx.response().headers().add(
                 HttpHeaders.ALLOW,
-                "${HttpMethod.GET}, ${HttpMethod.POST}, ${HttpMethod.PATCH}, ${HttpMethod.OPTIONS}, ${HttpMethod.DELETE}"
+                "${HttpMethod.GET}, ${HttpMethod.POST}, ${HttpMethod.PATCH}, ${HttpMethod.OPTIONS}, ${HttpMethod.DELETE}",
             )
             ctx.response().end()
         }

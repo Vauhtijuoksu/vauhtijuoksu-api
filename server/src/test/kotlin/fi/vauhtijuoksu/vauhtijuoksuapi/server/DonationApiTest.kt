@@ -82,8 +82,8 @@ class DonationApiTest : ServerTestBase() {
                     val expectedJson = jacksonObjectMapper().writeValueAsString(
                         arrayListOf(
                             DonationApiModel.fromDonation(donation1),
-                            DonationApiModel.fromDonation(donation2)
-                        )
+                            DonationApiModel.fromDonation(donation2),
+                        ),
                     )
                     assertEquals(expectedJson, res.bodyAsString())
                     verifyNoMoreInteractions(donationDb)
@@ -123,7 +123,7 @@ class DonationApiTest : ServerTestBase() {
                     val resJson = res.bodyAsJsonObject()
                     assertEquals(
                         DonationApiModel.fromDonation(donation1.copy(id = UUID.fromString(resJson.getString("id")))),
-                        res.bodyAsJson(DonationApiModel::class.java)
+                        res.bodyAsJson(DonationApiModel::class.java),
                     )
                     verify(donationDb).add(any())
                     verifyNoMoreInteractions(donationDb)
@@ -223,12 +223,12 @@ class DonationApiTest : ServerTestBase() {
                         listOf(
                             ChosenIncentive(
                                 incentiveId,
-                                "kissa"
-                            )
-                        )
-                    )
-                )
-            )
+                                "kissa",
+                            ),
+                        ),
+                    ),
+                ),
+            ),
         )
         client.get("/donations/${donation1.id}").send()
             .onFailure(testContext::failNow)
@@ -248,7 +248,7 @@ class DonationApiTest : ServerTestBase() {
                             .put("incentives", incentives)
                     assertEquals(
                         expectedDonation,
-                        JsonObject(res.bodyAsString())
+                        JsonObject(res.bodyAsString()),
                     )
                     verifyNoMoreInteractions(donationDb)
                 }
@@ -275,7 +275,7 @@ class DonationApiTest : ServerTestBase() {
                     assertEquals(200, res.statusCode())
                     assertEquals(
                         DonationApiModel.fromDonation(newDonation),
-                        res.bodyAsJson(DonationApiModel::class.java)
+                        res.bodyAsJson(DonationApiModel::class.java),
                     )
                     verify(donationDb).update(newDonation)
                     verifyNoMoreInteractions(donationDb)

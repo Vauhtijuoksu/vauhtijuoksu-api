@@ -18,7 +18,7 @@ internal data class StreamMetadataDbModel(
     @JsonProperty("counters")
     val counters: List<Int>,
     @JsonProperty("heart_rates")
-    val heartRates: List<Int>
+    val heartRates: List<Int>,
 ) {
     fun toStreamMetadata(): StreamMetadata {
         return StreamMetadata(
@@ -28,7 +28,7 @@ internal data class StreamMetadataDbModel(
             counters,
             heartRates,
             listOf(),
-            nowPlaying
+            nowPlaying,
         )
     }
 }

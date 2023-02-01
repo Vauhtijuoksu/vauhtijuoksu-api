@@ -48,13 +48,13 @@ class DonationServiceTest {
         listOf(
             ChosenIncentive(
                 UUID.randomUUID(),
-                "kissa"
+                "kissa",
             ),
             ChosenIncentive(
                 UUID.randomUUID(),
                 null,
-            )
-        )
+            ),
+        ),
     )
 
     private val generated2 = GeneratedIncentive(
@@ -62,13 +62,13 @@ class DonationServiceTest {
         listOf(
             ChosenIncentive(
                 UUID.randomUUID(),
-                "koira"
+                "koira",
             ),
             ChosenIncentive(
                 UUID.randomUUID(),
                 "Fruktoosi",
-            )
-        )
+            ),
+        ),
     )
 
     private val donationWithGen1 = TestDonation.donation1.copy(message = "Ota rahet: ${generated1.generatedCode}")
@@ -136,9 +136,9 @@ class DonationServiceTest {
                 assertEquals(
                     listOf(
                         DonationWithCodes(donationWithGen1, listOf()),
-                        DonationWithCodes(donationWithGen2, listOf())
+                        DonationWithCodes(donationWithGen2, listOf()),
                     ),
-                    it
+                    it,
                 )
             }
     }
@@ -153,9 +153,9 @@ class DonationServiceTest {
                 assertEquals(
                     listOf(
                         DonationWithCodes(donationWithGen1, listOf(generated1)),
-                        DonationWithCodes(donationWithGen2, listOf(generated2))
+                        DonationWithCodes(donationWithGen2, listOf(generated2)),
                     ),
-                    it
+                    it,
                 )
             }
     }

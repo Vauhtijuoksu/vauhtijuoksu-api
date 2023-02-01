@@ -50,5 +50,5 @@ class IncentiveCodeRouter @Inject constructor(
     incentiveCodePostRouter: IncentiveCodePostRouter,
 ) : BaseRouter(
     "/generate-incentive-code",
-    listOf(incentiveCodePostRouter)
+    listOf(incentiveCodePostRouter),
 )

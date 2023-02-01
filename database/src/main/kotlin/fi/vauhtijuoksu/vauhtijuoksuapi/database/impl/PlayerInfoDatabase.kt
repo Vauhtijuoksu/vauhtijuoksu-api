@@ -36,11 +36,11 @@ internal class PlayerInfoDatabase
         return client.preparedQuery(
             """UPDATE player_info SET 
                         message = $1
-                        """
+                        """,
         ).execute(
             Tuple.of(
-                record.message
-            )
+                record.message,
+            ),
         ).recover {
             throw ServerError(it)
         }.mapEmpty()

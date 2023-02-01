@@ -22,7 +22,7 @@ class DonationDatabase
         configuration,
         "donations",
         "timestamp",
-        { donationDbModel -> donationDbModel.toDonation() }
+        { donationDbModel -> donationDbModel.toDonation() },
     ),
     VauhtijuoksuDatabase<Donation> {
     private val logger = KotlinLogging.logger {}
@@ -37,7 +37,7 @@ class DonationDatabase
             "INSERT INTO donations " +
                 "(name, message, timestamp, amount, read, external_id) VALUES " +
                 "(#{name}, #{message}, #{timestamp}, #{amount}, #{read}, #{external_id})" +
-                "RETURNING *"
+                "RETURNING *",
         )
             .mapFrom(DonationDbModel::class.java)
             .mapTo(DonationDbModel::class.java)
@@ -60,7 +60,7 @@ class DonationDatabase
                 "timestamp = #{timestamp}, " +
                 "amount = #{amount}, " +
                 "read = #{read} " +
-                "WHERE id = #{id} RETURNING *"
+                "WHERE id = #{id} RETURNING *",
         )
             .mapFrom(DonationDbModel::class.java)
             .mapTo(DonationDbModel::class.java)

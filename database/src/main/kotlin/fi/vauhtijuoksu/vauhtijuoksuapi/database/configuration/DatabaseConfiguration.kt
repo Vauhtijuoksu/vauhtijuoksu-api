@@ -6,5 +6,5 @@ data class DatabaseConfiguration(
     val database: String,
     val user: String,
     val password: String,
-    val poolSize: Int
+    val poolSize: Int,
 )

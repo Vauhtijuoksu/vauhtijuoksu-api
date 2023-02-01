@@ -56,11 +56,11 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
                             "vauhtijuoksu-api",
                             pg.username,
                             pg.password,
-                            6
-                        )
+                            6,
+                        ),
                     )
                 }
-            }
+            },
         )
 
         db = getDatabase(injector)

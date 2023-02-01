@@ -21,5 +21,5 @@ class IncentivePatchRouter
     authenticatedEndpointCorsHandler,
     db,
     { null }, // Incentive is always valid
-    IncentiveApiModel::fromIncentive
+    IncentiveApiModel::fromIncentive,
 )

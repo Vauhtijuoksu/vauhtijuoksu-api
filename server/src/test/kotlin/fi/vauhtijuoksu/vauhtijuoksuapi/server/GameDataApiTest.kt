@@ -78,8 +78,8 @@ class GameDataApiTest : ServerTestBase() {
                     val expectedJson = jacksonObjectMapper().writeValueAsString(
                         arrayListOf(
                             GameDataApiModel.fromGameData(gameData1),
-                            GameDataApiModel.fromGameData(gameData2)
-                        )
+                            GameDataApiModel.fromGameData(gameData2),
+                        ),
                     )
                     assertEquals(expectedJson, res.bodyAsString())
                     verifyNoMoreInteractions(gameDataDb)
@@ -132,7 +132,7 @@ class GameDataApiTest : ServerTestBase() {
                     val resJson = res.bodyAsJsonObject()
                     assertEquals(
                         GameDataApiModel.fromGameData(gameData1.copy(id = UUID.fromString(resJson.getString("id")))),
-                        res.bodyAsJson(GameDataApiModel::class.java)
+                        res.bodyAsJson(GameDataApiModel::class.java),
                     )
                     verify(gameDataDb).add(any())
                     verifyNoMoreInteractions(gameDataDb)
@@ -249,7 +249,7 @@ class GameDataApiTest : ServerTestBase() {
                     assertEquals("application/json", res.getHeader("content-type"))
                     assertEquals(
                         JsonObject(jacksonObjectMapper().writeValueAsString(GameDataApiModel.fromGameData(gameData1))),
-                        JsonObject(res.bodyAsString())
+                        JsonObject(res.bodyAsString()),
                     )
                     verifyNoMoreInteractions(gameDataDb)
                 }
@@ -278,7 +278,7 @@ class GameDataApiTest : ServerTestBase() {
                     .put("vod_link", newGame.vodLink)
                     .put("img_filename", newGame.imgFilename)
                     .put("player_twitch", newGame.playerTwitch)
-                    .put("meta", newGame.meta)
+                    .put("meta", newGame.meta),
             )
             .onFailure(testContext::failNow)
             .onSuccess { res ->

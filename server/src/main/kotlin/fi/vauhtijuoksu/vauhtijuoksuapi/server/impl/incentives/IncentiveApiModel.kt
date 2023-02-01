@@ -85,7 +85,7 @@ data class IncentiveApiModel(
                         when (it) {
                             is OptionIncentiveStatus -> it.amount
                             else -> null
-                        }
+                        },
                     )
                 },
             )

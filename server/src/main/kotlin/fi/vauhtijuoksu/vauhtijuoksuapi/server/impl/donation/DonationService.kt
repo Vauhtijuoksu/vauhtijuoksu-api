@@ -54,10 +54,10 @@ class DonationService
                                     donation,
                                     it.filter { generatedIncentive ->
                                         donation.codes.contains(generatedIncentive.generatedCode)
-                                    }
+                                    },
                                 )
                             }
-                    }
+                    },
                 )
             }
             .map {

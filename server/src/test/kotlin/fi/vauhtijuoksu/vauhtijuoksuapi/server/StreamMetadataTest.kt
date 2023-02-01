@@ -30,11 +30,11 @@ class StreamMetadataTest : ServerTestBase() {
     private val someTimer = Timer(
         UUID.randomUUID(),
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z"))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
     )
     private val someApiTimer = TimerApiModel(
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z"))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
     )
     private val someMetadata = StreamMetadata(
         100,
@@ -43,7 +43,7 @@ class StreamMetadataTest : ServerTestBase() {
         listOf(1, 0),
         listOf(100, 120),
         listOf(someTimer),
-        "Deerboy - Biisi"
+        "Deerboy - Biisi",
     )
     private val someMetadataApi = StreamMetaDataApiModel(
         100,
@@ -52,16 +52,18 @@ class StreamMetadataTest : ServerTestBase() {
         listOf(1, 0),
         listOf(100, 120),
         listOf(someApiTimer),
-        "Deerboy - Biisi"
+        "Deerboy - Biisi",
     )
 
     private val newTimer = someTimer.copy(
         startTime = OffsetDateTime.ofInstant(
-            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2021-09-21T15:05:47.000+00:00")), ZoneId.of("Z")
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2021-09-21T15:05:47.000+00:00")),
+            ZoneId.of("Z"),
         ),
         endTime = OffsetDateTime.ofInstant(
-            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2021-09-21T16:05:47.000+00:00")), ZoneId.of("Z")
-        )
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2021-09-21T16:05:47.000+00:00")),
+            ZoneId.of("Z"),
+        ),
     )
 
     private val jsonTimer = """

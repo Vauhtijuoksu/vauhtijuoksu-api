@@ -21,13 +21,13 @@ class FeatureTestUtils : ParameterResolver {
         val webClient = WebClient.create(
             vertx,
             WebClientOptions()
-                .setDefaultHost("api.localhost")
+                .setDefaultHost("api.localhost"),
         )
         extensionContext.getStore(
             ExtensionContext.Namespace.create(
                 extensionContext.requiredTestClass,
-                extensionContext.requiredTestMethod
-            )
+                extensionContext.requiredTestMethod,
+            ),
         ).put(
             "data",
             object : CloseableResource {
@@ -35,7 +35,7 @@ class FeatureTestUtils : ParameterResolver {
                     webClient.close()
                     vertx.close()
                 }
-            }
+            },
         )
         return webClient
     }

@@ -16,13 +16,13 @@ import javax.inject.Inject
 class TimerDatabase
 @Inject constructor(
     private val client: SqlClient,
-    configuration: DatabaseConfiguration
+    configuration: DatabaseConfiguration,
 ) : AbstractModelDatabase<Timer, TimerDbModel>(
     client,
     configuration,
     "timers",
     null,
-    { TimerDbModel -> TimerDbModel.toTimer() }
+    { TimerDbModel -> TimerDbModel.toTimer() },
 ),
     VauhtijuoksuDatabase<Timer> {
     private val logger = KotlinLogging.logger {}
@@ -36,7 +36,7 @@ class TimerDatabase
             client,
             "INSERT INTO timers VALUES " +
                 "(#{id}, #{start_time}, #{end_time}) " +
-                "RETURNING *"
+                "RETURNING *",
         )
             .mapTo { row -> row.toJson().mapTo(TimerDbModel::class.java) }
             .mapFrom(
@@ -46,7 +46,7 @@ class TimerDatabase
                         "start_time" to timer.startTime,
                         "end_time" to timer.endTime,
                     )
-                }
+                },
             )
             .execute(TimerDbModel.fromTimer(record))
             .recover {
@@ -65,7 +65,7 @@ class TimerDatabase
                 "id = #{id}, " +
                 "start_time = #{start_time}, " +
                 "end_time = #{end_time} " +
-                "WHERE id = #{id} RETURNING *"
+                "WHERE id = #{id} RETURNING *",
         )
             .mapFrom(
                 TupleMapper.mapper { timer: TimerDbModel ->
@@ -74,7 +74,7 @@ class TimerDatabase
                         "start_time" to timer.startTime,
                         "end_time" to timer.endTime,
                     )
-                }
+                },
             )
             .mapTo(TimerDbModel::class.java)
             .execute(TimerDbModel.fromTimer(record))

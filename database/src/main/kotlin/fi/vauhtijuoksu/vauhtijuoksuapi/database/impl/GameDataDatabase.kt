@@ -14,13 +14,13 @@ import javax.inject.Inject
 
 internal class GameDataDatabase @Inject constructor(
     private val client: SqlClient,
-    configuration: DatabaseConfiguration
+    configuration: DatabaseConfiguration,
 ) : AbstractModelDatabase<GameData, GameDataDbModel>(
     client,
     configuration,
     "gamedata",
     "start_time",
-    { gameDataDbModel -> gameDataDbModel.toGameData() }
+    { gameDataDbModel -> gameDataDbModel.toGameData() },
 ),
     VauhtijuoksuDatabase<GameData> {
     private val logger = KotlinLogging.logger {}
@@ -36,7 +36,7 @@ internal class GameDataDatabase @Inject constructor(
             "INSERT INTO gamedata " +
                 "(game, player, start_time, end_time, category, device, published, vod_link, img_filename, player_twitch, meta) VALUES " +
                 "(#{game}, #{player}, #{start_time}, #{end_time}, #{category}, #{device}, #{published}, #{vod_link}, #{img_filename}, #{player_twitch}, #{meta} ) " +
-                "RETURNING *"
+                "RETURNING *",
         )
             .mapFrom(GameDataDbModel::class.java)
             .mapTo(GameDataDbModel::class.java)
@@ -65,7 +65,7 @@ internal class GameDataDatabase @Inject constructor(
                 "img_filename = #{img_filename}, " +
                 "player_twitch = #{player_twitch}, " +
                 "meta = #{meta} " +
-                "WHERE id = #{id} RETURNING *"
+                "WHERE id = #{id} RETURNING *",
         )
             .mapFrom(GameDataDbModel::class.java)
             .mapTo(GameDataDbModel::class.java)

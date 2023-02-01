@@ -18,5 +18,5 @@ class DonationDeleteRouter
 ) : DeleteRouter<Donation>(
     authenticationHandler,
     authenticatedEndpointCorsHandler,
-    db
+    db,
 )

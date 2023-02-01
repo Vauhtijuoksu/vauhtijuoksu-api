@@ -46,7 +46,7 @@ class StreamMetadataRouter
             "counters": [],
             "heart_rates": [],
             "timers": []
-        }"""
+        }""",
     )
 
     private val logger = KotlinLogging.logger {}
@@ -150,19 +150,21 @@ class StreamMetadataRouter
                             UUID.randomUUID(),
                             if (startTime != null) {
                                 OffsetDateTime.ofInstant(
-                                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse(startTime)), ZoneId.of("Z")
+                                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse(startTime)),
+                                    ZoneId.of("Z"),
                                 )
                             } else {
                                 null
                             },
                             if (endTime != null) {
                                 OffsetDateTime.ofInstant(
-                                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse(endTime)), ZoneId.of("Z")
+                                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse(endTime)),
+                                    ZoneId.of("Z"),
                                 )
                             } else {
                                 null
-                            }
-                        )
+                            },
+                        ),
                     )
                 }
             }
@@ -181,7 +183,7 @@ class StreamMetadataRouter
             mergedData.counters,
             mergedData.heartRates,
             listOf(),
-            mergedData.nowPlaying
+            mergedData.nowPlaying,
         )
     }
 
@@ -191,7 +193,7 @@ class StreamMetadataRouter
         return Timer(
             data.id,
             mergedData.startTime,
-            mergedData.endTime
+            mergedData.endTime,
         )
     }
 }

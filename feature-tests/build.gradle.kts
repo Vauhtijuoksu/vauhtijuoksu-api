@@ -110,7 +110,7 @@ tasks {
                     """
                     kubectl delete cm jacoco --ignore-not-found=true
                     kubectl create cm jacoco --from-file  "$jacocoPath"
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
             KubernetesClientBuilder().build().use { k8s ->

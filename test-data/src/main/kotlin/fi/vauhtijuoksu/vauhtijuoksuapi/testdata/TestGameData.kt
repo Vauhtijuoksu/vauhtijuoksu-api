@@ -25,7 +25,7 @@ class TestGameData private constructor() {
             URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
             "tetris.png",
             "jiisloth",
-            "k18"
+            "k18",
         )
 
         val gameData2 = GameData(
@@ -40,7 +40,7 @@ class TestGameData private constructor() {
             URL("https://www.youtube.com/watch?v=this is glukoosi"),
             "chicken.png",
             "Glukoosi",
-            "kid friendly"
+            "kid friendly",
         )
 
         val gameData3 = GameData(
@@ -55,7 +55,7 @@ class TestGameData private constructor() {
             null,
             "chief.png",
             "T3mu & Spike_B",
-            "space themed"
+            "space themed",
         )
     }
 }

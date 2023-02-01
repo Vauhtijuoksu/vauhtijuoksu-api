@@ -15,7 +15,7 @@ data class TimerApiModel(
         fun from(data: Timer): TimerApiModel {
             return TimerApiModel(
                 data.startTime,
-                data.endTime
+                data.endTime,
             )
         }
     }
@@ -23,7 +23,7 @@ data class TimerApiModel(
         return Timer(
             id,
             data.startTime,
-            data.endTime
+            data.endTime,
         )
     }
 }

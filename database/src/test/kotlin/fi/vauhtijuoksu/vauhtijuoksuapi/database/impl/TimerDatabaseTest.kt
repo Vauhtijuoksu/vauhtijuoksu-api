@@ -17,19 +17,19 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
     private val timer1 = Timer(
         UUID.randomUUID(),
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z"))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
     )
 
     private val timer2 = Timer(
         UUID.randomUUID(),
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")), ZoneId.of("Z"))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")), ZoneId.of("Z")),
     )
 
     private val timer3 = Timer(
         UUID.randomUUID(),
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-08T16:00:00Z")), ZoneId.of("Z"))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-08T16:00:00Z")), ZoneId.of("Z")),
     )
 
     override fun insertStatement(data: List<Timer>): String {
@@ -73,21 +73,25 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
     fun testUpdate(testContext: VertxTestContext) {
         val newTimer = timer1.copy(
             startTime = OffsetDateTime.ofInstant(
-                Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z")), ZoneId.of("Z")
+                Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z")),
+                ZoneId.of("Z"),
             ),
             endTime = OffsetDateTime.ofInstant(
-                Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")), ZoneId.of("Z")
-            )
+                Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")),
+                ZoneId.of("Z"),
+            ),
         )
         db.update(
             timer1.copy(
                 startTime = OffsetDateTime.ofInstant(
-                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z")), ZoneId.of("Z")
+                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z")),
+                    ZoneId.of("Z"),
                 ),
                 endTime = OffsetDateTime.ofInstant(
-                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")), ZoneId.of("Z")
-                )
-            )
+                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")),
+                    ZoneId.of("Z"),
+                ),
+            ),
         )
             .onFailure(testContext::failNow)
             .onSuccess { res ->

@@ -30,7 +30,7 @@ class StreamMetadataDatabaseTest {
         listOf(),
         listOf(),
         listOf(),
-        null
+        null,
     )
 
     private val someData = StreamMetadata(
@@ -40,7 +40,7 @@ class StreamMetadataDatabaseTest {
         listOf(10, 100, 3),
         listOf(99, 100, 189, 69, 0),
         listOf(),
-        "Deerboy - Boiiii"
+        "Deerboy - Boiiii",
     )
 
     @Container
@@ -60,11 +60,11 @@ class StreamMetadataDatabaseTest {
                             "vauhtijuoksu-api",
                             pg.username,
                             pg.password,
-                            6
-                        )
+                            6,
+                        ),
                     )
                 }
-            }
+            },
         )
         db = injector.getInstance(StreamMetadataDatabase::class.java)
         gamedataDb = injector.getInstance(GameDataDatabase::class.java)

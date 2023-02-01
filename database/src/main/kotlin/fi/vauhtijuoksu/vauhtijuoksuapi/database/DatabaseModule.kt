@@ -51,7 +51,7 @@ class DatabaseModule : AbstractModule() {
                 .setDatabase(config.database)
                 .setUser(config.user)
                 .setPassword(config.password),
-            PoolOptions().setMaxSize(config.poolSize)
+            PoolOptions().setMaxSize(config.poolSize),
         )
     }
 }

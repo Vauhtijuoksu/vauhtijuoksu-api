@@ -50,7 +50,7 @@ abstract class AbstractModelDatabase<T : Model, DbModel>(
     }
 
     private fun <I, R, DbModel> SqlTemplate<I, R>.mapWith(
-        mapper: (SqlTemplate<I, R>) -> SqlTemplate<I, RowSet<DbModel>>
+        mapper: (SqlTemplate<I, R>) -> SqlTemplate<I, RowSet<DbModel>>,
     ): SqlTemplate<I, RowSet<DbModel>> {
         return mapper(this)
     }

@@ -35,7 +35,7 @@ class MetadataTimerDatabaseTest {
         listOf(),
         listOf(),
         listOf(),
-        null
+        null,
     )
 
     private val someData = StreamMetadata(
@@ -45,13 +45,13 @@ class MetadataTimerDatabaseTest {
         listOf(10, 100, 3),
         listOf(99, 100, 189, 69, 0),
         listOf(),
-        "Deerboy - Boiiii"
+        "Deerboy - Boiiii",
     )
 
     private val timer1 = Timer(
         UUID.randomUUID(),
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z"))
+        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
     )
 
     @Container
@@ -71,11 +71,11 @@ class MetadataTimerDatabaseTest {
                             "vauhtijuoksu-api",
                             pg.username,
                             pg.password,
-                            6
-                        )
+                            6,
+                        ),
                     )
                 }
-            }
+            },
         )
         db = injector.getInstance(MetadataTimerDatabase::class.java)
         gamedataDb = injector.getInstance(GameDataDatabase::class.java)
@@ -110,9 +110,9 @@ class MetadataTimerDatabaseTest {
                         someData.copy(
                             currentGameId = gameId,
                             counters = listOf(1, 3, 100),
-                            timers = listOf(timer1)
+                            timers = listOf(timer1),
                         ),
-                        it
+                        it,
                     )
                 }
                 testContext.completeNow()

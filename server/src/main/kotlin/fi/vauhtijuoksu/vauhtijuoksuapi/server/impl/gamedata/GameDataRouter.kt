@@ -16,5 +16,5 @@ class GameDataRouter @Inject constructor(
             postRouter,
             patchRouter,
             deleteRouter,
-        )
+        ),
     )
