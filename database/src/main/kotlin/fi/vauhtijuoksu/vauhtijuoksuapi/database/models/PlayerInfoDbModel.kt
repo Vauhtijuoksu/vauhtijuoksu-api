@@ -11,7 +11,7 @@ internal data class PlayerInfoDbModel(
 ) {
     fun toPlayerInfo(): PlayerInfo {
         return PlayerInfo(
-            message
+            message,
         )
     }
 }

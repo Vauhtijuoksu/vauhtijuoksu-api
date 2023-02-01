@@ -47,7 +47,7 @@ data class GameDataApiModel(
                 gameData.vodLink,
                 gameData.imgFilename,
                 gameData.playerTwitch,
-                gameData.meta
+                gameData.meta,
             )
         }
     }
@@ -69,7 +69,7 @@ data class GameDataApiModel(
             vodLink,
             imgFilename,
             playerTwitch,
-            meta
+            meta,
         )
     }
 }

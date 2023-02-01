@@ -9,5 +9,5 @@ data class StreamMetadata(
     val counters: List<Int>,
     val heartRates: List<Int>,
     var timers: List<Timer>,
-    var nowPlaying: String?
+    var nowPlaying: String?,
 )

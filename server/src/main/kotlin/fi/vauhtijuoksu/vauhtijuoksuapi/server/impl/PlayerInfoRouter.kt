@@ -31,7 +31,7 @@ class PlayerInfoRouter
     private val playerInfo = JsonObject(
         """{
             "message": null
-        }"""
+        }""",
     )
 
     @Suppress("SwallowedException") // Not swallowed, the message is used in augmented error
@@ -88,7 +88,7 @@ class PlayerInfoRouter
         val oldData = jacksonObjectMapper().readerForUpdating(data)
         val mergedData: PlayerInfo = oldData.readValue(json.encode())
         return PlayerInfo(
-            mergedData.message
+            mergedData.message,
         )
     }
 }

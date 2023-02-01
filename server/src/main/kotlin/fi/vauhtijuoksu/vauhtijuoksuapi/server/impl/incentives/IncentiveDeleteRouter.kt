@@ -17,5 +17,5 @@ class IncentiveDeleteRouter
 ) : DeleteRouter<Incentive>(
     authenticationHandler,
     authenticatedEndpointCorsHandler,
-    db
+    db,
 )

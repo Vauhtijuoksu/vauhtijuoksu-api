@@ -57,7 +57,7 @@ class GameDataTest {
                     .sendJson(
                         JsonObject(gameData1)
                             .put("id", id)
-                            .put("game", "Tetris3")
+                            .put("game", "Tetris3"),
                     )
             }
             .onFailure(testContext::failNow)

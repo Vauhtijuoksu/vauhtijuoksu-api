@@ -10,7 +10,7 @@ data class ChosenIncentive(
 )
 
 data class IncentiveCode constructor(
-    val code: String
+    val code: String,
 ) {
     init {
         if (!code.matches(codeFormat)) {
@@ -29,7 +29,7 @@ data class IncentiveCode constructor(
                 .uppercase()
                 .padStart(CODE_LENGTH, '0')
             return IncentiveCode(
-                "{#Vj$code}"
+                "{#Vj$code}",
             )
         }
     }

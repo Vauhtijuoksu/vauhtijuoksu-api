@@ -22,7 +22,7 @@ class TestIncentive private constructor() {
             "Noobelit on tulisia",
             listOf(100),
             null,
-            null
+            null,
         )
         val incentive2 = Incentive(
             UUID.randomUUID(),
@@ -44,7 +44,7 @@ class TestIncentive private constructor() {
             "Äänestä slotin lempipeli",
             null,
             listOf("Kingdom Hearts 1", "Kingdom Hearts 2", "Kingdom Hearts 3"),
-            null
+            null,
         )
     }
 }

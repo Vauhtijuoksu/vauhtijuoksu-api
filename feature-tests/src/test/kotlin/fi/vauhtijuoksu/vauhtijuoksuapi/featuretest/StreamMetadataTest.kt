@@ -98,7 +98,7 @@ class StreamMetadataTest {
                     .sendJson(
                         JsonObject()
                             .put("donation_goal", 3000)
-                            .put("counters", JsonArray())
+                            .put("counters", JsonArray()),
                     )
             }
             .onSuccess { res ->
@@ -157,8 +157,8 @@ class StreamMetadataTest {
                             listOf(
                                 JsonObject()
                                     .put("start_time", "2021-09-21T15:05:47Z")
-                                    .put("end_time", "2021-09-21T16:05:47Z")
-                            )
+                                    .put("end_time", "2021-09-21T16:05:47Z"),
+                            ),
                         )
                     assertEquals(expectedData, res.bodyAsJsonObject())
                 }

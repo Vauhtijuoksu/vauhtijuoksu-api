@@ -9,13 +9,13 @@ import org.flywaydb.core.Flyway
  * Initializes a new database from migrations and setups jackson databind for kotlin
  */
 open class BaseDatabase(
-    configuration: DatabaseConfiguration
+    configuration: DatabaseConfiguration,
 ) {
     init {
         val migrations = Flyway.configure().dataSource(
             "jdbc:postgresql://${configuration.address}:${configuration.port}/${configuration.database}?sslmode=prefer",
             configuration.user,
-            configuration.password
+            configuration.password,
         ).load()
         migrations.migrate()
 

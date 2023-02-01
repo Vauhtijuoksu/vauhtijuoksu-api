@@ -68,7 +68,7 @@ class DonationApiModelTest {
             amount,
             true,
             "an id",
-            listOf()
+            listOf(),
         )
 
         val donationAsJson = donation.toJson()

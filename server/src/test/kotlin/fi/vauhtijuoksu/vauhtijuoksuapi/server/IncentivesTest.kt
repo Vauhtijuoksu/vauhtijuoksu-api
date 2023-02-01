@@ -67,15 +67,15 @@ class IncentivesTest : ServerTestBase() {
                                             listOf(
                                                 MilestoneIncentiveStatus(
                                                     MilestoneStatus.INCOMPLETE,
-                                                    100
-                                                )
+                                                    100,
+                                                ),
                                             ),
-                                        )
+                                        ),
                                     )
                                 }
-                                .map { it.toJson() }
+                                .map { it.toJson() },
                         ),
-                        it.bodyAsJsonArray()
+                        it.bodyAsJsonArray(),
                     )
                 }
                 testContext.completeNow()
@@ -115,12 +115,12 @@ class IncentivesTest : ServerTestBase() {
                                 listOf(
                                     MilestoneIncentiveStatus(
                                         MilestoneStatus.INCOMPLETE,
-                                        100
-                                    )
+                                        100,
+                                    ),
                                 ),
-                            )
+                            ),
                         ).toJson(),
-                        it.bodyAsJsonObject()
+                        it.bodyAsJsonObject(),
                     )
                 }
                 testContext.completeNow()
@@ -154,7 +154,7 @@ class IncentivesTest : ServerTestBase() {
                 someIncentive.milestones,
                 someIncentive.optionParameters,
                 someIncentive.openCharLimit,
-            )
+            ),
         )
         client.post(incentivesEndpoint)
             .putHeader("Origin", "https://vauhtijuoksu.fi")
@@ -185,7 +185,7 @@ class IncentivesTest : ServerTestBase() {
                 someIncentive.milestones,
                 someIncentive.optionParameters,
                 someIncentive.openCharLimit,
-            )
+            ),
         )
         body.remove("title")
         client.post(incentivesEndpoint)
@@ -229,7 +229,7 @@ class IncentivesTest : ServerTestBase() {
                     assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
                     assertEquals(
                         JsonObject.mapFrom(IncentiveApiModel.fromIncentive(expectedIncentive)),
-                        res.bodyAsJsonObject()
+                        res.bodyAsJsonObject(),
                     )
                     verify(incentiveDatabase).update(expectedIncentive)
                 }
@@ -253,7 +253,7 @@ class IncentivesTest : ServerTestBase() {
                     assertEquals(200, res.statusCode())
                     assertEquals(
                         JsonObject.mapFrom(IncentiveApiModel.fromIncentive(expectedIncentive)),
-                        res.bodyAsJsonObject()
+                        res.bodyAsJsonObject(),
                     )
                     verify(incentiveDatabase).update(expectedIncentive)
                 }

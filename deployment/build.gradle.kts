@@ -68,7 +68,7 @@ tasks {
                         #kind load docker-image registry.k8s.io/ingress-nginx/controller:v1.3.1@sha256:54f7fe2c6c5a9db9a0ebf1131797109bb7a4d91f56b9b362bde2abd237dd1974 --name=vauhtijuoksu
                         #kind load docker-image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.3.0@sha256:549e71a6ca248c5abd51cdb73dbc3083df62cf92ed5e6147c780e30f7e007a47 --name=vauhtijuoksu
                         kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/e079486d4dc40387389adbaed7ec9b80d897d810/deploy/static/provider/kind/deploy.yaml
-                        """
+                        """,
                     )
                 }
                 // Utilize the wait time that would otherwise be spent waiting on ingress by installing postgres here
@@ -81,7 +81,7 @@ tasks {
                         # Upgrade version for image tag in deployment/kind-cluster/psql-values.yaml when upgrading this
                         docker image pull postgres:10.20
                         kind load docker-image postgres:10.20 --name vauhtijuoksu
-                        """
+                        """,
                     )
                 }
                 exec {
@@ -122,7 +122,7 @@ tasks {
                 # Force restart, because in development pods might have a same dirty version if no commits were made
                 kubectl delete pod -l app.kubernetes.io/name=vauhtijuoksu-api
                 kubectl rollout status deployment vauhtijuoksu-api
-                """
+                """,
                 )
             }
         }

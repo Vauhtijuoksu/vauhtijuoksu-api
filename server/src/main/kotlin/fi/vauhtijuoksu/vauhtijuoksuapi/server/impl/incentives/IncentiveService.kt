@@ -26,7 +26,7 @@ private data class IncentiveAndItsCodes(
 
 private data class ParameterDonation(
     val sum: Double,
-    val parameter: String?
+    val parameter: String?,
 )
 
 private data class IncentiveAndItsParameterDonations(
@@ -61,7 +61,7 @@ data class OptionIncentiveStatus(
 data class IncentiveWithStatuses(
     val incentive: Incentive,
     val total: Double,
-    val statuses: List<IncentiveStatus>
+    val statuses: List<IncentiveStatus>,
 )
 
 class IncentiveService
@@ -86,7 +86,7 @@ class IncentiveService
                 CompositeFuture.all(
                     it.map { incentive ->
                         mapStatuses(incentive, donations, generatedIncentives)
-                    }
+                    },
                 )
                     .map { compositeFuture ->
                         compositeFuture.list()
@@ -97,7 +97,7 @@ class IncentiveService
     private fun mapStatuses(
         incentive: Incentive,
         donations: Future<List<Donation>>,
-        generatedIncentives: Future<List<GeneratedIncentive>>
+        generatedIncentives: Future<List<GeneratedIncentive>>,
     ): Future<IncentiveWithStatuses> {
         return Future.succeededFuture(incentive)
             .compose { getIncentiveCodesForIncentive(incentive, generatedIncentives) }
@@ -115,7 +115,7 @@ class IncentiveService
 
     private fun getIncentiveCodesForIncentive(
         incentive: Incentive,
-        generatedIncentives: Future<List<GeneratedIncentive>>
+        generatedIncentives: Future<List<GeneratedIncentive>>,
     ): Future<IncentiveAndItsCodes> {
         return generatedIncentives.map {
             val incentiveCodes = it.filter { incentiveWithCode ->
@@ -135,7 +135,7 @@ class IncentiveService
                                     incentiveCode.generatedCode,
                                     1.0 / incentiveCode.chosenIncentives.size,
                                     chosenIncentive.parameter,
-                                )
+                                ),
                             )
                         }
                     incentiveCodesWithShares
@@ -151,8 +151,9 @@ class IncentiveService
         if (incentiveAndItsCodes.codes.isEmpty()) {
             return Future.succeededFuture(
                 IncentiveAndItsParameterDonations(
-                    incentiveAndItsCodes.incentive, listOf()
-                )
+                    incentiveAndItsCodes.incentive,
+                    listOf(),
+                ),
             )
         }
         return donations.map { donationList ->
@@ -184,7 +185,7 @@ class IncentiveService
     }
 
     private fun calculateTotalAndSummary(
-        incentiveAndItsParameterDonations: IncentiveAndItsParameterDonations
+        incentiveAndItsParameterDonations: IncentiveAndItsParameterDonations,
     ): Future<IncentiveWithStatuses> {
         val incentive = incentiveAndItsParameterDonations.incentive
         val parameterDonation = incentiveAndItsParameterDonations.parameterDonation
@@ -199,7 +200,7 @@ class IncentiveService
                         MilestoneIncentiveStatus(
                             if (milestone.toDouble() <= sum) MilestoneStatus.COMPLETED else MilestoneStatus.INCOMPLETE,
                             milestone,
-                        )
+                        ),
                     )
                 }
                 Future.succeededFuture(
@@ -207,7 +208,7 @@ class IncentiveService
                         incentive,
                         sum,
                         statuses,
-                    )
+                    ),
                 )
             }
             IncentiveType.OPTION -> {
@@ -224,7 +225,7 @@ class IncentiveService
     private fun calculateOptionIncentiveStatuses(
         incentive: Incentive,
         options: List<String>,
-        parameterDonation: List<ParameterDonation>
+        parameterDonation: List<ParameterDonation>,
     ): Future<IncentiveWithStatuses> {
         var total = 0.0
         val statuses = mutableListOf<OptionIncentiveStatus>()
@@ -235,14 +236,16 @@ class IncentiveService
                 OptionIncentiveStatus(
                     option,
                     sum,
-                )
+                ),
             )
             total = total.plus(sum)
         }
         return Future.succeededFuture(
             IncentiveWithStatuses(
-                incentive, total, statuses
-            )
+                incentive,
+                total,
+                statuses,
+            ),
         )
     }
 }

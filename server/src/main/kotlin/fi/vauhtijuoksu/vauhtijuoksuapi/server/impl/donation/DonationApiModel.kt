@@ -62,7 +62,7 @@ data class DonationApiModel(
                 donation.amount,
                 donation.read,
                 donation.externalId,
-                listOf()
+                listOf(),
             )
         }
 
@@ -83,11 +83,11 @@ data class DonationApiModel(
                         generatedIncentive.chosenIncentives.map {
                             ChosenIncentiveInDonationApi(
                                 it.incentiveId,
-                                it.parameter
+                                it.parameter,
                             )
-                        }
+                        },
                     )
-                }
+                },
             )
         }
     }

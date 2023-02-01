@@ -29,7 +29,7 @@ class TestDonation private constructor() {
             "mee tänne: töihin :))))))))",
             5F,
             true,
-            "this is an id"
+            "this is an id",
         )
         val donation3 = Donation(
             UUID.randomUUID(),
@@ -38,7 +38,7 @@ class TestDonation private constructor() {
             "nythän on tiistai ja pitäisi olla töissä",
             5000F,
             false,
-            "this is an id also"
+            "this is an id also",
         )
     }
 }

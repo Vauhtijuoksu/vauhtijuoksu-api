@@ -39,13 +39,13 @@ class IncentiveCodeServiceTest {
     fun setup() {
         incentiveCodeService = IncentiveCodeService(incentiveCodeDatabase, incentiveDatabase)
         lenient().`when`(incentiveDatabase.getById(milestoneIncentive.id)).thenReturn(
-            Future.succeededFuture(milestoneIncentive)
+            Future.succeededFuture(milestoneIncentive),
         )
         lenient().`when`(incentiveDatabase.getById(optionIncentive.id)).thenReturn(
-            Future.succeededFuture(optionIncentive)
+            Future.succeededFuture(optionIncentive),
         )
         lenient().`when`(incentiveDatabase.getById(openIncentive.id)).thenReturn(
-            Future.succeededFuture(openIncentive)
+            Future.succeededFuture(openIncentive),
         )
     }
 
@@ -64,7 +64,7 @@ class IncentiveCodeServiceTest {
                         GeneratedIncentive(
                             IncentiveCode(it.code),
                             listOf(ChosenIncentive(milestoneIncentive.id, null)),
-                        )
+                        ),
                     )
                 }
                 testContext.completeNow()
@@ -104,7 +104,7 @@ class IncentiveCodeServiceTest {
     @Test
     fun `the service fails if too long option is chosen for open incentive`(testContext: VertxTestContext) {
         incentiveCodeService.generateCode(
-            listOf(ChosenIncentive(openIncentive.id, "A".repeat(openIncentive.openCharLimit!! + 1)))
+            listOf(ChosenIncentive(openIncentive.id, "A".repeat(openIncentive.openCharLimit!! + 1))),
         ).expectToFailWithVauhtijuoksuException(testContext)
     }
 

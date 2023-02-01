@@ -53,8 +53,11 @@ val dockerBuild by tasks.registering {
     outputs.file(imageHashFile)
     outputs.upToDateWhen {
         val findHash = ProcessBuilder().command(
-            "bash", "-euo", "pipefail", "-c",
-            "docker image inspect $imageName:$imageTag | jq '.[0].Id'"
+            "bash",
+            "-euo",
+            "pipefail",
+            "-c",
+            "docker image inspect $imageName:$imageTag | jq '.[0].Id'",
         ).start()
         val foundImageHash = String(findHash.inputStream.readAllBytes()).trim()
         var previousHash: String? = null

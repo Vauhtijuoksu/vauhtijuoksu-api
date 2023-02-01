@@ -32,14 +32,14 @@ class IncentiveCodeService @Inject constructor(
                     .map { incentive ->
                         validateChosenIncentive(chosenIncentive, incentive)
                     }
-            }
+            },
         ).flatMap {
             val code = IncentiveCode.random()
             db.add(
                 GeneratedIncentive(
                     code,
                     chosenIncentives,
-                )
+                ),
             ).map { code }
         }
     }

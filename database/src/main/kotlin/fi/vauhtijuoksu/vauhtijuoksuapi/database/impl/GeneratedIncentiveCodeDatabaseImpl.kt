@@ -25,7 +25,7 @@ internal class GeneratedIncentiveCodeDatabaseImpl
         )
         return client.preparedQuery(
             "SELECT * FROM incentive_codes " +
-                "INNER JOIN chosen_incentives ON incentive_codes.id = chosen_incentives.incentive_code"
+                "INNER JOIN chosen_incentives ON incentive_codes.id = chosen_incentives.incentive_code",
         )
             .mapping {
                 CodeWithChosenIncentive(
@@ -33,7 +33,7 @@ internal class GeneratedIncentiveCodeDatabaseImpl
                     ChosenIncentive(
                         it.getUUID("incentive_id"),
                         it.getString("parameter"),
-                    )
+                    ),
                 )
             }
             .execute()
@@ -61,10 +61,10 @@ internal class GeneratedIncentiveCodeDatabaseImpl
                             Tuple.of(
                                 chosenIncentive.incentiveId,
                                 record.generatedCode.code,
-                                chosenIncentive.parameter
+                                chosenIncentive.parameter,
                             )
-                        }
-                    )
+                        },
+                    ),
             )
         }.recover {
             throw ServerError(it)

@@ -19,12 +19,12 @@ open class DonationInputValidator {
 
     private fun validateNonNullFields(input: Donation): String? {
         for (
-            (getter, fieldName) in mapOf<() -> Any?, String>(
-                input::name to "name",
-                input::timestamp to "timestamp",
-                input::amount to "amount",
-                input::read to "read",
-            )
+        (getter, fieldName) in mapOf<() -> Any?, String>(
+            input::name to "name",
+            input::timestamp to "timestamp",
+            input::amount to "amount",
+            input::read to "read",
+        )
         ) {
             val v = getter()
 

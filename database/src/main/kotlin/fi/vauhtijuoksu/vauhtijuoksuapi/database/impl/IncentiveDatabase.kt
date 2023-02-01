@@ -15,13 +15,13 @@ import javax.inject.Inject
 
 internal class IncentiveDatabase @Inject constructor(
     private val client: SqlClient,
-    configuration: DatabaseConfiguration
+    configuration: DatabaseConfiguration,
 ) : AbstractModelDatabase<Incentive, IncentiveDbModel>(
     client,
     configuration,
     "incentives",
     "\"endTime\"",
-    { incentiveDbModel -> incentiveDbModel.toIncentive() }
+    { incentiveDbModel -> incentiveDbModel.toIncentive() },
 ),
     VauhtijuoksuDatabase<Incentive> {
     private val logger = KotlinLogging.logger {}
@@ -38,7 +38,7 @@ internal class IncentiveDatabase @Inject constructor(
             "INSERT INTO incentives VALUES" +
                 "(#{id}, #{gameId}, #{title}, #{endTime}, #{type}, " +
                 "#{info}, #{milestones}, #{optionParameters}, #{openCharLimit}) " +
-                "RETURNING *"
+                "RETURNING *",
         )
             .mapTo { row -> row.toJson().mapTo(IncentiveDbModel::class.java) }
             .mapFrom(
@@ -54,7 +54,7 @@ internal class IncentiveDatabase @Inject constructor(
                         "optionParameters" to incentive.optionParameters?.toTypedArray(),
                         "openCharLimit" to incentive.openCharLimit,
                     )
-                }
+                },
             )
             .execute(IncentiveDbModel.fromIncentive(record))
             .recover {
@@ -81,7 +81,7 @@ internal class IncentiveDatabase @Inject constructor(
                     "optionParameters" = #{optionParameters},  
                     "openCharLimit" = #{openCharLimit}  
                     WHERE id = #{id} RETURNING *
-                    """
+                    """,
         )
             .mapFrom(
                 TupleMapper.mapper { incentive: IncentiveDbModel ->
@@ -96,7 +96,7 @@ internal class IncentiveDatabase @Inject constructor(
                         "optionParameters" to incentive.optionParameters?.toTypedArray(),
                         "openCharLimit" to incentive.openCharLimit,
                     )
-                }
+                },
             )
             .mapTo(IncentiveDbModel::class.java)
             .execute(IncentiveDbModel.fromIncentive(record))

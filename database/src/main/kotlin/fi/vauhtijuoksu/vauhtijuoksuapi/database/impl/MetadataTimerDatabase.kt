@@ -60,7 +60,7 @@ open class MetadataTimerDatabase
                         counters = $4,
                         heart_rates = $5,
                         now_playing = $6
-                        """
+                        """,
         ).execute(
             Tuple.of(
                 record.donationGoal,
@@ -68,8 +68,8 @@ open class MetadataTimerDatabase
                 record.donateBarInfo.toTypedArray(),
                 record.counters.toTypedArray(),
                 record.heartRates.toTypedArray(),
-                record.nowPlaying
-            )
+                record.nowPlaying,
+            ),
         ).recover {
             throw ServerError(it)
         }
@@ -117,14 +117,16 @@ open class MetadataTimerDatabase
     private fun toTimer(row: Row): Timer {
         val startTime = if (row.getString("start_time") != null) {
             OffsetDateTime.ofInstant(
-                Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("start_time"))), ZoneId.of("Z")
+                Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("start_time"))),
+                ZoneId.of("Z"),
             )
         } else {
             null
         }
         val endTime = if (row.getString("end_time") != null) {
             OffsetDateTime.ofInstant(
-                Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("end_time"))), ZoneId.of("Z")
+                Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("end_time"))),
+                ZoneId.of("Z"),
             )
         } else {
             null
@@ -132,7 +134,7 @@ open class MetadataTimerDatabase
         return Timer(
             UUID.fromString(row.getString("id")),
             startTime,
-            endTime
+            endTime,
         )
     }
 }

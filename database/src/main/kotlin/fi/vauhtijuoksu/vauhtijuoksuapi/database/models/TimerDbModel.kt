@@ -16,7 +16,7 @@ data class TimerDbModel(
         return Timer(
             id,
             startTime,
-            endTime
+            endTime,
         )
     }
     companion object {
@@ -24,7 +24,7 @@ data class TimerDbModel(
             return TimerDbModel(
                 timer.id,
                 timer.startTime,
-                timer.endTime
+                timer.endTime,
             )
         }
     }

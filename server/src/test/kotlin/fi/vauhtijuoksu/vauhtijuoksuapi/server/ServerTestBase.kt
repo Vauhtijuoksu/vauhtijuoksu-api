@@ -102,11 +102,11 @@ open class ServerTestBase {
                         ServerConfiguration(
                             serverPort,
                             htpasswdFile,
-                            corsHeaderUrl
-                        )
+                            corsHeaderUrl,
+                        ),
                     )
                 }
-            }
+            },
         )
 
         vertx = injector.getInstance(Vertx::class.java)
