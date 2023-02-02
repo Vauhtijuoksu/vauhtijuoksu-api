@@ -25,7 +25,7 @@ jackson-module-kotlin = { group = "com.fasterxml.jackson.module", name = "jackso
 guice = "com.google.inject:guice:5.1.0"
 hoplite-core = { group = "com.sksamuel.hoplite", name = "hoplite-core", version.ref = "hoplite" }
 hoplite-yaml = { group = "com.sksamuel.hoplite", name = "hoplite-yaml", version.ref = "hoplite" }
-mu-logging = "io.github.microutils:kotlin-logging-jvm:3.0.4"
+mu-logging = "io.github.microutils:kotlin-logging-jvm:3.0.5"
 vertx-auth-htpasswd = { group = "io.vertx", name = "vertx-auth-htpasswd", version.ref = "vertx" }
 vertx-core = { group = "io.vertx", name = "vertx-core", version.ref = "vertx" }
 vertx-web-core = { group = "io.vertx", name = "vertx-web", version.ref = "vertx" }
