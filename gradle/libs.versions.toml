@@ -33,7 +33,7 @@ vertx-lang-kotlin = { group = "io.vertx", name = "vertx-lang-kotlin", version.re
 vertx-pg-client = { group = "io.vertx", name = "vertx-pg-client", version.ref = "vertx" }
 vertx-sql-client-templates = { group = "io.vertx", name = "vertx-sql-client-templates", version.ref = "vertx" }
 flyway-core = "org.flywaydb:flyway-core:9.15.1"
-postgresql = "org.postgresql:postgresql:42.5.1"
+postgresql = "org.postgresql:postgresql:42.5.4"
 
 log4j-slf4j18-impl = "org.apache.logging.log4j:log4j-slf4j18-impl:2.18.0"
 # Jackson databind required by log4j2 to read yaml configuration files
