@@ -2,8 +2,8 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PartialRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler

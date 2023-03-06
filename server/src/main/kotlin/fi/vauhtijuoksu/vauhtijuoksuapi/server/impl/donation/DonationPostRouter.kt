@@ -2,8 +2,8 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.PostRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.CorsHandler
 import java.util.UUID

@@ -6,8 +6,6 @@ import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
@@ -15,6 +13,8 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationPatchInputVa
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationPostInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataPatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataPostInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer

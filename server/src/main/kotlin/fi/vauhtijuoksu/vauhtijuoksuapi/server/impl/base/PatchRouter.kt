@@ -58,7 +58,8 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
                             throw UserError("Invalid input: $validationMessage")
                         }
                         return@map mergedData
-                    }.compose { db.update(it) }
+                    }
+                    .compose(db::update)
                     .map {
                         // Record was removed after fetching it, before patching
                         return@map it ?: throw MissingEntityException("Could not find record with id $id for update")

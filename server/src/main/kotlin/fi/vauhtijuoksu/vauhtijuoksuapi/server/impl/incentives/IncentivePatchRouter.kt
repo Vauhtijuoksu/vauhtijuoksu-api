@@ -2,9 +2,9 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.PatchRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.CorsHandler
 import javax.inject.Inject

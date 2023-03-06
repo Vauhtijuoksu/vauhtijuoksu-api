@@ -9,13 +9,13 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.VauhtijuoksuException
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.BAD_REQUEST
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.INTERNAL_SERVER_ERROR
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.NOT_FOUND
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.PlayerInfoRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.StreamMetadataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentivecodes.IncentiveCodeRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentivesRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
