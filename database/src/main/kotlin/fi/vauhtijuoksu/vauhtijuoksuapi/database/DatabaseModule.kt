@@ -24,7 +24,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import io.vertx.pgclient.PgConnectOptions
 import io.vertx.pgclient.PgPool
 import io.vertx.pgclient.SslMode
-import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.PoolOptions
 import io.vertx.sqlclient.SqlClient
 
@@ -37,12 +36,12 @@ class DatabaseModule : AbstractModule() {
         bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).to(StreamMetadataDatabase::class.java)
         bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).to(PlayerInfoDatabase::class.java)
         bind(GeneratedIncentiveCodeDatabase::class.java).to(GeneratedIncentiveCodeDatabaseImpl::class.java)
-        bind(SqlClient::class.java).to(Pool::class.java)
+        bind(SqlClient::class.java).to(PgPool::class.java)
     }
 
     @Provides
     @Singleton
-    fun getSqlClient(config: DatabaseConfiguration): Pool {
+    fun getSqlClient(config: DatabaseConfiguration): PgPool {
         return PgPool.pool(
             PgConnectOptions()
                 .setHost(config.address)

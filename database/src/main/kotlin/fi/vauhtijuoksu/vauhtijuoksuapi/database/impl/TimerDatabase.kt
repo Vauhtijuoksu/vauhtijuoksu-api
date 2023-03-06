@@ -6,7 +6,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.models.TimerDbModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import io.vertx.core.Future
-import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.templates.SqlTemplate
 import io.vertx.sqlclient.templates.TupleMapper
@@ -22,23 +21,17 @@ class TimerDatabase
     configuration,
     "timers",
     null,
-    { TimerDbModel -> TimerDbModel.toTimer() },
+    TimerDbModel::toTimer,
+    TimerDbModel::class,
 ),
     VauhtijuoksuDatabase<Timer> {
     private val logger = KotlinLogging.logger {}
 
-    override fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<TimerDbModel>> {
-        return template.mapTo(TimerDbModel::class.java)
-    }
-
-    override fun add(record: Timer): Future<Timer> {
+    override fun add(record: Timer): Future<Unit> {
         return SqlTemplate.forUpdate(
             client,
-            "INSERT INTO timers VALUES " +
-                "(#{id}, #{start_time}, #{end_time}) " +
-                "RETURNING *",
+            "INSERT INTO timers VALUES (#{id}, #{start_time}, #{end_time}) ",
         )
-            .mapTo { row -> row.toJson().mapTo(TimerDbModel::class.java) }
             .mapFrom(
                 TupleMapper.mapper { timer: TimerDbModel ->
                     mapOf<String, Any?>(
@@ -54,18 +47,17 @@ class TimerDatabase
             }
             .map {
                 logger.debug { "Inserted timer $record" }
-                return@map it.iterator().next().toTimer()
             }
     }
 
-    override fun update(record: Timer): Future<Timer?> {
+    override fun update(record: Timer): Future<Unit> {
         return SqlTemplate.forUpdate(
             client,
             "UPDATE timers SET " +
                 "id = #{id}, " +
                 "start_time = #{start_time}, " +
                 "end_time = #{end_time} " +
-                "WHERE id = #{id} RETURNING *",
+                "WHERE id = #{id}",
         )
             .mapFrom(
                 TupleMapper.mapper { timer: TimerDbModel ->
@@ -81,14 +73,9 @@ class TimerDatabase
             .recover {
                 throw ServerError("Failed to update $record because of ${it.message}")
             }
+            .expectOneChangedRow()
             .map {
-                if (it.iterator().hasNext()) {
-                    logger.debug { "Updated Timer into $it" }
-                    return@map it.iterator().next().toTimer()
-                } else {
-                    logger.debug { "No Timer with id ${record.id} found" }
-                    return@map null
-                }
+                logger.debug { "Updated Timer into $it" }
             }
     }
 }

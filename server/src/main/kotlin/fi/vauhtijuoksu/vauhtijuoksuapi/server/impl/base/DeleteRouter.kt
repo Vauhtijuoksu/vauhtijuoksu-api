@@ -1,7 +1,6 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
-import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants
@@ -29,13 +28,7 @@ open class DeleteRouter<M : Model>(
                 }
                 db.delete(id)
                     .onFailure(ctx::fail)
-                    .onSuccess { res ->
-                        if (res) {
-                            ctx.response().setStatusCode(ApiConstants.NO_CONTENT).end()
-                        } else {
-                            ctx.fail(MissingEntityException("No entity with id $id"))
-                        }
-                    }
+                    .onSuccess { ctx.response().setStatusCode(ApiConstants.NO_CONTENT).end() }
             }
     }
 }

@@ -11,24 +11,21 @@ interface VauhtijuoksuDatabase<T : Model> {
     fun getAll(): Future<List<T>>
 
     /**
-     * Get a record by id
-     *
-     * @return Null if no such record exists
+     * Get a record by id or MissingEntityException
      */
-    fun getById(id: UUID): Future<T?>
+    fun getById(id: UUID): Future<T>
 
-    fun add(record: T): Future<T>
+    fun add(record: T): Future<Unit>
 
     /**
-     * Update given record and return the updated record if it exists. Note that full record is expected as input,
-     * i.e. any null values are written to db.
+     * Update given record. Note that full record is expected as input, i.e. any null values are written to db.
+     *
+     * Fails with MissingEntityException if the record is missing
      */
-    fun update(record: T): Future<T?>
+    fun update(record: T): Future<Unit>
 
     /**
-     * Delete a record with given id
-     *
-     * @return Future<Boolean> indicating whether a record with given id existed, and was therefore deleted
+     * Delete a record with given id or MissingEntityException
      */
-    fun delete(id: UUID): Future<Boolean>
+    fun delete(id: UUID): Future<Unit>
 }

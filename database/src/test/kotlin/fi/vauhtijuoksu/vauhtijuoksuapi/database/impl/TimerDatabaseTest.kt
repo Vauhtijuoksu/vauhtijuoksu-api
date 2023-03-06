@@ -5,7 +5,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -16,20 +15,38 @@ import java.util.UUID
 class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
     private val timer1 = Timer(
         UUID.randomUUID(),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
+        OffsetDateTime.ofInstant(
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")),
+            ZoneId.of("Z"),
+        ),
+        OffsetDateTime.ofInstant(
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")),
+            ZoneId.of("Z"),
+        ),
     )
 
     private val timer2 = Timer(
         UUID.randomUUID(),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")), ZoneId.of("Z")),
+        OffsetDateTime.ofInstant(
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")),
+            ZoneId.of("Z"),
+        ),
+        OffsetDateTime.ofInstant(
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")),
+            ZoneId.of("Z"),
+        ),
     )
 
     private val timer3 = Timer(
         UUID.randomUUID(),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-08T16:00:00Z")), ZoneId.of("Z")),
+        OffsetDateTime.ofInstant(
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")),
+            ZoneId.of("Z"),
+        ),
+        OffsetDateTime.ofInstant(
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-08T16:00:00Z")),
+            ZoneId.of("Z"),
+        ),
     )
 
     override fun insertStatement(data: List<Timer>): String {
@@ -93,12 +110,7 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
                 ),
             ),
         )
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(res, newTimer)
-                }
-            }.compose { db.getAll() }
+            .compose { db.getAll() }
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -115,12 +127,8 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
     @Test
     fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
         db.update(timer3)
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertNull(res)
-                }
-            }
+            .failOnSuccess(testContext)
+            .recoverIfMissingEntity(testContext)
             .compose { db.getAll() }
             .onFailure(testContext::failNow)
             .onSuccess { res ->

@@ -7,7 +7,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -54,16 +53,10 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
         val oldId = TestGameData.gameData1.id
         val newGame = TestGameData.gameData2.copy(id = oldId)
         db.update(TestGameData.gameData2.copy(id = oldId))
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(res, newGame)
-                }
-            }.compose {
+            .compose {
                 db.getById(oldId)
             }
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
+            .map { res ->
                 testContext.verify {
                     assertEquals(res, newGame)
                 }
@@ -83,12 +76,7 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
     @Test
     fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
         db.update(TestGameData.gameData3)
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertNull(res)
-                }
-            }
+            .recoverIfMissingEntity(testContext)
             .compose { db.getAll() }
             .onFailure(testContext::failNow)
             .onSuccess { res ->

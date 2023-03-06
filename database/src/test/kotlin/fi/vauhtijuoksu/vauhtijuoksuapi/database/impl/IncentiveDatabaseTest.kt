@@ -5,7 +5,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestIncentive
 import io.vertx.junit5.VertxTestContext
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -39,7 +38,7 @@ class IncentiveDatabaseTest : VauhtijuoksuDatabaseTest<Incentive>() {
                 ${intArrayOrNull(incentive.milestones)},
                 ${arrayOrNull(incentive.optionParameters)},
                 ${
-                if (incentive.openCharLimit == null){
+                if (incentive.openCharLimit == null) {
                     "NULL"
                 } else {
                     "${incentive.openCharLimit}"
@@ -84,11 +83,7 @@ class IncentiveDatabaseTest : VauhtijuoksuDatabaseTest<Incentive>() {
         val expectedIncentive = existingRecord1().copy(title = "Changed the title")
         db.update(existingRecord1().copy(title = "Changed the title"))
             .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(expectedIncentive, res)
-                }
-            }.compose { db.getAll() }
+            .compose { db.getAll() }
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -101,12 +96,8 @@ class IncentiveDatabaseTest : VauhtijuoksuDatabaseTest<Incentive>() {
     @Test
     fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
         db.update(newRecord())
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    Assertions.assertNull(res)
-                }
-            }
+            .failOnSuccess(testContext)
+            .recoverIfMissingEntity(testContext)
             .compose { db.getAll() }
             .onFailure(testContext::failNow)
             .onSuccess { res ->

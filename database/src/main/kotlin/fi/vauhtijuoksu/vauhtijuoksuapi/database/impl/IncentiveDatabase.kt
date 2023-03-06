@@ -6,7 +6,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.models.IncentiveDbModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
 import io.vertx.core.Future
-import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.templates.SqlTemplate
 import io.vertx.sqlclient.templates.TupleMapper
@@ -21,24 +20,20 @@ internal class IncentiveDatabase @Inject constructor(
     configuration,
     "incentives",
     "\"endTime\"",
-    { incentiveDbModel -> incentiveDbModel.toIncentive() },
+    IncentiveDbModel::toIncentive,
+    IncentiveDbModel::class,
 ),
     VauhtijuoksuDatabase<Incentive> {
     private val logger = KotlinLogging.logger {}
 
-    override fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<IncentiveDbModel>> {
-        return template.mapTo { row ->
-            row.toJson().mapTo(IncentiveDbModel::class.java)
-        }
-    }
-
-    override fun add(record: Incentive): Future<Incentive> {
+    override fun add(record: Incentive): Future<Unit> {
         return SqlTemplate.forUpdate(
             client,
-            "INSERT INTO incentives VALUES" +
-                "(#{id}, #{gameId}, #{title}, #{endTime}, #{type}, " +
-                "#{info}, #{milestones}, #{optionParameters}, #{openCharLimit}) " +
-                "RETURNING *",
+            """INSERT INTO incentives VALUES
+                |(#{id}, #{gameId}, #{title}, #{endTime}, #{type}, 
+                |#{info}, #{milestones}, #{optionParameters}, #{openCharLimit})
+                |
+            """.trimMargin(),
         )
             .mapTo { row -> row.toJson().mapTo(IncentiveDbModel::class.java) }
             .mapFrom(
@@ -62,11 +57,10 @@ internal class IncentiveDatabase @Inject constructor(
             }
             .map {
                 logger.debug { "Inserted incentive $record" }
-                return@map it.iterator().next().toIncentive()
             }
     }
 
-    override fun update(record: Incentive): Future<Incentive?> {
+    override fun update(record: Incentive): Future<Unit> {
         return SqlTemplate.forUpdate(
             client,
             """
@@ -80,7 +74,7 @@ internal class IncentiveDatabase @Inject constructor(
                     milestones = #{milestones},  
                     "optionParameters" = #{optionParameters},  
                     "openCharLimit" = #{openCharLimit}  
-                    WHERE id = #{id} RETURNING *
+                    WHERE id = #{id}
                     """,
         )
             .mapFrom(
@@ -98,19 +92,13 @@ internal class IncentiveDatabase @Inject constructor(
                     )
                 },
             )
-            .mapTo(IncentiveDbModel::class.java)
             .execute(IncentiveDbModel.fromIncentive(record))
             .recover {
                 throw ServerError("Failed to update $record because of ${it.message}")
             }
+            .expectOneChangedRow()
             .map {
-                if (it.iterator().hasNext()) {
-                    logger.debug { "Updated Incentive into $it" }
-                    return@map it.iterator().next().toIncentive()
-                } else {
-                    logger.debug { "No Incentive with id ${record.id} found" }
-                    return@map null
-                }
+                logger.debug { "Updated Incentive into $it" }
             }
     }
 }

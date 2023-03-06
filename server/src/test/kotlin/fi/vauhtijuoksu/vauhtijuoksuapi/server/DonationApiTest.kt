@@ -2,6 +2,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.ChosenIncentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GeneratedIncentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveCode
@@ -109,7 +110,7 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testAddingDonation(testContext: VertxTestContext) {
-        `when`(donationDb.add(any())).thenReturn(Future.succeededFuture(donation1.copy(UUID.randomUUID())))
+        `when`(donationDb.add(any())).thenReturn(Future.succeededFuture())
         val body = JsonObject.mapFrom(DonationApiModel.fromDonation(donation1))
         body.remove("id")
         body.remove("incentives")
@@ -263,8 +264,11 @@ class DonationApiTest : ServerTestBase() {
             message = null,
         )
 
-        `when`(donationDb.getById(donation1.id)).thenReturn(Future.succeededFuture(donation1))
-        `when`(donationDb.update(any())).thenReturn(Future.succeededFuture(newDonation))
+        `when`(donationDb.getById(donation1.id)).thenReturn(
+            Future.succeededFuture(donation1),
+            Future.succeededFuture(newDonation),
+        )
+        `when`(donationDb.update(any())).thenReturn(Future.succeededFuture())
         client.patch("/donations/${donation1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("read", true).put("message", null))
@@ -350,7 +354,7 @@ class DonationApiTest : ServerTestBase() {
     @Test
     fun testDeleteDonation(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
-        `when`(donationDb.delete(any())).thenReturn(Future.succeededFuture(true))
+        `when`(donationDb.delete(any())).thenReturn(Future.succeededFuture())
         client.delete("/donations/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
@@ -368,7 +372,7 @@ class DonationApiTest : ServerTestBase() {
     @Test
     fun testDeleteNonExistingDonation(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
-        `when`(donationDb.delete(any())).thenReturn(Future.succeededFuture(false))
+        `when`(donationDb.delete(any())).thenReturn(Future.failedFuture(MissingEntityException("No such donation")))
         client.delete("/donations/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()

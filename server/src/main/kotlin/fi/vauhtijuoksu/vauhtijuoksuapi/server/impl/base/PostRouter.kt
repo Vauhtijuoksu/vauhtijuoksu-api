@@ -45,10 +45,10 @@ open class PostRouter<M : Model>(
 
                 db.add(record)
                     .onFailure(ctx::fail)
-                    .onSuccess { insertedGd ->
-                        logger.info { "Inserted record $insertedGd" }
+                    .onSuccess {
+                        logger.info { "Inserted record $record" }
                         ctx.response().setStatusCode(ApiConstants.CREATED)
-                            .end(toJson(insertedGd).encode())
+                            .end(toJson(record).encode())
                     }
             }
     }

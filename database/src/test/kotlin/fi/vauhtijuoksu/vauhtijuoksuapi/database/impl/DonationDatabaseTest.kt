@@ -8,7 +8,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation2
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation3
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -54,12 +53,7 @@ class DonationDatabaseTest : VauhtijuoksuDatabaseTest<Donation>() {
     fun testUpdate(testContext: VertxTestContext) {
         val newDonation = donation1.copy(read = true, message = null)
         db.update(donation1.copy(read = true, message = null))
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(res, newDonation)
-                }
-            }.compose { db.getAll() }
+            .compose { db.getAll() }
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -72,19 +66,15 @@ class DonationDatabaseTest : VauhtijuoksuDatabaseTest<Donation>() {
     @Test
     fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
         db.update(donation3)
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertNull(res)
-                }
-            }
+            .failOnSuccess(testContext)
+            .recoverIfMissingEntity(testContext)
             .compose { db.getAll() }
-            .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(listOf(donation1, donation2), res)
                 }
                 testContext.completeNow()
             }
+            .onFailure(testContext::failNow)
     }
 }

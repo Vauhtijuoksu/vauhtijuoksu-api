@@ -1,7 +1,6 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentiveApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentiveWithStatuses
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.MilestoneIncentiveStatus
@@ -141,9 +140,7 @@ class IncentivesTest : ServerTestBase() {
 
     @Test
     fun `post adds a new incentive`(testContext: VertxTestContext) {
-        `when`(incentiveDatabase.add(any())).thenAnswer {
-            Future.succeededFuture(it.getArgument<Incentive>(0))
-        }
+        `when`(incentiveDatabase.add(any())).thenReturn(Future.succeededFuture())
         val body = JsonObject.mapFrom(
             NewIncentiveApiModel(
                 someIncentive.gameId,
@@ -217,8 +214,11 @@ class IncentivesTest : ServerTestBase() {
     fun `patch modifies existing incentive`(testContext: VertxTestContext) {
         val id = someIncentive.id
         val expectedIncentive = someIncentive.copy(endTime = null)
-        `when`(incentiveDatabase.getById(id)).thenReturn(Future.succeededFuture(someIncentive))
-        `when`(incentiveDatabase.update(any())).thenReturn(Future.succeededFuture(expectedIncentive))
+        `when`(incentiveDatabase.getById(id)).thenReturn(
+            Future.succeededFuture(someIncentive),
+            Future.succeededFuture(expectedIncentive),
+        )
+        `when`(incentiveDatabase.update(expectedIncentive)).thenReturn(Future.succeededFuture())
         client.patch("$incentivesEndpoint/$id")
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
@@ -242,8 +242,11 @@ class IncentivesTest : ServerTestBase() {
         val id = someIncentive.id
         val newTime = OffsetDateTime.now(ZoneId.of("Z"))
         val expectedIncentive = someIncentive.copy(endTime = newTime)
-        `when`(incentiveDatabase.getById(id)).thenReturn(Future.succeededFuture(someIncentive))
-        `when`(incentiveDatabase.update(any())).thenReturn(Future.succeededFuture(expectedIncentive))
+        `when`(incentiveDatabase.getById(id)).thenReturn(
+            Future.succeededFuture(someIncentive),
+            Future.succeededFuture(expectedIncentive),
+        )
+        `when`(incentiveDatabase.update(expectedIncentive)).thenReturn(Future.succeededFuture())
         client.patch("$incentivesEndpoint/$id")
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))

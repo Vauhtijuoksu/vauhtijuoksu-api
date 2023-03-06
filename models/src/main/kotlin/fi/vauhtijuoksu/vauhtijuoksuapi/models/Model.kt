@@ -6,5 +6,5 @@ import java.util.UUID
  * Marker interface for generics
  */
 interface Model {
-    val id: UUID?
+    val id: UUID
 }

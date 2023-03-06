@@ -21,7 +21,7 @@ import java.util.UUID
 @ExtendWith(VertxExtension::class)
 class StreamMetadataDatabaseTest {
     private lateinit var db: StreamMetadataDatabase
-    private lateinit var gamedataDb: GameDataDatabase
+    private lateinit var gameDataDb: GameDataDatabase
 
     private val emptyData = StreamMetadata(
         null,
@@ -67,7 +67,7 @@ class StreamMetadataDatabaseTest {
             },
         )
         db = injector.getInstance(StreamMetadataDatabase::class.java)
-        gamedataDb = injector.getInstance(GameDataDatabase::class.java)
+        gameDataDb = injector.getInstance(GameDataDatabase::class.java)
     }
 
     @Test
@@ -84,11 +84,10 @@ class StreamMetadataDatabaseTest {
 
     @Test
     fun `database saves given data`(testContext: VertxTestContext) {
-        lateinit var gameId: UUID
-        gamedataDb.add(TestGameData.gameData1)
+        val gameId: UUID = TestGameData.gameData1.id
+        gameDataDb.add(TestGameData.gameData1)
             .compose {
-                gameId = it.id
-                db.save(someData.copy(currentGameId = it.id, counters = listOf(1, 3, 100)))
+                db.save(someData.copy(currentGameId = gameId, counters = listOf(1, 3, 100)))
             }
             .compose { db.get() }
             .onFailure(testContext::failNow)
@@ -102,13 +101,12 @@ class StreamMetadataDatabaseTest {
 
     @Test
     fun `current game is set to null when the game is deleted`(testContext: VertxTestContext) {
-        lateinit var gameId: UUID
-        gamedataDb.add(TestGameData.gameData1)
+        val gameId: UUID = TestGameData.gameData1.id
+        gameDataDb.add(TestGameData.gameData1)
             .compose {
-                gameId = it.id
-                db.save(someData.copy(currentGameId = it.id))
+                db.save(someData.copy(currentGameId = gameId))
             }
-            .compose { gamedataDb.delete(gameId) }
+            .compose { gameDataDb.delete(gameId) }
             .compose { db.get() }
             .onFailure(testContext::failNow)
             .onSuccess {

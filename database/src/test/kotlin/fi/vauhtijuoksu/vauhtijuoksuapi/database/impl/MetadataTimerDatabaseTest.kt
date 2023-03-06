@@ -26,7 +26,7 @@ import java.util.UUID
 @ExtendWith(VertxExtension::class)
 class MetadataTimerDatabaseTest {
     private lateinit var db: MetadataTimerDatabase
-    private lateinit var gamedataDb: GameDataDatabase
+    private lateinit var gameDataDb: GameDataDatabase
 
     private val emptyData = StreamMetadata(
         null,
@@ -50,8 +50,14 @@ class MetadataTimerDatabaseTest {
 
     private val timer1 = Timer(
         UUID.randomUUID(),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
+        OffsetDateTime.ofInstant(
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")),
+            ZoneId.of("Z"),
+        ),
+        OffsetDateTime.ofInstant(
+            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")),
+            ZoneId.of("Z"),
+        ),
     )
 
     @Container
@@ -78,7 +84,7 @@ class MetadataTimerDatabaseTest {
             },
         )
         db = injector.getInstance(MetadataTimerDatabase::class.java)
-        gamedataDb = injector.getInstance(GameDataDatabase::class.java)
+        gameDataDb = injector.getInstance(GameDataDatabase::class.java)
     }
 
     @Test
@@ -89,18 +95,22 @@ class MetadataTimerDatabaseTest {
                 testContext.verify {
                     assertEquals(emptyData, it)
                 }
-                System.out.println(it)
                 testContext.completeNow()
             }
     }
 
     @Test
     fun `database saves given data`(testContext: VertxTestContext) {
-        lateinit var gameId: UUID
-        gamedataDb.add(TestGameData.gameData1)
+        val gameData = TestGameData.gameData1
+        gameDataDb.add(gameData)
             .compose {
-                gameId = it.id
-                db.save(someData.copy(currentGameId = it.id, counters = listOf(1, 3, 100), timers = listOf(timer1)))
+                db.save(
+                    someData.copy(
+                        currentGameId = gameData.id,
+                        counters = listOf(1, 3, 100),
+                        timers = listOf(timer1),
+                    ),
+                )
             }
             .compose { db.get() }
             .onFailure(testContext::failNow)
@@ -108,7 +118,7 @@ class MetadataTimerDatabaseTest {
                 testContext.verify {
                     assertEquals(
                         someData.copy(
-                            currentGameId = gameId,
+                            currentGameId = gameData.id,
                             counters = listOf(1, 3, 100),
                             timers = listOf(timer1),
                         ),
@@ -121,13 +131,12 @@ class MetadataTimerDatabaseTest {
 
     @Test
     fun `current game is set to null when the game is deleted`(testContext: VertxTestContext) {
-        lateinit var gameId: UUID
-        gamedataDb.add(TestGameData.gameData1)
+        val gameData = TestGameData.gameData1
+        gameDataDb.add(TestGameData.gameData1)
             .compose {
-                gameId = it.id
-                db.save(someData.copy(currentGameId = it.id))
+                db.save(someData.copy(currentGameId = gameData.id))
             }
-            .compose { gamedataDb.delete(gameId) }
+            .compose { gameDataDb.delete(gameData.id) }
             .compose { db.get() }
             .onFailure(testContext::failNow)
             .onSuccess {

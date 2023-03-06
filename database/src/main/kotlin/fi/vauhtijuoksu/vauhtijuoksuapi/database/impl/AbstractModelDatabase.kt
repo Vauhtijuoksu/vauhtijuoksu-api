@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import io.vertx.core.Future
@@ -17,19 +18,20 @@ import io.vertx.sqlclient.templates.SqlTemplate
 import mu.KotlinLogging
 import java.util.Collections
 import java.util.UUID
+import kotlin.reflect.KClass
 
 /**
  * Usable for data that uses an uuid field named id as a primary key
  */
-abstract class AbstractModelDatabase<T : Model, DbModel>(
+abstract class AbstractModelDatabase<T : Model, DbModel : Any>(
     private val client: SqlClient,
     configuration: DatabaseConfiguration,
     tableName: String,
     defaultOrderBy: String?,
     private val toModel: ((DbModel) -> T),
+    private val dbModelClass: KClass<DbModel>,
 ) : BaseDatabase(configuration), VauhtijuoksuDatabase<T> {
     private val logger = KotlinLogging.logger {}
-
     private val getAllQuery: String
     private val getByIdQuery: String
     private val deleteQuery: PreparedQuery<RowSet<Row>>
@@ -49,13 +51,11 @@ abstract class AbstractModelDatabase<T : Model, DbModel>(
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    private fun <I, R, DbModel> SqlTemplate<I, R>.mapWith(
-        mapper: (SqlTemplate<I, R>) -> SqlTemplate<I, RowSet<DbModel>>,
-    ): SqlTemplate<I, RowSet<DbModel>> {
-        return mapper(this)
+    private fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<DbModel>> {
+        return template.mapTo { row ->
+            row.toJson().mapTo(dbModelClass.java)
+        }
     }
-
-    abstract fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<DbModel>>
 
     override fun getAll(): Future<List<T>> {
         logger.debug { "Get all objects" }
@@ -70,7 +70,7 @@ abstract class AbstractModelDatabase<T : Model, DbModel>(
             }
     }
 
-    override fun getById(id: UUID): Future<T?> {
+    override fun getById(id: UUID): Future<T> {
         logger.debug { "Get record by id $id" }
         return SqlTemplate.forQuery(client, getByIdQuery)
             .mapWith(this::mapToFunction)
@@ -84,19 +84,17 @@ abstract class AbstractModelDatabase<T : Model, DbModel>(
                     return@map toModel(it.iterator().next())
                 } else {
                     logger.debug { "No record found by id $id" }
-                    return@map null
+                    throw MissingEntityException("No row with id $id")
                 }
             }
     }
 
-    override fun delete(id: UUID): Future<Boolean> {
+    override fun delete(id: UUID): Future<Unit> {
         return deleteQuery
             .execute(Tuple.of(id))
             .recover {
                 throw ServerError("Failed to delete a record with id $id because ${it.message}")
             }
-            .map {
-                return@map it.rowCount() == 1
-            }
+            .expectOneChangedRow()
     }
 }

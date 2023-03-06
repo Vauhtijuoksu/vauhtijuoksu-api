@@ -2,6 +2,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData2
@@ -119,7 +120,7 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testAddingGameData(testContext: VertxTestContext) {
-        `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture(gameData1.copy(UUID.randomUUID())))
+        `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture())
         val body = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         body.remove("id")
         client.post("/gamedata")
@@ -143,7 +144,7 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testAddingGameDataWithOriginHeader(testContext: VertxTestContext) {
-        `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture(gameData1.copy(UUID.randomUUID())))
+        `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture())
         val body = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         body.remove("id")
         client.post("/gamedata").putHeader("Origin", "https://vauhtijuoksu.fi")
@@ -262,8 +263,11 @@ class GameDataApiTest : ServerTestBase() {
         val oldId = gameData1.id
         val newGame = gameData2.copy(id = oldId)
 
-        `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1))
-        `when`(gameDataDb.update(any())).thenReturn(Future.succeededFuture(newGame))
+        `when`(gameDataDb.getById(gameData1.id)).thenReturn(
+            Future.succeededFuture(gameData1),
+            Future.succeededFuture(newGame),
+        )
+        `when`(gameDataDb.update(any())).thenReturn(Future.succeededFuture())
         client.patch("/gamedata/${gameData1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(
@@ -374,7 +378,7 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testDeleteGameData(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
-        `when`(gameDataDb.delete(any())).thenReturn(Future.succeededFuture(true))
+        `when`(gameDataDb.delete(uuid)).thenReturn(Future.succeededFuture())
         client.delete("/gamedata/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
@@ -392,7 +396,7 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testDeleteNonExistingGameData(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
-        `when`(gameDataDb.delete(any())).thenReturn(Future.succeededFuture(false))
+        `when`(gameDataDb.delete(uuid)).thenReturn(Future.failedFuture(MissingEntityException("No such row")))
         client.delete("/gamedata/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()

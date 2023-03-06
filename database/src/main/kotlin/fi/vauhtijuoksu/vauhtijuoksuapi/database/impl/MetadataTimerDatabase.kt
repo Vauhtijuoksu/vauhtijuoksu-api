@@ -37,15 +37,14 @@ open class MetadataTimerDatabase
             .map {
                 return@map it.first().toStreamMetadata()
             }
-            .compose {
-                var results = it
+            .compose { results ->
                 SqlTemplate.forQuery(client, "SELECT * FROM timers")
                     .mapTo(TimerDbModel::class.java)
                     .execute(Collections.emptyMap())
                     .recover {
                         throw ServerError("Failed to retrieve records because ${it.message}")
                     }.map {
-                        results.timers = it.toList().map({ TimerDbModel -> TimerDbModel.toTimer() })
+                        results.timers = it.toList().map(TimerDbModel::toTimer)
                         return@map results
                     }
             }
@@ -115,21 +114,18 @@ open class MetadataTimerDatabase
     }
 
     private fun toTimer(row: Row): Timer {
-        val startTime = if (row.getString("start_time") != null) {
+        val startTime = row.getString("start_time")?.let {
             OffsetDateTime.ofInstant(
-                Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("start_time"))),
+                Instant.from(DateTimeFormatter.ISO_INSTANT.parse(it)),
                 ZoneId.of("Z"),
             )
-        } else {
-            null
         }
-        val endTime = if (row.getString("end_time") != null) {
+
+        val endTime = row.getString("end_time")?.let {
             OffsetDateTime.ofInstant(
-                Instant.from(DateTimeFormatter.ISO_INSTANT.parse(row.getString("end_time"))),
+                Instant.from(DateTimeFormatter.ISO_INSTANT.parse(it)),
                 ZoneId.of("Z"),
             )
-        } else {
-            null
         }
         return Timer(
             UUID.fromString(row.getString("id")),
