@@ -7,7 +7,6 @@ import java.util.UUID
 data class GameData(
     override val id: UUID,
     val game: String,
-    val player: String,
     val startTime: Date,
     val endTime: Date,
     val category: String,
@@ -15,6 +14,6 @@ data class GameData(
     val published: String,
     val vodLink: URL?,
     val imgFilename: String?,
-    val playerTwitch: String?,
     val meta: String?,
+    val players: List<UUID>,
 ) : Model

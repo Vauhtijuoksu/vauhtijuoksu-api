@@ -8,6 +8,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
+import io.vertx.core.Future
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
 import io.vertx.sqlclient.SqlClient
@@ -27,6 +28,7 @@ import java.util.UUID
 abstract class VauhtijuoksuDatabaseTest<T : Model> {
     protected lateinit var db: VauhtijuoksuDatabase<T>
     private lateinit var sqlClient: SqlClient
+    protected lateinit var injector: Injector
     val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
     @Container
@@ -40,12 +42,11 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
     abstract fun newRecord(): T
     abstract fun tableName(): String
     abstract fun copyWithId(oldRecord: T, newId: UUID): T
-
     abstract fun getDatabase(injector: Injector): VauhtijuoksuDatabase<T>
 
     @BeforeEach
     fun beforeEach(testContext: VertxTestContext) {
-        val injector = Guice.createInjector(
+        injector = Guice.createInjector(
             DatabaseModule(),
             object : AbstractModule() {
                 override fun configure() {
@@ -66,12 +67,17 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
         db = getDatabase(injector)
         sqlClient = injector.getInstance(SqlClient::class.java)
 
-        sqlClient.query(insertStatement(listOf(existingRecord1(), existingRecord2())))
-            .execute()
+        insertExistingRecords()
             .onFailure(testContext::failNow)
             .onSuccess {
                 testContext.completeNow()
             }
+    }
+
+    protected open fun insertExistingRecords(): Future<Unit> {
+        return sqlClient.query(insertStatement(listOf(existingRecord1(), existingRecord2())))
+            .execute()
+            .mapEmpty()
     }
 
     @Test
@@ -158,7 +164,7 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
     @Test
     fun testDeleteNonExisting(testContext: VertxTestContext) {
         db.delete(UUID.randomUUID())
-            .onSuccess { testContext.failNow("Did not expect to succeed") }
+            .failOnSuccess(testContext)
             .recoverIfMissingEntity(testContext)
             .compose { db.getAll() }
             .onSuccess { res ->

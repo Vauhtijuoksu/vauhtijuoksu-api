@@ -4,17 +4,21 @@ import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
+import io.vertx.core.Future
 import io.vertx.junit5.VertxTestContext
+import io.vertx.sqlclient.SqlClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
+
     override fun insertStatement(data: List<GameData>): String {
         fun valuesStringForGameData(gd: GameData): String {
             @Suppress("MaxLineLength")
-            return "('${gd.id}', '${gd.game}', '${gd.player}', '${df.format(gd.startTime)}', '${df.format(gd.endTime)}', '${gd.category}', '${gd.device}', '${gd.published}', '${gd.vodLink}', '${gd.imgFilename}', '${gd.playerTwitch}', '${gd.meta}')"
+            return "('${gd.id}', '${gd.game}', '${df.format(gd.startTime)}', '${df.format(gd.endTime)}', '${gd.category}', '${gd.device}', '${gd.published}', '${gd.vodLink}', '${gd.imgFilename}', '${gd.meta}')"
         }
 
         var statement = "INSERT INTO gamedata VALUES "
@@ -22,6 +26,27 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
             statement += "${valuesStringForGameData(gd)},"
         }
         return statement.trim(',')
+    }
+
+    override fun insertExistingRecords(): Future<Unit> {
+        val playerDb = injector.getInstance(PlayerDatabase::class.java)
+        val client = injector.getInstance(SqlClient::class.java)
+        return playerDb
+            .add(TestPlayer.player1)
+            .flatMap {
+                playerDb.add(TestPlayer.player2)
+            }.flatMap {
+                super.insertExistingRecords()
+            }
+            .flatMap {
+                client
+                    .query(
+                        @Suppress("MaxLineLength")
+                        """INSERT INTO players_in_game (game_id, player_id) VALUES ('${existingRecord1().id}', '${existingRecord1().players.first()}'), ('${existingRecord2().id}', '${existingRecord2().players.first()}')""",
+                    )
+                    .execute()
+                    .mapEmpty()
+            }
     }
 
     override fun existingRecord1(): GameData {
@@ -56,11 +81,12 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
             .compose {
                 db.getById(oldId)
             }
-            .map { res ->
+            .map {
                 testContext.verify {
-                    assertEquals(res, newGame)
+                    assertEquals(it, newGame)
                 }
-            }.compose {
+            }
+            .compose {
                 db.getById(TestGameData.gameData2.id)
             }
             .onFailure(testContext::failNow)
@@ -76,6 +102,7 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
     @Test
     fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
         db.update(TestGameData.gameData3)
+            .failOnSuccess(testContext)
             .recoverIfMissingEntity(testContext)
             .compose { db.getAll() }
             .onFailure(testContext::failNow)
@@ -85,5 +112,22 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
                 }
                 testContext.completeNow()
             }
+    }
+
+    @Test
+    fun testUpdateChangePlayers(testContext: VertxTestContext) {
+        assertEquals(listOf(TestPlayer.player1.id), existingRecord1().players)
+        val playerChangedRecord = existingRecord1().copy(players = listOf(TestPlayer.player2.id))
+        db.update(playerChangedRecord)
+            .compose {
+                db.getById(playerChangedRecord.id)
+            }
+            .map {
+                testContext.verify {
+                    assertEquals(playerChangedRecord, it)
+                }
+                testContext.completeNow()
+            }
+            .onFailure(testContext::failNow)
     }
 }

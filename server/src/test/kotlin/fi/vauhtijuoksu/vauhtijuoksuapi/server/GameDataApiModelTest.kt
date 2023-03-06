@@ -23,6 +23,8 @@ internal class GameDataApiModelTest {
     private val startUtc = "2021-09-21T15:05:47.000+00:00"
     private val endUtc = "2021-09-21T17:05:47.000+00:00"
 
+    private val playerId = UUID.randomUUID()
+
     private lateinit var expectedGameData: JsonObject
 
     @BeforeEach
@@ -30,7 +32,6 @@ internal class GameDataApiModelTest {
         expectedGameData = JsonObject()
             .put("id", uuid.toString())
             .put("game", "Tetris")
-            .put("player", "jsloth")
             .put("start_time", startUtc)
             .put("end_time", endUtc)
             .put("category", "any%")
@@ -38,8 +39,8 @@ internal class GameDataApiModelTest {
             .put("published", "1970")
             .put("vod_link", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             .put("img_filename", "tetris.png")
-            .put("player_twitch", "jiisloth")
             .put("meta", "k18")
+            .put("players", listOf(playerId.toString()))
     }
 
     @Test
@@ -47,7 +48,6 @@ internal class GameDataApiModelTest {
         val gameData = GameDataApiModel(
             uuid,
             "Tetris",
-            "jsloth",
             Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(start))),
             Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(end))),
             "any%",
@@ -55,8 +55,8 @@ internal class GameDataApiModelTest {
             "1970",
             URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
             "tetris.png",
-            "jiisloth",
             "k18",
+            listOf(playerId),
         )
 
         val gameDataAsJson = gameData.toJson()
@@ -69,7 +69,6 @@ internal class GameDataApiModelTest {
         val gameDataApiModel = GameDataApiModel(
             uuid,
             "Tetris",
-            "jsloth",
             Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(start))),
             Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(end))),
             "any%",
@@ -77,8 +76,8 @@ internal class GameDataApiModelTest {
             "1970",
             null,
             "tetris.png",
-            "jiisloth",
             "k18",
+            listOf(playerId),
         )
 
         val gameDataAsJson = gameDataApiModel.toJson()

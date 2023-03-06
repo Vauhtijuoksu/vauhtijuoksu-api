@@ -10,6 +10,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.MetadataTimerDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.PlayerInfo
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
@@ -62,6 +63,9 @@ open class ServerTestBase {
     @Mock
     protected lateinit var metadataTimerDatabase: MetadataTimerDatabase
 
+    @Mock
+    protected lateinit var playerDatabase: VauhtijuoksuDatabase<Player>
+
     @TempDir
     lateinit var tmpDir: File
 
@@ -98,6 +102,7 @@ open class ServerTestBase {
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
                     bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
                     bind(object : TypeLiteral<MetadataTimerDatabase>() {}).toInstance(metadataTimerDatabase)
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Player>>() {}).toInstance(playerDatabase)
                     bind(ServerConfiguration::class.java).toInstance(
                         ServerConfiguration(
                             serverPort,

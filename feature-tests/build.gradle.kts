@@ -22,6 +22,7 @@ val buildId = Random.nextInt(0, Int.MAX_VALUE)
 dependencies {
     testImplementation(libs.vertx.junit5)
     testImplementation(libs.vertx.web.client)
+    testImplementation(libs.jackson.databind)
 }
 
 val jacocoPath = "$buildDir/tmp/jacocoagent.jar"

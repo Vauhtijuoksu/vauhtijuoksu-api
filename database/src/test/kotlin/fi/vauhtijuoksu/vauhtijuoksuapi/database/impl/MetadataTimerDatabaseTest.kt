@@ -7,6 +7,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfigurat
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,6 +28,7 @@ import java.util.UUID
 class MetadataTimerDatabaseTest {
     private lateinit var db: MetadataTimerDatabase
     private lateinit var gameDataDb: GameDataDatabase
+    private lateinit var playerDatabase: PlayerDatabase
 
     private val emptyData = StreamMetadata(
         null,
@@ -85,6 +87,7 @@ class MetadataTimerDatabaseTest {
         )
         db = injector.getInstance(MetadataTimerDatabase::class.java)
         gameDataDb = injector.getInstance(GameDataDatabase::class.java)
+        playerDatabase = injector.getInstance(PlayerDatabase::class.java)
     }
 
     @Test
@@ -102,7 +105,12 @@ class MetadataTimerDatabaseTest {
     @Test
     fun `database saves given data`(testContext: VertxTestContext) {
         val gameData = TestGameData.gameData1
-        gameDataDb.add(gameData)
+        assertEquals(1, gameData.players.size)
+        assertEquals(TestPlayer.player1.id, gameData.players.first())
+        playerDatabase.add(TestPlayer.player1)
+            .compose {
+                gameDataDb.add(gameData)
+            }
             .compose {
                 db.save(
                     someData.copy(
@@ -132,7 +140,12 @@ class MetadataTimerDatabaseTest {
     @Test
     fun `current game is set to null when the game is deleted`(testContext: VertxTestContext) {
         val gameData = TestGameData.gameData1
-        gameDataDb.add(TestGameData.gameData1)
+        assertEquals(1, gameData.players.size)
+        assertEquals(TestPlayer.player1.id, gameData.players.first())
+        playerDatabase.add(TestPlayer.player1)
+            .compose {
+                gameDataDb.add(TestGameData.gameData1)
+            }
             .compose {
                 db.save(someData.copy(currentGameId = gameData.id))
             }

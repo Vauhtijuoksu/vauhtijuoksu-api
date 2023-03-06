@@ -39,7 +39,7 @@ class GameDataApiTest : ServerTestBase() {
     }
 
     @Test
-    fun testSingleGamedataOptions(testContext: VertxTestContext) {
+    fun testSingleGameDataOptions(testContext: VertxTestContext) {
         client.request(HttpMethod.OPTIONS, "/gamedata/${UUID.randomUUID()}").send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -176,7 +176,7 @@ class GameDataApiTest : ServerTestBase() {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["game", "player", "start_time", "end_time", "category", "device", "published"])
+    @ValueSource(strings = ["game", "start_time", "end_time", "category", "device", "published", "players"])
     fun testMandatoryFieldsAreRequiredWhenAddingGameData(missingField: String, testContext: VertxTestContext) {
         val json = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         json.remove("id")
@@ -273,7 +273,6 @@ class GameDataApiTest : ServerTestBase() {
             .sendJson(
                 JsonObject()
                     .put("game", newGame.game)
-                    .put("player", newGame.player)
                     .put("start_time", newGame.startTime)
                     .put("end_time", newGame.endTime)
                     .put("category", newGame.category)
@@ -281,8 +280,8 @@ class GameDataApiTest : ServerTestBase() {
                     .put("published", newGame.published)
                     .put("vod_link", newGame.vodLink)
                     .put("img_filename", newGame.imgFilename)
-                    .put("player_twitch", newGame.playerTwitch)
-                    .put("meta", newGame.meta),
+                    .put("meta", newGame.meta)
+                    .put("players", newGame.players),
             )
             .onFailure(testContext::failNow)
             .onSuccess { res ->

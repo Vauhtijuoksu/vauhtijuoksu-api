@@ -24,6 +24,7 @@ dependencies {
     implementation(libs.vertx.core)
     implementation(libs.vertx.web.core)
     implementation(libs.vertx.lang.kotlin)
+    implementation(libs.jakarta.validation.api)
 
     runtimeOnly(libs.jackson.dataformat.yaml)
     runtimeOnly(libs.jackson.databind)

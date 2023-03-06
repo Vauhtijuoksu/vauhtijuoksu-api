@@ -14,7 +14,6 @@ import java.util.UUID
 data class GameDataApiModel(
     val id: UUID,
     val game: String,
-    val player: String,
     @JsonProperty("start_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val startTime: Date,
@@ -29,16 +28,14 @@ data class GameDataApiModel(
     val vodLink: URL?,
     @JsonProperty("img_filename")
     val imgFilename: String?,
-    @JsonProperty("player_twitch")
-    val playerTwitch: String?,
     val meta: String?,
+    val players: List<UUID>,
 ) : ApiModel<GameData> {
     companion object {
         fun fromGameData(gameData: GameData): GameDataApiModel {
             return GameDataApiModel(
                 gameData.id,
                 gameData.game,
-                gameData.player,
                 gameData.startTime,
                 gameData.endTime,
                 gameData.category,
@@ -46,8 +43,8 @@ data class GameDataApiModel(
                 gameData.published,
                 gameData.vodLink,
                 gameData.imgFilename,
-                gameData.playerTwitch,
                 gameData.meta,
+                gameData.players,
             )
         }
     }
@@ -60,7 +57,6 @@ data class GameDataApiModel(
         return GameData(
             id,
             game,
-            player,
             startTime,
             endTime,
             category,
@@ -68,8 +64,8 @@ data class GameDataApiModel(
             published,
             vodLink,
             imgFilename,
-            playerTwitch,
             meta,
+            players,
         )
     }
 }
