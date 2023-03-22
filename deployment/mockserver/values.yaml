@@ -1,6 +1,6 @@
 image:
   repository: muonsoft/openapi-mock
-  tag: "0.3.8"
+  tag: "0.3.9"
 
 # Possible values:
 # no
