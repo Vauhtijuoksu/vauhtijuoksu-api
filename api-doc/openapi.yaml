@@ -139,6 +139,14 @@ paths:
         '201':
           $ref: '#/components/responses/PlayerOk'
   /players/{playerId}:
+    parameters:
+      - name: playerId
+        in: path
+        required: true
+        description: An unique identifier for a player
+        schema:
+          type: string
+          format: uuid
     get:
       description:
         Get a player by id
@@ -710,6 +718,7 @@ components:
       properties:
         display_name:
           type: string
+          minLength: 1
         twitch_channel:
           type: string
         discord_nick:
