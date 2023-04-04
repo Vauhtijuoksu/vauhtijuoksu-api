@@ -832,7 +832,7 @@ components:
               milestone_goal: 300
               status: incomplete
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
-          game: e356b0a4-cd7f-4b97-ac73-15aee70607dd
+          game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
           title: silmät kii
           end_time: '2021-09-21T19:08:47.000+00:00'
           type: option

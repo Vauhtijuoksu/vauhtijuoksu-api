@@ -1,8 +1,8 @@
 # Vauhtijuoksu API server
 
 ## Requirements
-These are required to run all of the commands mentioned here. 
-Some of the commands might work without all of these if you're an adventurous person.
+These are required to run all the commands mentioned here. 
+Some commands might work without all of these if you're an adventurous person.
 * java 17 - Install Java and point JAVA_HOME environment variable to your installation directory
 * jq
 * kubectl 1.20
@@ -29,7 +29,7 @@ The mock server can also be deployed locally by running:
 ./gradlew localMockApi
 ```
 
-It's then available at http://mockapi.localhos
+It's then available at http://mockapi.localhost
 
 ### Using the API
 The API server is running at https://api.dev.vauhtijuoksu.fi. Ask around for credentials if you need to modify data.

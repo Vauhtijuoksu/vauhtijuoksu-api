@@ -68,7 +68,6 @@ class TimerDatabase
                     )
                 },
             )
-            .mapTo(TimerDbModel::class.java)
             .execute(TimerDbModel.fromTimer(record))
             .recover {
                 throw ServerError("Failed to update $record because of ${it.message}")

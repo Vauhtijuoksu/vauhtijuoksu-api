@@ -100,7 +100,7 @@ tasks {
                 // Wait for ingress
                 exec {
                     workingDir = projectDir
-                    bashCommand("kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s")
+                    bashCommand("kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=90s")
                 }
             }
         }
