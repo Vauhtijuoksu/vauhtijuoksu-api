@@ -364,20 +364,25 @@ components:
       items:
         $ref: '#/components/schemas/DonationOutput'
       example:
-        - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+        - id: 021c2143-5400-4087-92e8-0c67252685b5
           timestamp: '2021-09-21T15:05:47.000+00:00'
           name: jsloth
-          message: ota tää :D 🤔🤔
-          read: true
+          message: 'ota tää :D 🤔🤔 {Vj#2020}'
+          read: false
           amount: 10
           external_id: "a non unique string"
-        - id: 7c28df04-b9d2-4ebe-bd33-58c9b290d930
+          incentives:
+            - code: '{Vj#2020}'
+              chosen_incentives:
+                - incentive_id: d3fed394-193b-493b-b670-c9bea2bdfab0
+                  parameter: kissa
+        - id: ecf0ef85-06ba-4d5d-b032-775b560ee5de
           timestamp: '2021-09-21T15:05:50.000+00:00'
           name: luuranki
           message: 'mee tänne: töihin :))))))))'
           read: false
           amount: 5
-          external_id: "a non unique string"
+          external_id: "another non unique string"
     DonationInput:
       type: object
       properties:
@@ -464,7 +469,7 @@ components:
         - timestamp
         - amount
       example:
-      - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+      - id: 021c2143-5400-4087-92e8-0c67252685b5
         timestamp: '2021-09-21T15:05:47.000+00:00'
         name: jsloth
         message: 'ota tää :D 🤔🤔 {Vj#2020}'
@@ -474,7 +479,7 @@ components:
         incentives:
         - code: '{Vj#2020}'
           chosen_incentives:
-          - incentive_id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+          - incentive_id: d3fed394-193b-493b-b670-c9bea2bdfab0
             parameter: kissa
     GameData:
       type: object
@@ -517,9 +522,9 @@ components:
         - device
         - published
       example:
-        id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+        id: 1fbdc860-170c-4231-b354-464a2dfab94b
         game: Tetris
-        players: [1d0215f3-1aac-4d6e-b898-a002528eea4d]
+        players: [be3649a7-50e4-44e9-b157-05a3fbcf738c, 91aee618-2c62-42a1-b025-106baf6b71e7]
         start_time: '2021-09-21T15:05:47.000+00:00'
         end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
@@ -533,9 +538,9 @@ components:
       items:
         $ref: '#/components/schemas/GameData'
       example:
-        - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+        - id: 1fbdc860-170c-4231-b354-464a2dfab94b
           game: Tetris
-          players: [3febb953-ee2b-4daa-ac10-a32aa13726cc, 1d0215f3-1aac-4d6e-b898-a002528eea4d]
+          players: [be3649a7-50e4-44e9-b157-05a3fbcf738c, 91aee618-2c62-42a1-b025-106baf6b71e7]
           start_time: '2021-09-21T15:05:47.000+00:00'
           end_time: '2021-09-21T16:05:47.000+00:00'
           category: any%
@@ -544,9 +549,9 @@ components:
           vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
           img_filename: tetris.png
           meta: k18
-        - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
+        - id: 1571fccf-cc89-48ce-82d4-6b2173d782ec
           game: Tetris2
-          players: [1d0215f3-1aac-4d6e-b898-a002528eea4d]
+          players: [91aee618-2c62-42a1-b025-106baf6b71e7]
           start_time: '2021-09-21T15:07:47.000+00:00'
           end_time: '2021-09-21T16:08:47.000+00:00'
           category: any% no t
@@ -670,26 +675,27 @@ components:
         - device
         - published
       example:
-        game: Tetris
-        players: [faab43be-85d8-4f64-a3d4-c4302336fc9b]
-        start_time: '2021-09-21T15:05:47.000+00:00'
-        end_time: '2021-09-21T16:05:47.000+00:00'
-        category: any%
+        id: 1571fccf-cc89-48ce-82d4-6b2173d782ec
+        game: Tetris2
+        players: [91aee618-2c62-42a1-b025-106baf6b71e7]
+        start_time: '2021-09-21T15:07:47.000+00:00'
+        end_time: '2021-09-21T16:08:47.000+00:00'
+        category: any% no t
         device: PC
-        published: '1970'
+        published: '1971'
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
-        meta: meta
+        meta: k18
     PlayerList:
       type: array
       items:
         $ref: '#/components/schemas/Player'
       example:
-        - id: 1d0215f3-1aac-4d6e-b898-a002528eea4d
+        - id: be3649a7-50e4-44e9-b157-05a3fbcf738c
           display_name: glukoosi
           twitch_channel: hluposti
           discord_nick: sakkaroosi#9898
-        - id: 3febb953-ee2b-4daa-ac10-a32aa13726cc
+        - id: 91aee618-2c62-42a1-b025-106baf6b71e7
           display_name: jiisloth
           twitch_channel: jeesloth
           discord_nick: jooosloth#1234
@@ -709,7 +715,7 @@ components:
         - id
         - display_name
       example:
-        id: 3febb953-ee2b-4daa-ac10-a32aa13726cc
+        id: 91aee618-2c62-42a1-b025-106baf6b71e7
         display_name: jiisloth
         twitch_channel: jeesloth
         discord_nick: jooosloth#1234
@@ -782,7 +788,7 @@ components:
         - donation_goal
       example:
         donation_goal: 10000
-        current_game_id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+        current_game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
         now_playing: Deerboy - Huutia
         donatebar_info:
           - lahjota rahhaa
@@ -815,7 +821,7 @@ components:
         $ref: '#/components/schemas/IncentiveOutput'
       example:
         - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
-          game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
+          game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
           title: Ei pyörimistä
           end_time: '2021-09-21T16:08:47.000+00:00'
           type: milestone
@@ -831,8 +837,8 @@ components:
             - type: milestone
               milestone_goal: 300
               status: incomplete
-        - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
-          game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
+        - id: d3fed394-193b-493b-b670-c9bea2bdfab0
+          game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
           title: silmät kii
           end_time: '2021-09-21T19:08:47.000+00:00'
           type: option
@@ -848,8 +854,8 @@ components:
              - type: option
                option: koira
                amount: 150
-        - id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
-          game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
+        - id: 3a896646-70e0-4943-a3e3-01f29d0541f1
+          game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
           title: Tetrispakikan nimi
           end_time: '2021-09-21T19:08:47.000+00:00'
           type: open
@@ -901,7 +907,7 @@ components:
         - type
       example:
         title: Tetrispakikan nimi
-        game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
+        game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
         end_time: '2021-09-21T19:08:47.000+00:00'
         type: open
         open_char_limit: 10
@@ -978,8 +984,8 @@ components:
         - title
         - type
       example:
-        id: 6c28df04-b9d2-4ebe-bd33-58c9b290d930
-        game_id: e356b0a4-cd7f-4b97-ac73-15aee70607dd
+        id: 6c28df04-b9d2-4ebe-bd33-58c9b290d929
+        game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
         title: Ei pyörimistä
         end_time: '2021-09-21T16:08:47.000+00:00'
         type: milestone
@@ -994,6 +1000,7 @@ components:
             status: completed
           - type: milestone
             milestone_goal: 300
+            status: incomplete
     IncentiveCodeInput:
       type: array
       items:
@@ -1005,7 +1012,7 @@ components:
           parameter:
             type: string
         example:
-          id: 6c28df04-b9d2-4ebe-bd33-58c9b290d931
+          id: 3a896646-70e0-4943-a3e3-01f29d0541f1
           parameter: kalle tetr
 
 
