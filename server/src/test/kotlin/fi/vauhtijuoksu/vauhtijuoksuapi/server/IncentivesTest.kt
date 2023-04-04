@@ -1,6 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentiveApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentiveWithStatuses
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.MilestoneIncentiveStatus
@@ -219,6 +220,8 @@ class IncentivesTest : ServerTestBase() {
             Future.succeededFuture(expectedIncentive),
         )
         `when`(incentiveDatabase.update(expectedIncentive)).thenReturn(Future.succeededFuture())
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
         client.patch("$incentivesEndpoint/$id")
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
@@ -228,7 +231,18 @@ class IncentivesTest : ServerTestBase() {
                     assertEquals(200, res.statusCode())
                     assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
                     assertEquals(
-                        JsonObject.mapFrom(IncentiveApiModel.fromIncentive(expectedIncentive)),
+                        IncentiveApiModel.fromIncentiveWithStatuses(
+                            IncentiveWithStatuses(
+                                expectedIncentive,
+                                0.0,
+                                listOf(
+                                    MilestoneIncentiveStatus(
+                                        MilestoneStatus.INCOMPLETE,
+                                        100,
+                                    ),
+                                ),
+                            ),
+                        ).toJson(),
                         res.bodyAsJsonObject(),
                     )
                     verify(incentiveDatabase).update(expectedIncentive)
@@ -247,6 +261,8 @@ class IncentivesTest : ServerTestBase() {
             Future.succeededFuture(expectedIncentive),
         )
         `when`(incentiveDatabase.update(expectedIncentive)).thenReturn(Future.succeededFuture())
+        `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
+        `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
         client.patch("$incentivesEndpoint/$id")
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
@@ -255,7 +271,18 @@ class IncentivesTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals(
-                        JsonObject.mapFrom(IncentiveApiModel.fromIncentive(expectedIncentive)),
+                        IncentiveApiModel.fromIncentiveWithStatuses(
+                            IncentiveWithStatuses(
+                                expectedIncentive,
+                                0.0,
+                                listOf(
+                                    MilestoneIncentiveStatus(
+                                        MilestoneStatus.INCOMPLETE,
+                                        100,
+                                    ),
+                                ),
+                            ),
+                        ).toJson(),
                         res.bodyAsJsonObject(),
                     )
                     verify(incentiveDatabase).update(expectedIncentive)
@@ -266,7 +293,7 @@ class IncentivesTest : ServerTestBase() {
 
     @Test
     fun `patch returns 404 when the incentive does not exists`(testContext: VertxTestContext) {
-        `when`(incentiveDatabase.getById(any())).thenReturn(Future.succeededFuture())
+        `when`(incentiveDatabase.getById(any())).thenReturn(Future.failedFuture(MissingEntityException("No such row")))
         client.patch("$incentivesEndpoint/${UUID.randomUUID()}")
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
