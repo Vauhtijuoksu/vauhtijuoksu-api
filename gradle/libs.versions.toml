@@ -10,8 +10,8 @@ spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:6.18.0"
 detekt-plugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.22.0"
 detekt-formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:1.22.0"
 # Used by feature tests to gather coverage
-jacoco-core = "org.jacoco:org.jacoco.core:0.8.8"
-jacoco-agent = { group  = "org.jacoco", name = "org.jacoco.agent", version = "0.8.8" }
+jacoco-core = "org.jacoco:org.jacoco.core:0.8.9"
+jacoco-agent = { group  = "org.jacoco", name = "org.jacoco.agent", version = "0.8.9" }
 kubernetes-client = "io.fabric8:kubernetes-client:6.5.1"
 swagger-generator-plugin = "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.19.2"
 
