@@ -21,19 +21,21 @@ internal class GameDataDatabase
 ) : BaseDatabase(configuration),
     VauhtijuoksuDatabase<GameData> {
     private val selectClause =
-        """SELECT gamedata.*, array_remove(array_agg(players_in_game.player_id), NULL) as player_ids 
-            |FROM gamedata LEFT JOIN players_in_game ON gamedata.id = players_in_game.game_id 
-            |GROUP BY gamedata.id 
-            |ORDER BY start_time ASC
+        """SELECT gamedata.*, 
+    |array_remove(array_agg(players_in_game.player_id ORDER BY players_in_game.player_order ASC), NULL) as player_ids 
+    |FROM gamedata LEFT JOIN players_in_game ON gamedata.id = players_in_game.game_id 
+    |GROUP BY gamedata.id 
+    |ORDER BY start_time ASC
         """.trimMargin()
     private val getAllQuery = pool.preparedQuery(selectClause)
 
     private val getByIdQuery =
         pool.preparedQuery(
-            """SELECT gamedata.*, array_remove(array_agg(players_in_game.player_id), NULL) as player_ids 
-            |FROM gamedata LEFT JOIN players_in_game ON gamedata.id = players_in_game.game_id 
-            |WHERE gamedata.id=$1 
-            |GROUP BY gamedata.id
+            """SELECT gamedata.*,
+    | array_remove(array_agg(players_in_game.player_id ORDER BY players_in_game.player_order ASC), NULL) as player_ids 
+    |FROM gamedata LEFT JOIN players_in_game ON gamedata.id = players_in_game.game_id 
+    |WHERE gamedata.id=$1 
+    |GROUP BY gamedata.id
             """.trimMargin(),
         )
     private val deleteQuery = pool.preparedQuery("DELETE FROM gamedata WHERE id = $1")
@@ -53,8 +55,8 @@ internal class GameDataDatabase
                 .flatMap {
                     if (record.players.isNotEmpty()) {
                         client
-                            .preparedQuery("""INSERT INTO players_in_game (game_id, player_id) VALUES ($1, $2)""")
-                            .executeBatch(record.players.map { Tuple.of(record.id, it) })
+                            .preparedQuery("""INSERT INTO players_in_game (game_id, player_id, player_order) VALUES ($1, $2, $3)""")
+                            .executeBatch(record.players.mapIndexed { i, playerId -> Tuple.of(record.id, playerId, i) })
                     } else {
                         Future.succeededFuture()
                     }
@@ -92,8 +94,10 @@ internal class GameDataDatabase
                 }
                 .flatMap {
                     if (record.players.isNotEmpty()) {
-                        client.preparedQuery("""INSERT INTO players_in_game (game_id, player_id) VALUES ($1, $2)""")
-                            .executeBatch(record.players.map { Tuple.of(record.id, it) })
+                        client.preparedQuery(
+                            """INSERT INTO players_in_game (game_id, player_id, player_order) VALUES ($1, $2, $3)""",
+                        )
+                            .executeBatch(record.players.mapIndexed { i, playerId -> Tuple.of(record.id, playerId, i) })
                     } else {
                         Future.succeededFuture()
                     }
