@@ -3,14 +3,19 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
+import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
 import io.vertx.junit5.VertxTestContext
 import io.vertx.sqlclient.SqlClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import java.net.URL
+import java.time.Instant
+import java.util.Date
 import java.util.UUID
 
 class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
@@ -42,7 +47,7 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
                 client
                     .query(
                         @Suppress("MaxLineLength")
-                        """INSERT INTO players_in_game (game_id, player_id) VALUES ('${existingRecord1().id}', '${existingRecord1().players.first()}'), ('${existingRecord2().id}', '${existingRecord2().players.first()}')""",
+                        """INSERT INTO players_in_game (game_id, player_id, player_order) VALUES ('${existingRecord1().id}', '${existingRecord1().players.first()}', 1), ('${existingRecord2().id}', '${existingRecord2().players.first()}', 2)""",
                     )
                     .execute()
                     .mapEmpty()
@@ -129,5 +134,75 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
                 testContext.completeNow()
             }
             .onFailure(testContext::failNow)
+    }
+
+    @Test
+    fun `player order should stay consistent when players are in multiple games`(testContext: VertxTestContext) {
+        val playerDb = injector.getInstance(PlayerDatabase::class.java)
+
+        fun randomString(length: Int = 10, prefix: String?): String {
+            val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+            return (prefix ?: "") +
+                (1..length)
+                    .map { allowedChars.random() }
+                    .joinToString("")
+        }
+
+        fun generatePlayer(): Player {
+            return Player(
+                UUID.randomUUID(),
+                randomString(prefix = "name-"),
+                randomString(prefix = "twitch-"),
+                randomString(prefix = "discord-"),
+            )
+        }
+
+        fun generateGame(players: List<UUID>): GameData {
+            return GameData(
+                UUID.randomUUID(),
+                randomString(prefix = "game-"),
+                Date.from(Instant.now()),
+                Date.from(Instant.now()),
+                randomString(prefix = "category-"),
+                randomString(prefix = "device-"),
+                randomString(prefix = "published-"),
+                URL("https://${randomString(prefix = "vodlink-")}"),
+                randomString(prefix = "img-"),
+                randomString(prefix = "meta-"),
+                players,
+            )
+        }
+
+        val players = (1..100).map { generatePlayer() }.associateBy { it.id }
+        val games = (1..100).map { generateGame(players.values.shuffled().map { it.id }.subList(0, 80)) }
+            .associateBy { it.id }
+
+        CompositeFuture.all(
+            db.delete(existingRecord1().id),
+            db.delete(existingRecord2().id),
+        )
+            .flatMap {
+                CompositeFuture.all(
+                    players.values.map {
+                        playerDb.add(it)
+                    },
+                )
+            }
+            .flatMap {
+                CompositeFuture.all(
+                    games.values.map {
+                        db.add(it)
+                    },
+                )
+            }.flatMap {
+                db.getAll()
+            }.map { gd ->
+                testContext.verify {
+                    gd.forEach {
+                        assertEquals(games[it.id], it)
+                    }
+                }
+                testContext.completeNow()
+            }
     }
 }
