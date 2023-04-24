@@ -31,7 +31,6 @@ class StreamMetadataDatabaseTest {
         listOf(),
         listOf(),
         listOf(),
-        listOf(),
         null,
     )
 
@@ -41,7 +40,6 @@ class StreamMetadataDatabaseTest {
         listOf("gotta go fast", "pls give money to norppas"),
         listOf(10, 100, 3),
         listOf(99, 100, 189, 69, 0),
-        listOf(),
         "Deerboy - Boiiii",
     )
 

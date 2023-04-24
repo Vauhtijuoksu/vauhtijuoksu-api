@@ -16,10 +16,8 @@ class StreamMetadataDatabase
 @Inject constructor(
     configuration: DatabaseConfiguration,
     private val client: SqlClient,
-) :
-    BaseDatabase(configuration),
+) : BaseDatabase(configuration),
     SingletonDatabase<StreamMetadata> {
-
     override fun get(): Future<StreamMetadata> {
         return SqlTemplate.forQuery(client, "SELECT * FROM stream_metadata LIMIT 1")
             .mapTo(StreamMetadataDbModel::class.java)

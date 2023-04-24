@@ -23,6 +23,7 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
             Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")),
             ZoneId.of("Z"),
         ),
+        "timer 1",
     )
 
     private val timer2 = Timer(
@@ -35,6 +36,7 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
             Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")),
             ZoneId.of("Z"),
         ),
+        "timer 2",
     )
 
     private val timer3 = Timer(
@@ -47,12 +49,12 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
             Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-08T16:00:00Z")),
             ZoneId.of("Z"),
         ),
+        "timer 3",
     )
 
     override fun insertStatement(data: List<Timer>): String {
         fun valuesStringForTimer(timer: Timer): String {
-            @Suppress("MaxLineLength")
-            return "('${timer.id}', '${timer.startTime}', '${timer.endTime}')"
+            return "('${timer.id}', '${timer.startTime}', '${timer.endTime}', '${timer.name}')"
         }
 
         var statement = "INSERT INTO timers VALUES "
@@ -97,19 +99,9 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
                 Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")),
                 ZoneId.of("Z"),
             ),
+            name = "new timer name",
         )
-        db.update(
-            timer1.copy(
-                startTime = OffsetDateTime.ofInstant(
-                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z")),
-                    ZoneId.of("Z"),
-                ),
-                endTime = OffsetDateTime.ofInstant(
-                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-06T16:00:00Z")),
-                    ZoneId.of("Z"),
-                ),
-            ),
-        )
+        db.update(newTimer)
             .compose { db.getAll() }
             .onFailure(testContext::failNow)
             .onSuccess { res ->

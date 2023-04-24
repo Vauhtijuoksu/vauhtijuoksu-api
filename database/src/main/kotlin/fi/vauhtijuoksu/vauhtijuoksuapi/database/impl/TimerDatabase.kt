@@ -30,7 +30,7 @@ class TimerDatabase
     override fun add(record: Timer): Future<Unit> {
         return SqlTemplate.forUpdate(
             client,
-            "INSERT INTO timers VALUES (#{id}, #{start_time}, #{end_time}) ",
+            "INSERT INTO timers VALUES (#{id}, #{start_time}, #{end_time}, #{name}) ",
         )
             .mapFrom(
                 TupleMapper.mapper { timer: TimerDbModel ->
@@ -38,6 +38,7 @@ class TimerDatabase
                         "id" to timer.id,
                         "start_time" to timer.startTime,
                         "end_time" to timer.endTime,
+                        "name" to timer.name,
                     )
                 },
             )
@@ -53,11 +54,12 @@ class TimerDatabase
     override fun update(record: Timer): Future<Unit> {
         return SqlTemplate.forUpdate(
             client,
-            "UPDATE timers SET " +
-                "id = #{id}, " +
-                "start_time = #{start_time}, " +
-                "end_time = #{end_time} " +
-                "WHERE id = #{id}",
+            """UPDATE timers SET 
+                |id = #{id}, 
+                |start_time = #{start_time},
+                |end_time = #{end_time},
+                |name = #{name}WHERE id = #{id}
+            """.trimMargin(),
         )
             .mapFrom(
                 TupleMapper.mapper { timer: TimerDbModel ->
@@ -65,6 +67,7 @@ class TimerDatabase
                         "id" to timer.id,
                         "start_time" to timer.startTime,
                         "end_time" to timer.endTime,
+                        "name" to timer.name,
                     )
                 },
             )
