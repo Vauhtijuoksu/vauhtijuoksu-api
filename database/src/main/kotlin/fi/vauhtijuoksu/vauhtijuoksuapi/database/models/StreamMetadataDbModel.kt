@@ -27,7 +27,6 @@ internal data class StreamMetadataDbModel(
             donatebarInfo,
             counters,
             heartRates,
-            listOf(),
             nowPlaying,
         )
     }

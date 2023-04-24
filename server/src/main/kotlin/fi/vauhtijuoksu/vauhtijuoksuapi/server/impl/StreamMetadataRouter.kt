@@ -1,15 +1,14 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
-import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.MetadataTimerDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.StreamMetadataDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.model.StreamMetaDataApiModel
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.model.TimerApiModel
-import io.vertx.core.Future.future
-import io.vertx.core.Promise
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.streammetadata.StreamMetaDataApiModel
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.streammetadata.UpdateStreamMetaDataApiModel
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
@@ -18,11 +17,6 @@ import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.CorsHandler
 import mu.KotlinLogging
-import java.time.Instant
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -30,7 +24,8 @@ import javax.inject.Named
 @Suppress("ThrowsCount")
 class StreamMetadataRouter
 @Inject constructor(
-    private val db: MetadataTimerDatabase,
+    private val db: StreamMetadataDatabase,
+    private val timerDb: VauhtijuoksuDatabase<Timer>,
     private val authenticationHandler: AuthenticationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
     private val authenticatedEndpointCorsHandler: CorsHandler,
@@ -67,9 +62,17 @@ class StreamMetadataRouter
             .handler(publicEndpointCorsHandler)
             .handler { ctx ->
                 db.get()
-                    .onSuccess { res ->
+                    .flatMap { streamMetadata ->
+                        timerDb.getAll().map { timers ->
+                            StreamMetaDataApiModel.from(
+                                streamMetadata,
+                                timers,
+                            )
+                        }
+                    }
+                    .onSuccess {
                         ctx.response()
-                            .end(StreamMetaDataApiModel.from(res).toJson().encode())
+                            .end(it.toJson().encode())
                     }.onFailure(ctx::fail)
             }
     }
@@ -88,112 +91,45 @@ class StreamMetadataRouter
                         } catch (e: DecodeException) {
                             throw UserError("Invalid json ${e.message}")
                         }
-                        val newTimers = handleTimers(body, res.timers)
-                        logger.info("Update stream from json $newTimers")
+                        body.fieldNames().forEach { key ->
+                            if (!streamMetadata.containsKey(key)) {
+                                throw UserError("Unknown key in request: $key")
+                            }
+                        }
                         val newData = try {
-                            updateStreamFromJson(res, ctx.body().asJsonObject())
+                            updateStreamFromJson(res, body)
                         } catch (e: InvalidFormatException) {
                             throw UserError("Invalid request: ${e.message}")
                         }
-                        newData.timers = newTimers
                         logger.info("Save to database")
-                        return@flatMap future { p: Promise<StreamMetadata> ->
-                            db.save(newData)
-                                .onSuccess {
-                                    // return timers from database if no changes were made
-                                    if (newTimers.size == 0) {
-                                        newData.timers = res.timers
-                                    }
-                                    p.complete(newData)
-                                }
-                                .onFailure(p::fail)
+                        db.save(newData)
+                    }
+                    .flatMap { db.get() }
+                    .flatMap { streamMetadata ->
+                        timerDb.getAll().map { timers ->
+                            StreamMetaDataApiModel.from(
+                                streamMetadata,
+                                timers,
+                            )
                         }
                     }
-                    .onSuccess {
-                        ctx.response().end(StreamMetaDataApiModel.from(it).toJson().encode())
-                    }.onFailure(ctx::fail)
-            }
-    }
-
-    @Suppress("SwallowedException")
-    private fun handleTimers(body: JsonObject, existingTimers: List<Timer>): MutableList<Timer> {
-        val newTimers: MutableList<Timer> = mutableListOf()
-        logger.info("Handling timers")
-        body.fieldNames().forEach { key ->
-            if (!streamMetadata.containsKey(key)) {
-                throw UserError("Unknown key in request: $key")
-            }
-        }
-        val timerBody = body.getJsonArray("timers")
-        if (timerBody != null) {
-            val timerSize = timerBody.size()
-            val updatedTimers = existingTimers.mapIndexed { index, timer ->
-                if (index < timerSize) {
-                    try {
-                        logger.info("Update timer from json")
-                        updateTimersFromJson(timer, timerBody.getJsonObject(index))
-                    } catch (e: InvalidFormatException) {
-                        throw UserError("Invalid request: ${e.message}")
+                    .map {
+                        ctx.response().end(it.toJson().encode())
                     }
-                } else {
-                    timer
-                }
+                    .onFailure(ctx::fail)
             }
-            if (timerSize > updatedTimers.size) {
-                for (i in updatedTimers.size until timerSize) {
-                    val bt = timerBody.getJsonObject(i)
-                    val startTime = bt.getString("start_time")
-                    val endTime = bt.getString("end_time")
-                    logger.info("Creating new timer")
-                    newTimers.add(
-                        Timer(
-                            UUID.randomUUID(),
-                            if (startTime != null) {
-                                OffsetDateTime.ofInstant(
-                                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse(startTime)),
-                                    ZoneId.of("Z"),
-                                )
-                            } else {
-                                null
-                            },
-                            if (endTime != null) {
-                                OffsetDateTime.ofInstant(
-                                    Instant.from(DateTimeFormatter.ISO_INSTANT.parse(endTime)),
-                                    ZoneId.of("Z"),
-                                )
-                            } else {
-                                null
-                            },
-                        ),
-                    )
-                }
-            }
-            newTimers.addAll(0, updatedTimers)
-        }
-        return newTimers
     }
 
     private fun updateStreamFromJson(data: StreamMetadata, json: JsonObject): StreamMetadata {
-        val oldData = DatabindCodec.mapper().readerForUpdating(StreamMetaDataApiModel.from(data))
-        val mergedData: StreamMetaDataApiModel = oldData.readValue(json.encode())
+        val oldData = DatabindCodec.mapper().readerForUpdating(UpdateStreamMetaDataApiModel.from(data))
+        val mergedData = oldData.readValue<UpdateStreamMetaDataApiModel>(json.encode())
         return StreamMetadata(
             mergedData.donationGoal,
             mergedData.currentGameId,
             mergedData.donatebarInfo,
             mergedData.counters,
             mergedData.heartRates,
-            listOf(),
             mergedData.nowPlaying,
-        )
-    }
-
-    private fun updateTimersFromJson(data: Timer, json: JsonObject): Timer {
-        val oldData = DatabindCodec.mapper().readerForUpdating(TimerApiModel.from(data))
-        val mergedData: TimerApiModel = oldData.readValue(json.encode())
-        return Timer(
-            data.id,
-            mergedData.startTime,
-            mergedData.endTime,
         )
     }
 }

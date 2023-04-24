@@ -6,7 +6,7 @@ import com.google.inject.TypeLiteral
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.GeneratedIncentiveCodeDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
-import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.MetadataTimerDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.StreamMetadataDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
@@ -61,7 +61,7 @@ open class ServerTestBase {
     protected lateinit var generatedIncentiveCodeDatabase: GeneratedIncentiveCodeDatabase
 
     @Mock
-    protected lateinit var metadataTimerDatabase: MetadataTimerDatabase
+    protected lateinit var streamMetadataDatabase: StreamMetadataDatabase
 
     @Mock
     protected lateinit var playerDatabase: VauhtijuoksuDatabase<Player>
@@ -101,7 +101,7 @@ open class ServerTestBase {
                     bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).toInstance(playerInfoDb)
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
                     bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
-                    bind(object : TypeLiteral<MetadataTimerDatabase>() {}).toInstance(metadataTimerDatabase)
+                    bind(object : TypeLiteral<StreamMetadataDatabase>() {}).toInstance(streamMetadataDatabase)
                     bind(object : TypeLiteral<VauhtijuoksuDatabase<Player>>() {}).toInstance(playerDatabase)
                     bind(ServerConfiguration::class.java).toInstance(
                         ServerConfiguration(

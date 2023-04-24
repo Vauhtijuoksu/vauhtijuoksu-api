@@ -1,35 +1,23 @@
-package fi.vauhtijuoksu.vauhtijuoksuapi.database.models
+package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.timers
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import java.time.OffsetDateTime
 import java.util.UUID
 
-data class TimerDbModel(
-    val id: UUID,
+data class NewTimerApiModel(
     @JsonProperty("start_time")
     val startTime: OffsetDateTime?,
     @JsonProperty("end_time")
     val endTime: OffsetDateTime?,
     val name: String,
 ) {
-    fun toTimer(): Timer {
+    fun toTimer(id: UUID): Timer {
         return Timer(
             id,
             startTime,
             endTime,
             name,
         )
-    }
-
-    companion object {
-        fun fromTimer(timer: Timer): TimerDbModel {
-            return TimerDbModel(
-                timer.id,
-                timer.startTime,
-                timer.endTime,
-                timer.name,
-            )
-        }
     }
 }

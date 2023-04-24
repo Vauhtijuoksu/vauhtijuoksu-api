@@ -17,6 +17,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentivecodes.IncentiveCodeRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentivesRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players.PlayersRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.timers.TimerRouter
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
@@ -40,6 +41,7 @@ class Server @Inject constructor(
     incentivesRouter: IncentivesRouter,
     incentiveCodeRouter: IncentiveCodeRouter,
     playersRouter: PlayersRouter,
+    timerRouter: TimerRouter,
     @Named(PUBLIC_CORS) corsHandler: CorsHandler,
 ) {
     private val logger = KotlinLogging.logger {}
@@ -60,6 +62,7 @@ class Server @Inject constructor(
         incentivesRouter.configure(router)
         incentiveCodeRouter.configure(router)
         playersRouter.configure(router)
+        timerRouter.configure(router)
         router.route().failureHandler { ctx ->
             when (val cause = ctx.failure()) {
                 is UserError -> {
