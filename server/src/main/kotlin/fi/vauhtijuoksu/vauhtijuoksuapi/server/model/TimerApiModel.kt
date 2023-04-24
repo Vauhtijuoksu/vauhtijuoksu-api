@@ -10,12 +10,14 @@ data class TimerApiModel(
     val startTime: OffsetDateTime?,
     @JsonProperty("end_time")
     val endTime: OffsetDateTime?,
+    val indexcol: Int?,
 ) {
     companion object {
         fun from(data: Timer): TimerApiModel {
             return TimerApiModel(
                 data.startTime,
                 data.endTime,
+                data.indexcol,
             )
         }
     }
@@ -24,6 +26,7 @@ data class TimerApiModel(
             id,
             data.startTime,
             data.endTime,
+            data.indexcol,
         )
     }
 }

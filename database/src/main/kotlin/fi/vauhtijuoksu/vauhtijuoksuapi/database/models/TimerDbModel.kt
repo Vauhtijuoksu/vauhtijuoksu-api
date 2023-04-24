@@ -11,12 +11,14 @@ data class TimerDbModel(
     val startTime: OffsetDateTime?,
     @JsonProperty("end_time")
     val endTime: OffsetDateTime?,
+    val indexcol: Int?,
 ) {
     fun toTimer(): Timer {
         return Timer(
             id,
             startTime,
             endTime,
+            indexcol,
         )
     }
     companion object {
@@ -25,6 +27,7 @@ data class TimerDbModel(
                 timer.id,
                 timer.startTime,
                 timer.endTime,
+                timer.indexcol,
             )
         }
     }

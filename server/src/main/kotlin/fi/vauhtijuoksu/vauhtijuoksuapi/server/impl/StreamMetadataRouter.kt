@@ -99,12 +99,9 @@ class StreamMetadataRouter
                         logger.info("Save to database")
                         return@flatMap future { p: Promise<StreamMetadata> ->
                             db.save(newData)
-                                .onSuccess {
-                                    // return timers from database if no changes were made
-                                    if (newTimers.size == 0) {
-                                        newData.timers = res.timers
-                                    }
-                                    p.complete(newData)
+                                .compose { db.get() }
+                                .onSuccess { resNew ->
+                                    p.complete(resNew)
                                 }
                                 .onFailure(p::fail)
                         }
@@ -126,24 +123,17 @@ class StreamMetadataRouter
         }
         val timerBody = body.getJsonArray("timers")
         if (timerBody != null) {
-            val timerSize = timerBody.size()
-            val updatedTimers = existingTimers.mapIndexed { index, timer ->
-                if (index < timerSize) {
-                    try {
-                        logger.info("Update timer from json")
-                        updateTimersFromJson(timer, timerBody.getJsonObject(index))
-                    } catch (e: InvalidFormatException) {
-                        throw UserError("Invalid request: ${e.message}")
-                    }
+            val updatedTimers: MutableList<Timer> = mutableListOf()
+            for (item in timerBody) {
+                val jsonTimer = item as JsonObject
+                val index = jsonTimer.getInteger("indexcol")
+                val timer = existingTimers.find { it.indexcol == index }
+                if (timer != null) {
+                    newTimers.add(updateTimersFromJson(timer, item))
                 } else {
-                    timer
-                }
-            }
-            if (timerSize > updatedTimers.size) {
-                for (i in updatedTimers.size until timerSize) {
-                    val bt = timerBody.getJsonObject(i)
-                    val startTime = bt.getString("start_time")
-                    val endTime = bt.getString("end_time")
+                    val startTime = jsonTimer.getString("start_time")
+                    val endTime = jsonTimer.getString("end_time")
+                    var index = jsonTimer.getInteger("indexcol")
                     logger.info("Creating new timer")
                     newTimers.add(
                         Timer(
@@ -164,6 +154,7 @@ class StreamMetadataRouter
                             } else {
                                 null
                             },
+                            index,
                         ),
                     )
                 }
@@ -194,6 +185,7 @@ class StreamMetadataRouter
             data.id,
             mergedData.startTime,
             mergedData.endTime,
+            mergedData.indexcol,
         )
     }
 }

@@ -89,7 +89,12 @@ open class MetadataTimerDatabase
             fun valuesStringForTimer(timer: Timer): String {
                 val startTime = if (timer.startTime != null) "'${timer.startTime}'" else null
                 val endTime = if (timer.endTime != null) "'${timer.endTime}'" else null
-                return "('${timer.id}', $startTime, $endTime)"
+                val index = timer.indexcol
+                if (index != null) {
+                    return "('${timer.id}', $startTime, $endTime, $index)"
+                } else {
+                    return "('${timer.id}', $startTime, $endTime)"
+                }
             }
 
             var statement = "INSERT INTO timers VALUES "
@@ -127,10 +132,13 @@ open class MetadataTimerDatabase
                 ZoneId.of("Z"),
             )
         }
+
+        val index = row.getString("indexcol").toInt()
         return Timer(
             UUID.fromString(row.getString("id")),
             startTime,
             endTime,
+            index,
         )
     }
 }

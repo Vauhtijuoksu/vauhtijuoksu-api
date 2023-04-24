@@ -23,6 +23,7 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
             Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")),
             ZoneId.of("Z"),
         ),
+        1,
     )
 
     private val timer2 = Timer(
@@ -35,6 +36,7 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
             Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-07T16:00:00Z")),
             ZoneId.of("Z"),
         ),
+        2,
     )
 
     private val timer3 = Timer(
@@ -47,6 +49,7 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
             Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-08T16:00:00Z")),
             ZoneId.of("Z"),
         ),
+        3,
     )
 
     override fun insertStatement(data: List<Timer>): String {

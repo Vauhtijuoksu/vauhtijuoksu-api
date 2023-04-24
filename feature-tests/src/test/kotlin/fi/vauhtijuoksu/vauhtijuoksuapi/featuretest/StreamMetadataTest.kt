@@ -35,7 +35,8 @@ class StreamMetadataTest {
           "timers": [
                 {            
                     "start_time": "2020-09-21T15:05:47Z",
-                    "end_time": "2020-09-21T16:05:47Z"
+                    "end_time": "2020-09-21T16:05:47Z",
+                    "indexcol": 1
                 }
             ]
         }
@@ -57,7 +58,8 @@ class StreamMetadataTest {
             "timers": [
                 {            
                     "start_time": "2021-09-21T15:05:47Z",
-                    "end_time": "2021-09-21T16:05:47Z"
+                    "end_time": "2021-09-21T16:05:47Z",
+                    "indexcol": 1
                 }
             ]
         }
@@ -157,7 +159,8 @@ class StreamMetadataTest {
                             listOf(
                                 JsonObject()
                                     .put("start_time", "2021-09-21T15:05:47Z")
-                                    .put("end_time", "2021-09-21T16:05:47Z"),
+                                    .put("end_time", "2021-09-21T16:05:47Z")
+                                    .put("indexcol", 1),
                             ),
                         )
                     assertEquals(expectedData, res.bodyAsJsonObject())

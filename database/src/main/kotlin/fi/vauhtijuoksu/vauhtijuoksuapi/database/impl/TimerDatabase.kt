@@ -38,6 +38,7 @@ class TimerDatabase
                         "id" to timer.id,
                         "start_time" to timer.startTime,
                         "end_time" to timer.endTime,
+                        "indexcol" to timer.indexcol,
                     )
                 },
             )

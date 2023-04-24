@@ -31,10 +31,12 @@ class StreamMetadataTest : ServerTestBase() {
         UUID.randomUUID(),
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
+        1,
     )
     private val someApiTimer = TimerApiModel(
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")), ZoneId.of("Z")),
         OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")), ZoneId.of("Z")),
+        1,
     )
     private val someMetadata = StreamMetadata(
         100,
@@ -45,6 +47,17 @@ class StreamMetadataTest : ServerTestBase() {
         listOf(someTimer),
         "Deerboy - Biisi",
     )
+
+    private val someMetadataNoTimer = StreamMetadata(
+        100,
+        someUuid,
+        listOf("save", "norppas"),
+        listOf(1, 0),
+        listOf(100, 120),
+        listOf(),
+        "Deerboy - Biisi",
+    )
+
     private val someMetadataApi = StreamMetaDataApiModel(
         100,
         someUuid,
@@ -69,7 +82,8 @@ class StreamMetadataTest : ServerTestBase() {
     private val jsonTimer = """
             {            
                 "start_time": "2021-09-21T15:05:47.000+00:00",
-                "end_time": "2021-09-21T16:05:47.000+00:00"
+                "end_time": "2021-09-21T16:05:47.000+00:00",
+                "indexcol": 1
             }
     """.trimIndent()
 
@@ -146,7 +160,7 @@ class StreamMetadataTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
-                    verify(metadataTimerDatabase).save(someMetadata)
+                    verify(metadataTimerDatabase).save(someMetadataNoTimer)
                 }
                 testContext.completeNow()
             }
@@ -154,16 +168,18 @@ class StreamMetadataTest : ServerTestBase() {
 
     @Test
     fun `patch saves updated data and responds with new stream metadata`(testContext: VertxTestContext) {
+        lenient().`when`(metadataTimerDatabase.get())
+            .thenReturn(Future.succeededFuture(someMetadataNoTimer.copy(donationGoal = 1000)))
         patchStreamMetadata(JsonObject().put("donation_goal", 1000))
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    val original = StreamMetaDataApiModel.from(someMetadata.copy(donationGoal = 1000))
+                    val original = StreamMetaDataApiModel.from(someMetadataNoTimer.copy(donationGoal = 1000))
                     val response = res.bodyAsJson(StreamMetaDataApiModel::class.java)
                     assertEquals(original, response)
-                    verify(metadataTimerDatabase).save(someMetadata.copy(donationGoal = 1000))
+                    verify(metadataTimerDatabase).save(someMetadataNoTimer.copy(donationGoal = 1000))
                 }
                 testContext.completeNow()
             }
@@ -177,7 +193,7 @@ class StreamMetadataTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    val original = StreamMetaDataApiModel.from(someMetadata.copy(timers = listOf(newTimer)))
+                    val original = StreamMetaDataApiModel.from(someMetadata.copy(timers = listOf(someTimer)))
                     val response = res.bodyAsJson(StreamMetaDataApiModel::class.java)
                     assertEquals(original, response)
                     verify(metadataTimerDatabase).save(someMetadata.copy(timers = listOf(newTimer)))

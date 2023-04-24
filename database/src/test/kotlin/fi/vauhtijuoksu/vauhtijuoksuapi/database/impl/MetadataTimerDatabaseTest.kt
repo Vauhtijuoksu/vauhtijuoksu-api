@@ -60,6 +60,7 @@ class MetadataTimerDatabaseTest {
             Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")),
             ZoneId.of("Z"),
         ),
+        1,
     )
 
     @Container
