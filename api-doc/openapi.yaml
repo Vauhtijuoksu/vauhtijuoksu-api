@@ -192,10 +192,53 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StreamMetadata'
+              $ref: '#/components/schemas/StreamMetadataPatch'
       responses:
         '200':
           $ref: '#/components/responses/StreamMetadataOk'
+  /timers:
+    post:
+      description: Add a new timer object.
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimerInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/TimerOk'
+  /timers/{timerId}:
+    parameters:
+      - name: timerId
+        in: path
+        required: true
+        description: Timer id (uuid).
+        schema:
+          type: string
+          format: uuid
+    patch:
+      description: Patch timer
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimerPatch'
+      responses:
+        '200':
+          $ref: '#/components/responses/TimerOk'
+    delete:
+      description: Delete timer
+      security:
+        - basicAuth: []
+      responses:
+        '204':
+          $ref: '#/components/responses/Empty'
   /player-info:
     get:
       description:
@@ -357,6 +400,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/IncentiveOutput'
+    TimerOk:
+      description: Timers by id (uuid)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Timer'
 
   schemas:
     Donations:
@@ -776,6 +825,10 @@ components:
           items:
             type: object
             properties:
+              id:
+                type: string
+              name:
+                type: string
               start_time:
                 type: string
                 nullable: true
@@ -804,10 +857,54 @@ components:
           - 150
           - 300
         timers:
-          - start_time: '2021-09-21T16:08:47.000+00:00'
+          - id: 91aee618-2c62-42a1-b025-106baf6b71e7
+            start_time: '2021-09-21T16:08:47.000+00:00'
             end_time: '2021-09-22T16:08:47.000+00:00'
-          - start_time: '2021-09-21T16:08:47.000+00:00'
+            name: ykköstimer
+          - id: 91aee618-2c62-42a1-b025-106baf6b71e8
+            start_time: '2021-09-21T16:08:47.000+00:00'
             end_time: null
+    StreamMetadataPatch:
+      type: object
+      properties:
+        donation_goal:
+          type: integer
+        current_game_id:
+          type: string
+          format: uuid
+        now_playing:
+          type: string
+        donatebar_info:
+          type: array
+          items:
+            type: string
+        counters:
+          type: array
+          items:
+            type: integer
+        heart_rates:
+          type: array
+          items:
+            type: integer
+      required:
+        - donation_goal
+      example:
+        donation_goal: 10000
+        current_game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
+        now_playing: Deerboy - Huutia
+        donatebar_info:
+          - lahjota rahhaa
+          - mee töihi :D
+        counters:
+          - 1
+          - 7
+          - 6
+          - 9
+        heart_rates:
+          - 69
+          - 96
+          - 150
+          - 300
     PlayerInfo:
       type: object
       properties:
@@ -1014,6 +1111,67 @@ components:
         example:
           id: 3a896646-70e0-4943-a3e3-01f29d0541f1
           parameter: kalle tetr
+    Timer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+      example:
+        id: 91aee618-2c62-42a1-b025-106baf6b71e7
+        name: ykköstimeri
+        start_time: '2023-09-21T15:05:47.000+00:00'
+        end_time: '2023-09-21T15:05:48.000+00:00'
+    TimerInput:
+      type: object
+      properties:
+        name:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - name
+      example:
+        name: ykköstimeri
+        start_time: '2023-09-21T15:05:47.000+00:00'
+        end_time: '2023-09-21T15:05:48.000+00:00'
+    TimerPatch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+      example:
+        id: 91aee618-2c62-42a1-b025-106baf6b71e7
+        name: ykköstimeri
+        end_time: '2023-09-21T15:05:48.000+00:00'
 
 
   securitySchemes:
