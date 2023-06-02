@@ -184,11 +184,21 @@ class StreamMetadataFeatureTest {
             .flatMap {
                 client.post("/timers")
                     .withAuthenticationAndOrigins()
-                    .sendJson(JsonObject(aTimer))
+                    .sendJson(
+                        JsonObject(aTimer).put("end_time", null),
+                    )
             }
             .verifyStatusCode(201, testContext)
             .map {
-                it.bodyAsJsonObject().getString("id")
+                val id = it.bodyAsJsonObject().getString("id")
+                assertEquals(JsonObject(aTimer).put("end_time", null).put("id", id), it.bodyAsJsonObject())
+                id
+            }
+            .compose { id ->
+                client.patch("/timers/$id")
+                    .withAuthenticationAndOrigins()
+                    .sendJson(JsonObject().put("end_time", JsonObject(aTimer).getString("end_time")))
+                    .map(id)
             }
             .flatMap { id ->
                 client.get("/stream-metadata").send()
