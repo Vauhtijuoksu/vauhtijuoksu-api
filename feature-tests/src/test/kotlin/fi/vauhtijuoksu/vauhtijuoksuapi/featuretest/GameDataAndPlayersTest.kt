@@ -230,4 +230,39 @@ class GameDataAndPlayersTest {
             }
             .onFailure(testContext::failNow)
     }
+
+    @Test
+    @Order(6)
+    fun `modify player info`(testContext: VertxTestContext) {
+        client.patch("/players/$player1Id")
+            .putHeader("Origin", "http://api.localhost")
+            .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+            .sendJson(
+                JsonObject(playerData1)
+                    .put("display_name", "Pekka"),
+            )
+            .map {
+                testContext.verify {
+                    assertEquals(200, it.statusCode())
+                    val expectedResponse = JsonObject(playerData1)
+                        .put("id", player1Id.toString())
+                        .put("display_name", "Pekka")
+                    assertEquals(expectedResponse, it.bodyAsJsonObject())
+                }
+            }
+            .compose {
+                client.get("/players/$player1Id")
+                    .send()
+            }.map {
+                testContext.verify {
+                    assertEquals(200, it.statusCode())
+                    val expectedResponse = JsonObject(playerData1)
+                        .put("id", player1Id.toString())
+                        .put("display_name", "Pekka")
+                    assertEquals(expectedResponse, it.bodyAsJsonObject())
+                }
+                testContext.completeNow()
+            }
+            .onFailure(testContext::failNow)
+    }
 }
