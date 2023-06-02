@@ -83,7 +83,7 @@ jobs:
           path: vauhtijuoksu-api.tar
 
   publish:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && vars.DEPLOY_TO_PROD == 'true'
     needs: build
     runs-on: ubuntu-latest
     steps:
