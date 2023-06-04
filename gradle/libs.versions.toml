@@ -6,7 +6,7 @@ vertx = "4.4.2"
 [libraries]
 # Used in buildSrc
 kotlin-plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21"
-spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:6.18.0"
+spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:6.19.0"
 detekt-plugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.22.0"
 detekt-formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:1.22.0"
 # Used by feature tests to gather coverage
