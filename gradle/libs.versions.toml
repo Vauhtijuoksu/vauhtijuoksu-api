@@ -1,5 +1,5 @@
 [versions]
-jackson = "2.14.2"
+jackson = "2.15.2"
 hoplite = "2.7.3"
 vertx = "4.4.2"
 
