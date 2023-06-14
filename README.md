@@ -49,6 +49,7 @@ The server is accessible at http://api.localhost.
 It's also available with https, using a self-signed certificate. 
 The certificate must be trusted or ignored to access the server.
 The command can be run again to update the deployment to the latest version.
+Default credentials for the api: `vauhtijuoksu`:`vauhtijuoksu`
 
 The cluster can be deleted with:
 ```shell
