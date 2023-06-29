@@ -9,8 +9,8 @@ import io.vertx.core.Future
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.Tuple
 import io.vertx.sqlclient.templates.SqlTemplate
+import jakarta.inject.Inject
 import java.util.Collections
-import javax.inject.Inject
 
 internal class PlayerInfoDatabase
 @Inject constructor(

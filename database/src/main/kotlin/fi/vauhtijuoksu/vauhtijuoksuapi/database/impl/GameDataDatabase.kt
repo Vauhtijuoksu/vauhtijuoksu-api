@@ -10,8 +10,8 @@ import io.vertx.core.Future
 import io.vertx.pgclient.PgPool
 import io.vertx.sqlclient.Tuple
 import io.vertx.sqlclient.templates.SqlTemplate
+import jakarta.inject.Inject
 import java.util.UUID
-import javax.inject.Inject
 import kotlin.NoSuchElementException
 
 internal class GameDataDatabase

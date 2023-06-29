@@ -7,8 +7,8 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.PatchRouter
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.CorsHandler
-import javax.inject.Inject
-import javax.inject.Named
+import jakarta.inject.Inject
+import jakarta.inject.Named
 
 class ModifyPlayerRouter
 @Inject constructor(

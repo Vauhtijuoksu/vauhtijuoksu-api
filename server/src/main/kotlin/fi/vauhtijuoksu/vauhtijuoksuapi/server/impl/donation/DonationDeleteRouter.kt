@@ -6,8 +6,8 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Compa
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.DeleteRouter
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.CorsHandler
-import javax.inject.Inject
-import javax.inject.Named
+import jakarta.inject.Inject
+import jakarta.inject.Named
 
 class DonationDeleteRouter
 @Inject constructor(

@@ -10,10 +10,10 @@ import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.CorsHandler
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import mu.KotlinLogging
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Named
 
 class IncentivePatchRouter
 @Inject constructor(

@@ -9,9 +9,9 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.CorsHandler
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Named
 
 data class ChosenIncentiveApiModel(
     val id: UUID,

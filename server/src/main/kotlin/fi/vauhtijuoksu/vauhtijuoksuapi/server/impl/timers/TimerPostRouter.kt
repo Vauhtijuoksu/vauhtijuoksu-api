@@ -6,9 +6,9 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.PostRouter
 import io.vertx.ext.web.handler.AuthenticationHandler
 import io.vertx.ext.web.handler.CorsHandler
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Named
 
 class TimerPostRouter
 @Inject constructor(

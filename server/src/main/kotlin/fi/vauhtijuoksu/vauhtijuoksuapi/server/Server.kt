@@ -24,10 +24,10 @@ import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.HttpException
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import mu.KotlinLogging
 import java.util.concurrent.CountDownLatch
-import javax.inject.Inject
-import javax.inject.Named
 import kotlin.system.exitProcess
 
 @Suppress("LongParameterList")

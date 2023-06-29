@@ -9,8 +9,8 @@ import io.vertx.core.Future
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.templates.SqlTemplate
 import io.vertx.sqlclient.templates.TupleMapper
+import jakarta.inject.Inject
 import mu.KotlinLogging
-import javax.inject.Inject
 
 class TimerDatabase
 @Inject constructor(
