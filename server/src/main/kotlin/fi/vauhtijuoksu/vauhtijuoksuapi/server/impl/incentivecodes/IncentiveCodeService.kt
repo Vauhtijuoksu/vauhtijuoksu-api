@@ -10,7 +10,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveCode
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveType
 import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class IncentiveCodeService @Inject constructor(
     private val db: GeneratedIncentiveCodeDatabase,

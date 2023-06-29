@@ -5,8 +5,8 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.GetRouter
 import io.vertx.ext.web.handler.CorsHandler
-import javax.inject.Inject
-import javax.inject.Named
+import jakarta.inject.Inject
+import jakarta.inject.Named
 
 class GetPlayersRouter
 @Inject constructor(

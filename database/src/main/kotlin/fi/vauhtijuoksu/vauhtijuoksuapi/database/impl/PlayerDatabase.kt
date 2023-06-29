@@ -9,8 +9,8 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
 import io.vertx.core.Future
 import io.vertx.sqlclient.SqlClient
 import io.vertx.sqlclient.templates.SqlTemplate
+import jakarta.inject.Inject
 import mu.KotlinLogging
-import javax.inject.Inject
 
 class PlayerDatabase
 @Inject constructor(

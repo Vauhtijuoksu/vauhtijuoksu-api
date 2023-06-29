@@ -10,7 +10,7 @@ import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
 import io.vertx.pgclient.PgPool
 import io.vertx.sqlclient.Tuple
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 internal class GeneratedIncentiveCodeDatabaseImpl
 @Inject constructor(

@@ -1,7 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.BaseRouter
-import javax.inject.Inject
+import jakarta.inject.Inject
 
 class GameDataRouter @Inject constructor(
     getRouter: GameDataGetRouter,

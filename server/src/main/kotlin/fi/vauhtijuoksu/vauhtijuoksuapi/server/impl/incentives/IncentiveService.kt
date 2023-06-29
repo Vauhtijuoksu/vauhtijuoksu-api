@@ -10,8 +10,8 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveCode
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveType
 import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
+import jakarta.inject.Inject
 import java.util.UUID
-import javax.inject.Inject
 
 private data class IncentiveCodeAndShare(
     val code: IncentiveCode,

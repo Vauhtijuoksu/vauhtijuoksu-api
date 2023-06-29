@@ -7,8 +7,8 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GeneratedIncentive
 import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
+import jakarta.inject.Inject
 import java.util.UUID
-import javax.inject.Inject
 
 data class DonationWithCodes(
     val donation: Donation,

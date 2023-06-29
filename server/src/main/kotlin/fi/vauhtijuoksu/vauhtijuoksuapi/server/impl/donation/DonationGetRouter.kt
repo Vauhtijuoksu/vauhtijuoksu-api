@@ -7,9 +7,9 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PartialRouter
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Named
 
 class DonationGetRouter
 @Inject constructor(
