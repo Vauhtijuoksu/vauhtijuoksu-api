@@ -16,7 +16,7 @@ kubernetes-client = "io.fabric8:kubernetes-client:6.7.2"
 swagger-generator-plugin = "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.19.2"
 
 # Codegen components
-swagger-ui = "org.webjars:swagger-ui:4.19.1"
+swagger-ui = "org.webjars:swagger-ui:5.1.0"
 
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
