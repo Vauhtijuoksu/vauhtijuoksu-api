@@ -11,6 +11,7 @@ import io.vertx.core.json.jackson.DatabindCodec.mapper
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.AuthenticationHandler
+import io.vertx.ext.web.handler.AuthorizationHandler
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.CorsHandler
 import mu.KotlinLogging
@@ -18,6 +19,7 @@ import java.util.UUID
 
 open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
     private val authenticationHandler: AuthenticationHandler,
+    private val adminRequired: AuthorizationHandler,
     private val authenticatedEndpointCorsHandler: CorsHandler,
     private val db: VauhtijuoksuDatabase<M>,
     private val patchValidator: (M) -> String?,
@@ -30,6 +32,7 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
             .handler(authenticatedEndpointCorsHandler)
             .handler(BodyHandler.create())
             .handler(authenticationHandler)
+            .handler(adminRequired)
             .handler { ctx ->
                 val id: UUID
                 try {

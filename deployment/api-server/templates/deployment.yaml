@@ -27,18 +27,31 @@ spec:
               path: /gamedata
               port: http
           volumeMounts:
-          - name: configuration
-            mountPath: /configuration
-            readOnly: true
+            - name: configuration
+              mountPath: /configuration
+              readOnly: true
+            - name: logging
+              mountPath: /logging
+              readOnly: true
+            - name: htpasswd
+              mountPath: /htpasswd
+              readOnly: true
+          envFrom:
+            - secretRef:
+                name: {{ .Values.redis.secret }}
       volumes:
-      - name: configuration
-        projected:
-          sources:
-          - configMap:
-              name: '{{ include "vauhtijuoksu-api.fullname" . }}-conf'
-          - configMap:
-              name: '{{ include "vauhtijuoksu-api.fullname" . }}-log4j2'
-          - secret:
-              name: {{ .Values.database.secret }}
-          - secret:
-              name: {{ .Values.server.htpasswdSecret }}
+        - name: configuration
+          projected:
+            sources:
+              - configMap:
+                  name: '{{ include "vauhtijuoksu-api.fullname" . }}-conf'
+              - secret:
+                  name: '{{ .Values.database.secret }}'
+              - secret:
+                  name: '{{ .Values.oAuth.secret }}'
+        - name: logging
+          configMap:
+            name: '{{ include "vauhtijuoksu-api.fullname" . }}-log4j2'
+        - name: htpasswd
+          secret:
+            secretName: '{{ .Values.server.htpasswdSecret }}'

@@ -9,6 +9,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.PatchRouter
 import io.vertx.core.Future
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.AuthenticationHandler
+import io.vertx.ext.web.handler.AuthorizationHandler
 import io.vertx.ext.web.handler.CorsHandler
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -18,12 +19,14 @@ import java.util.UUID
 class IncentivePatchRouter
 @Inject constructor(
     authenticationHandler: AuthenticationHandler,
+    adminRequired: AuthorizationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
     private val authenticatedEndpointCorsHandler: CorsHandler,
     db: VauhtijuoksuDatabase<Incentive>,
     private val incentiveService: IncentiveService,
 ) : PatchRouter<Incentive, ApiModel<Incentive>>(
     authenticationHandler,
+    adminRequired,
     authenticatedEndpointCorsHandler,
     db,
     { null }, // Incentive is always valid

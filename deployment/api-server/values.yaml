@@ -14,11 +14,27 @@ database:
   address: postgres-postgresql.default.svc.cluster.local
   port: 5432
   database: vauhtijuoksu-api
-  # Create a secret file. See kind-cluster/secret-conf.yaml for example
-  # Create by running `kubectl create secret generic vauhtijuoksu-api-psql --from-file <path>/secret-conf.yaml`
+  # Create a secret file. See kind-cluster/psql-secret.yaml for example
+  # Create by running `kubectl create secret generic vauhtijuoksu-api-psql --from-file <path>/psql-secret.yaml`
   secret: vauhtijuoksu-api-psql
   user: postgres
   poolSize: 5
+
+oAuth:
+  secret: "vauhtijuoksu-api-oauth"
+  callbackUrl: "https://api.dev.vauhtijuoksu.fi/callback"
+  baseAuthorizationUrl: "https://discord.com"
+  authorizationPath: "/oauth2/authorize"
+  tokenPath:  "/api/oauth2/token"
+  tokenRevocationUrl: "/api/oauth2/token/revoke"
+
+discord:
+  vauhtijuoksuServerId: "558588462060797954"
+  adminRoleId: "1062745397518422046"
+
+redis:
+  host: redis-master.default.svc.cluster.local
+  secret: vauhtijuoksu-api-redis
 
 logging:
   level: info

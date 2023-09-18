@@ -9,12 +9,14 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.AuthenticationHandler
+import io.vertx.ext.web.handler.AuthorizationHandler
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.CorsHandler
 import mu.KotlinLogging
 
 open class PostRouter<M : Model>(
     private val authenticationHandler: AuthenticationHandler,
+    private val adminRequired: AuthorizationHandler,
     private val authenticatedEndpointCorsHandler: CorsHandler,
     private val db: VauhtijuoksuDatabase<M>,
     private val toModel: (JsonObject) -> M,
@@ -28,6 +30,7 @@ open class PostRouter<M : Model>(
             .handler(authenticatedEndpointCorsHandler)
             .handler(BodyHandler.create())
             .handler(authenticationHandler)
+            .handler(adminRequired)
             .handler { ctx ->
                 val record: M
                 try {

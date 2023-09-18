@@ -6,6 +6,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.PatchRouter
 import io.vertx.ext.web.handler.AuthenticationHandler
+import io.vertx.ext.web.handler.AuthorizationHandler
 import io.vertx.ext.web.handler.CorsHandler
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -13,11 +14,13 @@ import jakarta.inject.Named
 class ModifyPlayerRouter
 @Inject constructor(
     authenticationHandler: AuthenticationHandler,
+    adminRequired: AuthorizationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
     private val authenticatedEndpointCorsHandler: CorsHandler,
     db: VauhtijuoksuDatabase<Player>,
 ) : PatchRouter<Player, ApiModel<Player>>(
     authenticationHandler,
+    adminRequired,
     authenticatedEndpointCorsHandler,
     db,
     { null },

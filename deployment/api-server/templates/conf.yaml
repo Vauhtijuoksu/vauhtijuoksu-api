@@ -8,7 +8,7 @@ data:
   conf.yaml: |
     server:
       port: 8080
-      htpasswdFileLocation: /configuration/htpasswd
+      htpasswdFileLocation: /htpasswd/htpasswd
       corsHeader: {{ .Values.server.corsHeader }}
     database:
       database: {{ .Values.database.database }}
@@ -16,3 +16,15 @@ data:
       port: {{ .Values.database.port }}
       user: {{ .Values.database.user }}
       poolSize: {{ .Values.database.poolSize }}
+    oAuth:
+      secret: {{ .Values.oAuth.secret }}
+      callbackUrl: {{ .Values.oAuth.callbackUrl }}
+      baseAuthorizationUrl: {{ .Values.oAuth.baseAuthorizationUrl }}
+      authorizationPath: {{ .Values.oAuth.authorizationPath }}
+      tokenPath: {{ .Values.oAuth.tokenPath }}
+      tokenRevocationUrl: {{ .Values.oAuth.tokenRevocationUrl }}
+    discordClient:
+      vauhtijuoksuServerId: {{ .Values.discord.vauhtijuoksuServerId }}
+      adminRoleId: {{ .Values.discord.adminRoleId }}
+    redis:
+      host: {{ .Values.redis.host }}

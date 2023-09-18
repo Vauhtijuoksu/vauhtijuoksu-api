@@ -2,22 +2,27 @@
 jackson = "2.15.2"
 hoplite = "2.7.5"
 vertx = "4.4.6"
+kotlin = "1.8.22"
+kotest = "5.7.1"
 
 [libraries]
 # Used in buildSrc
-kotlin-plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22"
+kotlin-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin" }
 spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:6.21.0"
 detekt-plugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.1"
 detekt-formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:1.23.1"
 # Used by feature tests to gather coverage
 jacoco-core = "org.jacoco:org.jacoco.core:0.8.10"
-jacoco-agent = { group  = "org.jacoco", name = "org.jacoco.agent", version = "0.8.10" }
+jacoco-agent = { group = "org.jacoco", name = "org.jacoco.agent", version = "0.8.10" }
 kubernetes-client = "io.fabric8:kubernetes-client:6.8.1"
 swagger-generator-plugin = "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.19.2"
 
 # Codegen components
 swagger-ui = "org.webjars:swagger-ui:5.7.2"
 
+arrow-kt = "io.arrow-kt:arrow-core:1.2.0"
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.6.0" }
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
 jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
@@ -28,11 +33,14 @@ hoplite-core = { group = "com.sksamuel.hoplite", name = "hoplite-core", version.
 hoplite-yaml = { group = "com.sksamuel.hoplite", name = "hoplite-yaml", version.ref = "hoplite" }
 mu-logging = "io.github.microutils:kotlin-logging-jvm:3.0.5"
 vertx-auth-htpasswd = { group = "io.vertx", name = "vertx-auth-htpasswd", version.ref = "vertx" }
+vertx-auth-oauth = { group = "io.vertx", name = "vertx-auth-oauth2", version.ref = "vertx" }
 vertx-core = { group = "io.vertx", name = "vertx-core", version.ref = "vertx" }
 vertx-web-core = { group = "io.vertx", name = "vertx-web", version.ref = "vertx" }
 vertx-lang-kotlin = { group = "io.vertx", name = "vertx-lang-kotlin", version.ref = "vertx" }
+vertx-lang-kotlincoroutines = { group = "io.vertx", name = "vertx-lang-kotlin-coroutines", version.ref = "vertx" }
 vertx-pg-client = { group = "io.vertx", name = "vertx-pg-client", version.ref = "vertx" }
 vertx-sql-client-templates = { group = "io.vertx", name = "vertx-sql-client-templates", version.ref = "vertx" }
+vertx-session-redis = { group = "io.vertx", name = "vertx-web-sstore-redis", version.ref = "vertx" }
 flyway-core = "org.flywaydb:flyway-core:9.22.3"
 postgresql = "org.postgresql:postgresql:42.6.0"
 jakarta-validation-api = 'jakarta.validation:jakarta.validation-api:3.0.2'
@@ -43,7 +51,7 @@ jackson-dataformat-yaml = { group = "com.fasterxml.jackson.dataformat", name = "
 
 # Test
 junit-bom = "org.junit:junit-bom:5.10.0"
-junit-jupiter-api = { group ="org.junit.jupiter", name = "junit-jupiter-api" }
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api" }
 junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine" }
 testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version = "1.19.1" }
 testcontainers-core = { group = "org.testcontainers", name = "testcontainers" }
@@ -54,3 +62,7 @@ vertx-web-client = { group = "io.vertx", name = "vertx-web-client", version.ref 
 mockito-bom = { group = "org.mockito", name = "mockito-bom", version = "5.5.0" }
 mockito-core = { group = "org.mockito", name = "mockito-core" }
 mockito-junit-jupiter = { group = "org.mockito", name = "mockito-junit-jupiter" }
+kotest-assertions = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
+wirewock = { group = "org.wiremock", name = "wiremock", version = "3.0.4" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.7.3" }
+mock-oauth = "no.nav.security:mock-oauth2-server:2.0.0"

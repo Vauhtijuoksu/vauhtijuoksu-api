@@ -91,12 +91,33 @@ tasks {
                 // Postgres secrets for vauhtijuoksu api. Created manually on production environment
                 exec {
                     workingDir = projectDir
-                    bashCommand("kubectl create secret generic vauhtijuoksu-api-psql --from-file kind-cluster/secret-conf.yaml")
+                    bashCommand("kubectl create secret generic vauhtijuoksu-api-psql --from-file kind-cluster/psql-secret.yaml")
                 }
                 exec {
                     workingDir = projectDir
                     bashCommand("kubectl create secret generic vauhtijuoksu-api-htpasswd --from-file kind-cluster/htpasswd")
                 }
+                // Install redis
+                exec {
+                    bashCommand(
+                        """
+                        kubectl create secret generic --from-literal=REDIS__PASSWORD=topsecret vauhtijuoksu-api-redis
+                        helm upgrade --install redis oci://registry-1.docker.io/bitnamicharts/redis \
+                            --set architecture=standalone \
+                            --set auth.existingSecret=vauhtijuoksu-api-redis \
+                            --set auth.existingSecretPasswordKey=REDIS__PASSWORD \
+                            --version 18.1.5
+                        """.trimIndent(),
+                    )
+                }
+                // Install OAuth secret. Fill in the values in the secret if you wish to try OAuth
+                val secret = File("$projectDir/kind-cluster/oauth-secret.yaml")
+                val secretTemplate = File("$projectDir/kind-cluster/oauth-secret-template.yaml")
+                val oAuthSecret = if (secret.exists()) secret else secretTemplate
+                exec {
+                    bashCommand("kubectl create secret generic vauhtijuoksu-api-oauth --from-file ${oAuthSecret.path}")
+                }
+
                 // Wait for ingress
                 exec {
                     workingDir = projectDir

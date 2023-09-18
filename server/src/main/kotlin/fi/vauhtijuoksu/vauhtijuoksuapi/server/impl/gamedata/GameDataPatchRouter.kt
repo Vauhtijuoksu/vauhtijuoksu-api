@@ -5,6 +5,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.PatchRouter
 import io.vertx.ext.web.handler.AuthenticationHandler
+import io.vertx.ext.web.handler.AuthorizationHandler
 import io.vertx.ext.web.handler.CorsHandler
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -12,12 +13,14 @@ import jakarta.inject.Named
 class GameDataPatchRouter
 @Inject constructor(
     authenticationHandler: AuthenticationHandler,
+    adminRequired: AuthorizationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
     authenticatedEndpointCorsHandler: CorsHandler,
     db: VauhtijuoksuDatabase<GameData>,
     gamedataPatchInputValidator: GameDataPatchInputValidator,
 ) : PatchRouter<GameData, GameDataApiModel>(
     authenticationHandler,
+    adminRequired,
     authenticatedEndpointCorsHandler,
     db,
     gamedataPatchInputValidator::validate,
