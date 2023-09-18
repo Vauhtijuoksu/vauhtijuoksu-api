@@ -7,11 +7,13 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PartialRouter
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.AuthenticationHandler
+import io.vertx.ext.web.handler.AuthorizationHandler
 import io.vertx.ext.web.handler.CorsHandler
 import java.util.UUID
 
 open class DeleteRouter<M : Model>(
     private val authenticationHandler: AuthenticationHandler,
+    private val adminRequired: AuthorizationHandler,
     private val authenticatedEndpointCorsHandler: CorsHandler,
     private val db: VauhtijuoksuDatabase<M>,
 ) : PartialRouter {
@@ -19,6 +21,7 @@ open class DeleteRouter<M : Model>(
         router.delete("$basepath/:id")
             .handler(authenticatedEndpointCorsHandler)
             .handler(authenticationHandler)
+            .handler(adminRequired)
             .handler { ctx ->
                 val id: UUID
                 try {

@@ -10,6 +10,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Compa
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.RedisConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationPatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationPostInputValidator
@@ -19,14 +20,16 @@ import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerOptions
-import io.vertx.ext.auth.authentication.AuthenticationProvider
-import io.vertx.ext.auth.htpasswd.HtpasswdAuth
-import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.AuthenticationHandler
-import io.vertx.ext.web.handler.BasicAuthHandler
 import io.vertx.ext.web.handler.CorsHandler
+import io.vertx.ext.web.handler.SessionHandler
+import io.vertx.ext.web.sstore.LocalSessionStore
+import io.vertx.ext.web.sstore.SessionStore
+import io.vertx.ext.web.sstore.redis.RedisSessionStore
+import io.vertx.redis.client.Redis
+import io.vertx.redis.client.RedisOptions
 import jakarta.inject.Named
+import javax.annotation.Nullable
 
 class ApiModule : AbstractModule() {
 
@@ -39,58 +42,56 @@ class ApiModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun getVertx(): Vertx {
-        return Vertx.vertx()
+    fun getVertx(): Vertx = Vertx.vertx()
+
+    @Provides
+    @Singleton
+    fun getRouter(vertx: Vertx): Router = Router.router(vertx)
+
+    @Provides
+    @Singleton
+    fun getHttpServer(vertx: Vertx, conf: ServerConfiguration): HttpServer =
+        vertx.createHttpServer(HttpServerOptions().setPort(conf.port))
+
+    @Provides
+    @Singleton
+    fun getSessionStore(vertx: Vertx, @Nullable redisConf: RedisConfiguration?): SessionStore {
+        return if (redisConf != null) {
+            RedisSessionStore.create(
+                vertx,
+                Redis.createClient(
+                    vertx,
+                    RedisOptions().setEndpoints(listOf("redis://${redisConf.host}")).setPassword(redisConf.password),
+                ),
+            )
+        } else {
+            LocalSessionStore.create(vertx)
+        }
     }
 
     @Provides
     @Singleton
-    fun getRouter(vertx: Vertx): Router {
-        return Router.router(vertx)
-    }
-
-    @Provides
-    @Singleton
-    fun getHttpServer(vertx: Vertx, conf: ServerConfiguration): HttpServer {
-        return vertx.createHttpServer(HttpServerOptions().setPort(conf.port))
-    }
-
-    @Provides
-    @Singleton
-    fun getAuthenticationProvider(vertx: Vertx, conf: ServerConfiguration): AuthenticationProvider {
-        return HtpasswdAuth.create(vertx, HtpasswdAuthOptions().setHtpasswdFile(conf.htpasswdFileLocation))
-    }
-
-    @Provides
-    @Singleton
-    fun getAuthenticationHandler(authenticationProvider: AuthenticationProvider): AuthenticationHandler {
-        return BasicAuthHandler.create(authenticationProvider)
-    }
+    fun getSessionHandler(sessionStore: SessionStore): SessionHandler = SessionHandler.create(sessionStore)
 
     @Provides
     @Singleton
     @Named(AUTHENTICATED_CORS)
-    fun getCorsHandlerAuth(conf: ServerConfiguration): CorsHandler {
-        return CorsHandler
-            .create()
-            .addRelativeOrigin(conf.corsHeader)
-            .allowCredentials(true)
+    fun getCorsHandlerAuth(conf: ServerConfiguration): CorsHandler =
+        CorsHandler.create().addRelativeOrigin(conf.corsHeader).allowCredentials(true)
             .allowedMethod(HttpMethod.GET)
             .allowedMethod(HttpMethod.POST)
             .allowedMethod(HttpMethod.OPTIONS)
             .allowedMethod(HttpMethod.PATCH)
             .allowedMethod(HttpMethod.DELETE)
-    }
 
     @Provides
     @Singleton
     @Named(PUBLIC_CORS)
-    fun getCorsHandlerPublic(): CorsHandler {
-        return CorsHandler.create()
+    fun getCorsHandlerPublic(): CorsHandler =
+        CorsHandler.create()
             .allowedMethod(HttpMethod.GET)
             .allowedMethod(HttpMethod.POST)
             .allowedMethod(HttpMethod.OPTIONS)
             .allowedMethod(HttpMethod.PATCH)
             .allowedMethod(HttpMethod.DELETE)
-    }
 }

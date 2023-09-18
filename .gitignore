@@ -7,3 +7,5 @@ build
 .idea
 
 python
+
+deployment/kind-cluster/oauth-secret.yaml

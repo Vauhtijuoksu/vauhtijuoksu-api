@@ -56,6 +56,10 @@ The cluster can be deleted with:
 ./gradlew tearDownCluster
 ```
 
+### Testing OAuth on the local cluster
+Copy `deployment/kind-cluster/oauth-secret-template.yaml` withouth the `-template` suffix and copy the values from
+Discord developer site.
+
 ## Feature tests
 
 Feature tests are run against a local kind cluster by running at project root

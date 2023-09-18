@@ -2,3 +2,9 @@ image:
   registry:
 server:
   corsHeader: http(s)?://api.localhost(:\d{1,5})?$
+oAuth:
+  callbackUrl: "https://api.localhost/callback"
+  baseAuthorizationUrl: "https://discord.com"
+  authorizationPath: "/oauth2/authorize"
+  tokenPath:  "/api/oauth2/token"
+  tokenRevocationUrl: "/api/oauth2/token/revoke"

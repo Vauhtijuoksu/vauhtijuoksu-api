@@ -5,18 +5,21 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.DeleteRouter
 import io.vertx.ext.web.handler.AuthenticationHandler
+import io.vertx.ext.web.handler.AuthorizationHandler
 import io.vertx.ext.web.handler.CorsHandler
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class GameDataDeleteRouter @Inject constructor(
-    private val authenticationHandler: AuthenticationHandler,
+    authenticationHandler: AuthenticationHandler,
+    adminRequired: AuthorizationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    private val authenticatedEndpointCorsHandler: CorsHandler,
-    private val db: VauhtijuoksuDatabase<GameData>,
+    authenticatedEndpointCorsHandler: CorsHandler,
+    db: VauhtijuoksuDatabase<GameData>,
 ) :
     DeleteRouter<GameData>(
         authenticationHandler,
+        adminRequired,
         authenticatedEndpointCorsHandler,
         db,
     )

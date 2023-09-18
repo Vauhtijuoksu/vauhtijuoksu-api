@@ -16,6 +16,7 @@ buildscript {
 
 dependencies {
     implementation(libs.kotlin.plugin)
+    implementation(libs.kotlin.serialization)
     implementation(libs.spotless.plugin)
     implementation(libs.detekt.plugin)
     implementation(libs.swagger.generator.plugin)

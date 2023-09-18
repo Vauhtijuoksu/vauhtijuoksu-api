@@ -116,7 +116,8 @@ tasks {
             }
             KubernetesClientBuilder().build().use { k8s ->
                 logger.debug("Patching deployment")
-                val vauhtijuoksuApiDeployment = k8s.apps().deployments().inNamespace("default").withName("vauhtijuoksu-api")
+                val vauhtijuoksuApiDeployment =
+                    k8s.apps().deployments().inNamespace("default").withName("vauhtijuoksu-api")
                 vauhtijuoksuApiDeployment.patch(patch)
                 logger.debug("Deployment patched")
             }

@@ -7,6 +7,7 @@ plugins {
     id("vauhtijuoksu-api.implementation-conventions")
     id("application")
     `jacoco-report-aggregation`
+    kotlin("plugin.serialization")
 }
 
 dependencies {
@@ -14,16 +15,22 @@ dependencies {
     implementation(project(path = ":database-api"))
     implementation(project(path = ":database"))
 
+    implementation(libs.arrow.kt)
     implementation(libs.guice)
+    implementation(libs.kotlinx.serialization)
     implementation(libs.jackson.datatype.jsr310)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.hoplite.core)
     implementation(libs.hoplite.yaml)
     implementation(libs.mu.logging)
     implementation(libs.vertx.auth.htpasswd)
+    implementation(libs.vertx.auth.oauth)
     implementation(libs.vertx.core)
-    implementation(libs.vertx.web.core)
     implementation(libs.vertx.lang.kotlin)
+    implementation(libs.vertx.lang.kotlincoroutines)
+    implementation(libs.vertx.web.core)
+    implementation(libs.vertx.web.client)
+    implementation(libs.vertx.session.redis)
     implementation(libs.jakarta.validation.api)
 
     runtimeOnly(libs.jackson.dataformat.yaml)
@@ -32,15 +39,18 @@ dependencies {
 
     testImplementation(project(path = ":test-data"))
 
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.vertx.junit5)
-    testImplementation(libs.vertx.web.client)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.junit.jupiter)
+    testImplementation(libs.kotest.assertions)
+    testImplementation(libs.wirewock)
+    testImplementation(libs.mock.oauth)
 }
 
 application {
     mainClass.set("fi.vauhtijuoksu.vauhtijuoksuapi.server.ServerKt")
-    applicationDefaultJvmArgs = listOf("-Dlog4j2.configurationFile=/configuration/log4j2.yaml")
+    applicationDefaultJvmArgs = listOf("-Dlog4j2.configurationFile=/logging/log4j2.yaml")
 }
 
 val dockerBuild by tasks.registering {

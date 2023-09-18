@@ -2,7 +2,10 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
+import com.google.inject.Injector
+import com.google.inject.Module
 import com.google.inject.TypeLiteral
+import com.google.inject.util.Providers
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.GeneratedIncentiveCodeDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
@@ -14,6 +17,9 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.PlayerInfo
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.DiscordClientConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.OAuthConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.RedisConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
@@ -68,6 +74,7 @@ open class ServerTestBase {
 
     @TempDir
     lateinit var tmpDir: File
+    lateinit var htpasswdFile: String
 
     protected val username = "vauhtijuoksu"
     protected val password = "vauhtijuoksu"
@@ -81,38 +88,65 @@ open class ServerTestBase {
         return port
     }
 
+    /**
+     * Used in AuthTest
+     */
+    open fun oauthServerPort() = 0
+
+    fun oAuthConfiguration(serverPort: Int): OAuthConfiguration =
+        OAuthConfiguration(
+            "id",
+            "secret",
+            "http://localhost:$serverPort/callback",
+            "http://localhost:${oauthServerPort()}",
+            scopes = listOf("openid"), // The mock OAuth server requires this scope
+        )
+
+    open fun modules(serverPort: Int): List<Module> = listOf(
+        ApiModule(),
+        AuthModule(),
+        object : AbstractModule() {
+            override fun configure() {
+                bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
+                bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
+                bind(object : TypeLiteral<VauhtijuoksuDatabase<Timer>>() {}).toInstance(timerDb)
+                bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).toInstance(streamMetadataDb)
+                bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).toInstance(playerInfoDb)
+                bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
+                bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
+                bind(object : TypeLiteral<StreamMetadataDatabase>() {}).toInstance(streamMetadataDatabase)
+                bind(object : TypeLiteral<VauhtijuoksuDatabase<Player>>() {}).toInstance(playerDatabase)
+                bind(ServerConfiguration::class.java).toInstance(
+                    ServerConfiguration(
+                        serverPort,
+                        htpasswdFile,
+                        corsHeaderUrl,
+                    ),
+                )
+                bind(RedisConfiguration::class.java).toProvider(Providers.of(null))
+                bind(OAuthConfiguration::class.java).toInstance(oAuthConfiguration(serverPort))
+                bind(DiscordClientConfiguration::class.java).toInstance(
+                    DiscordClientConfiguration(
+                        vauhtijuoksuServerId = "serverId",
+                        adminRoleId = "adminRoleId",
+                    ),
+                )
+            }
+        },
+    )
+
+    open fun injector(modules: List<Module>): Injector = Guice.createInjector(modules)
+
     @BeforeEach
     fun beforeEach(testContext: VertxTestContext) {
-        val htpasswdFile = "${tmpDir.path}/.htpasswd"
+        htpasswdFile = "${tmpDir.path}/.htpasswd"
         val writer = BufferedWriter(FileWriter(File(htpasswdFile)))
         // Pre-generated credentials vauhtijuoksu / vauhtijuoksu
         writer.write("vauhtijuoksu:{SHA}Iih8iFrD8jPkj1eYEw6tJmTbHrg=")
         writer.close()
 
         val serverPort = getFreePort()
-        val injector = Guice.createInjector(
-            ApiModule(),
-            object : AbstractModule() {
-                override fun configure() {
-                    bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
-                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
-                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Timer>>() {}).toInstance(timerDb)
-                    bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).toInstance(streamMetadataDb)
-                    bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).toInstance(playerInfoDb)
-                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
-                    bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
-                    bind(object : TypeLiteral<StreamMetadataDatabase>() {}).toInstance(streamMetadataDatabase)
-                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Player>>() {}).toInstance(playerDatabase)
-                    bind(ServerConfiguration::class.java).toInstance(
-                        ServerConfiguration(
-                            serverPort,
-                            htpasswdFile,
-                            corsHeaderUrl,
-                        ),
-                    )
-                }
-            },
-        )
+        val injector = Guice.createInjector(modules(serverPort))
 
         vertx = injector.getInstance(Vertx::class.java)
         server = injector.getInstance(Server::class.java)

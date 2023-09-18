@@ -8,7 +8,7 @@ class PlayersRouter
     getPlayersRouter: GetPlayersRouter,
     addPlayerRouter: AddPlayerRouter,
     modifyPlayerRouter: ModifyPlayerRouter,
-    removePLayerRouter: RemovePLayerRouter,
+    removePLayerRouter: RemovePlayerRouter,
 ) : BaseRouter(
     "/players",
     listOf(
