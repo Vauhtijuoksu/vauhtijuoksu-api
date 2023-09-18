@@ -7,11 +7,9 @@ Created by following and improvising, based on Microsoft tutorials here: https:/
 DNS_LABEL=dev.vauhtijuoksu.fi
 
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-helm install nginx-ingress ingress-nginx/ingress-nginx \
+helm install --upgrade nginx-ingress ingress-nginx/ingress-nginx \
     --set controller.replicaCount=1 \
-    --set controller.nodeSelector."kubernetes\.io/os"=linux \
-    --set controller.admissionWebhooks.patch.nodeSelector."kubernetes\.io/os"=linux \
-    --set defaultBackend.nodeSelector."kubernetes\.io/os"=linux \
+    --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz \
     --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-dns-label-name"=$DNS_LABEL
 
 helm repo add jetstack https://charts.jetstack.io
