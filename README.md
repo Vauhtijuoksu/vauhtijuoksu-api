@@ -5,9 +5,9 @@ These are required to run all the commands mentioned here.
 Some commands might work without all of these if you're an adventurous person.
 * java 17 - Install Java and point JAVA_HOME environment variable to your installation directory
 * jq
-* kubectl 1.20
+* kubectl 1.25
 * helm 3
-* kind
+* kind 0.17.0
 * bash
 
 ## API documentation
