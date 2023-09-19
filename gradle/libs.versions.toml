@@ -1,6 +1,6 @@
 [versions]
 jackson = "2.15.2"
-hoplite = "2.7.4"
+hoplite = "2.7.5"
 vertx = "4.4.5"
 
 [libraries]
