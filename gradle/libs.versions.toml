@@ -8,7 +8,7 @@ vertx = "4.4.5"
 kotlin-plugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22"
 spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:6.21.0"
 detekt-plugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.0"
-detekt-formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0"
+detekt-formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:1.23.1"
 # Used by feature tests to gather coverage
 jacoco-core = "org.jacoco:org.jacoco.core:0.8.10"
 jacoco-agent = { group  = "org.jacoco", name = "org.jacoco.agent", version = "0.8.10" }
