@@ -33,7 +33,7 @@ vertx-web-core = { group = "io.vertx", name = "vertx-web", version.ref = "vertx"
 vertx-lang-kotlin = { group = "io.vertx", name = "vertx-lang-kotlin", version.ref = "vertx" }
 vertx-pg-client = { group = "io.vertx", name = "vertx-pg-client", version.ref = "vertx" }
 vertx-sql-client-templates = { group = "io.vertx", name = "vertx-sql-client-templates", version.ref = "vertx" }
-flyway-core = "org.flywaydb:flyway-core:9.22.2"
+flyway-core = "org.flywaydb:flyway-core:9.22.3"
 postgresql = "org.postgresql:postgresql:42.6.0"
 jakarta-validation-api = 'jakarta.validation:jakarta.validation-api:3.0.2'
 
