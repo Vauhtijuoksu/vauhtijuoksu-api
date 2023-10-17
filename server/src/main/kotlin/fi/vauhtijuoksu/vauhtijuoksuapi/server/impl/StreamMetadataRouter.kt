@@ -14,6 +14,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.AuthenticationHandler
+import io.vertx.ext.web.handler.AuthorizationHandler
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.CorsHandler
 import jakarta.inject.Inject
@@ -27,6 +28,7 @@ class StreamMetadataRouter
     private val db: StreamMetadataDatabase,
     private val timerDb: VauhtijuoksuDatabase<Timer>,
     private val authenticationHandler: AuthenticationHandler,
+    private val adminRequired: AuthorizationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
     private val authenticatedEndpointCorsHandler: CorsHandler,
     @Named(DependencyInjectionConstants.PUBLIC_CORS)
@@ -83,6 +85,7 @@ class StreamMetadataRouter
             .handler(authenticatedEndpointCorsHandler)
             .handler(BodyHandler.create())
             .handler(authenticationHandler)
+            .handler(adminRequired)
             .handler { ctx ->
                 db.get()
                     .flatMap { res ->
