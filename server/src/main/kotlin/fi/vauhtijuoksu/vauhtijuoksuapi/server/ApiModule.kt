@@ -83,6 +83,7 @@ class ApiModule : AbstractModule() {
             .allowedMethod(HttpMethod.OPTIONS)
             .allowedMethod(HttpMethod.PATCH)
             .allowedMethod(HttpMethod.DELETE)
+            .allowCredentials(true)
 
     @Provides
     @Singleton
