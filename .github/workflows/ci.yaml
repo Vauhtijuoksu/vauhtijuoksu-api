@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "VERSION=$(./scripts/version.sh)" >> $GITHUB_ENV
       - name: Build and test
-        uses: eskatos/gradle-command-action@v2.8.1
+        uses: eskatos/gradle-command-action@v2.12.0
         with:
           arguments: build --info
       - name: Add coverage report to PR
