@@ -15,7 +15,7 @@ detekt-formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:1.23.4"
 # Used by feature tests to gather coverage
 jacoco-core = "org.jacoco:org.jacoco.core:0.8.11"
 jacoco-agent = { group = "org.jacoco", name = "org.jacoco.agent", version = "0.8.10" }
-kubernetes-client = "io.fabric8:kubernetes-client:6.8.1"
+kubernetes-client = "io.fabric8:kubernetes-client:6.10.0"
 swagger-generator-plugin = "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.19.2"
 
 # Codegen components
