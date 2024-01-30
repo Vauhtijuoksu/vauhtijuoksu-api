@@ -3,7 +3,7 @@ jackson = "2.15.3"
 hoplite = "2.7.5"
 vertx = "4.4.6"
 kotlin = "1.9.22"
-kotest = "5.7.2"
+kotest = "5.8.0"
 
 [libraries]
 # Used in buildSrc
