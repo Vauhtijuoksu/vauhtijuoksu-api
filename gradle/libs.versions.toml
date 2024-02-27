@@ -19,7 +19,7 @@ kubernetes-client = "io.fabric8:kubernetes-client:6.8.1"
 swagger-generator-plugin = "gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.19.2"
 
 # Codegen components
-swagger-ui = "org.webjars:swagger-ui:5.7.2"
+swagger-ui = "org.webjars:swagger-ui:5.11.8"
 
 arrow-kt = "io.arrow-kt:arrow-core:1.2.1"
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.6.2" }
