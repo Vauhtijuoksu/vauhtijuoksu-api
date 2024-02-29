@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: adopt
-          java-version: 17
+          java-version: 21
       - name: Install a newer curl
         # Integration tests utilize --retry-all-errors, which is added in curl 7.71.0
         run: |
