@@ -63,6 +63,6 @@ mockito-bom = { group = "org.mockito", name = "mockito-bom", version = "5.10.0" 
 mockito-core = { group = "org.mockito", name = "mockito-core" }
 mockito-junit-jupiter = { group = "org.mockito", name = "mockito-junit-jupiter" }
 kotest-assertions = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
-wirewock = { group = "org.wiremock", name = "wiremock", version = "3.0.4" }
+wirewock = { group = "org.wiremock", name = "wiremock", version = "3.4.2" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.7.3" }
 mock-oauth = "no.nav.security:mock-oauth2-server:2.0.0"
