@@ -3,7 +3,7 @@
 ## Requirements
 These are required to run all the commands mentioned here. 
 Some commands might work without all of these if you're an adventurous person.
-* java 17 - Install Java and point JAVA_HOME environment variable to your installation directory
+* java 21 - Install Java and point JAVA_HOME environment variable to your installation directory
 * jq
 * kubectl 1.25
 * helm 3
