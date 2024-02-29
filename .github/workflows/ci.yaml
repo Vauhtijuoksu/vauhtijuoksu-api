@@ -29,10 +29,10 @@ jobs:
       - name: Set version
         run: |
           echo "VERSION=$(./scripts/version.sh)" >> $GITHUB_ENV
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3.1.0
       - name: Build and test
-        uses: eskatos/gradle-command-action@v2.12.0
-        with:
-          arguments: build --info
+        run: ./gradlew build --info
       - name: Add coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
         uses: madrapps/jacoco-report@v1.6
