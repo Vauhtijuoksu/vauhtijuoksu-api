@@ -42,7 +42,7 @@ vertx-pg-client = { group = "io.vertx", name = "vertx-pg-client", version.ref = 
 vertx-sql-client-templates = { group = "io.vertx", name = "vertx-sql-client-templates", version.ref = "vertx" }
 vertx-session-redis = { group = "io.vertx", name = "vertx-web-sstore-redis", version.ref = "vertx" }
 flyway-core = "org.flywaydb:flyway-core:9.22.3"
-postgresql = "org.postgresql:postgresql:42.6.0"
+postgresql = "org.postgresql:postgresql:42.7.2"
 jakarta-validation-api = 'jakarta.validation:jakarta.validation-api:3.0.2'
 
 log4j-slf4j18-impl = "org.apache.logging.log4j:log4j-slf4j18-impl:2.18.0"
