@@ -2,7 +2,7 @@
 jackson = "2.16.1"
 hoplite = "2.7.5"
 vertx = "4.5.4"
-kotlin = "1.9.22"
+kotlin = "1.9.23"
 kotest = "5.8.0"
 
 [libraries]
