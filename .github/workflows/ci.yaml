@@ -99,7 +99,7 @@ jobs:
         with:
           name: swagger ui
           path: swagger-ui
-      - uses: azure/login@v1
+      - uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Upload rendered specification to Azure
