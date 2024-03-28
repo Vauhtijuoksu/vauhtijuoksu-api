@@ -79,13 +79,13 @@ class PlayerInfoApiTest : ServerTestBase() {
     @Test
     fun `patch accepts vauhtijuoksu origins`() = runTest {
         client.patch(playerInfoEndpoint)
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject())
             .coAwait()
             .let { res ->
                 assertEquals(200, res.statusCode())
-                assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+                assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
                 verify(playerInfoDb).save(somePlayerInfo)
             }
     }

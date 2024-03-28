@@ -79,7 +79,8 @@ open class ServerTestBase {
     protected val username = "vauhtijuoksu"
     protected val password = "vauhtijuoksu"
 
-    protected val corsHeaderUrl = "https://vauhtijuoksu.fi"
+    protected val corsHeaderUrl = "https://(\\w+[.])?vauhtijuoksu.fi"
+    protected val allowedOrigin = "https://newapi.vauhtijuoksu.fi"
 
     private fun getFreePort(): Int {
         val sock = ServerSocket(0)
@@ -121,6 +122,7 @@ open class ServerTestBase {
                         serverPort,
                         htpasswdFile,
                         corsHeaderUrl,
+                        false,
                     ),
                 )
                 bind(RedisConfiguration::class.java).toProvider(Providers.of(null))

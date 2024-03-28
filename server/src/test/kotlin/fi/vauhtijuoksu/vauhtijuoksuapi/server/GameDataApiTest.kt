@@ -147,14 +147,14 @@ class GameDataApiTest : ServerTestBase() {
         `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture())
         val body = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         body.remove("id")
-        client.post("/gamedata").putHeader("Origin", "https://vauhtijuoksu.fi")
+        client.post("/gamedata").putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(201, res.statusCode())
-                    assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+                    assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
                 }
                 testContext.completeNow()
             }
