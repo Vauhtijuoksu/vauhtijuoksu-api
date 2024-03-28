@@ -2,21 +2,22 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 
 import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
-import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.sqlclient.SqlClient
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.net.URL
 import java.time.Instant
-import java.util.Date
-import java.util.UUID
+import java.util.*
 
 class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
 
@@ -79,73 +80,54 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
     }
 
     @Test
-    fun testUpdate(testContext: VertxTestContext) {
+    fun testUpdate() = runTest {
         val oldId = TestGameData.gameData1.id
         val newGame = TestGameData.gameData2.copy(id = oldId)
         db.update(TestGameData.gameData2.copy(id = oldId))
-            .compose {
+            .flatMap {
                 db.getById(oldId)
-            }
-            .map {
-                testContext.verify {
-                    assertEquals(it, newGame)
-                }
-            }
-            .compose {
+            }.flatMap {
+                assertEquals(it, newGame)
                 db.getById(TestGameData.gameData2.id)
-            }
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(res, TestGameData.gameData2)
-                    assertNotEquals(oldId, TestGameData.gameData2.id)
-                }
-                testContext.completeNow()
-            }
+            }.map { res ->
+                assertEquals(res, TestGameData.gameData2)
+                assertNotEquals(oldId, TestGameData.gameData2.id)
+            }.coAwait()
     }
 
     @Test
-    fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
-        db.update(TestGameData.gameData3)
-            .failOnSuccess(testContext)
-            .recoverIfMissingEntity(testContext)
-            .compose { db.getAll() }
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(listOf(TestGameData.gameData1, TestGameData.gameData2), res)
-                }
-                testContext.completeNow()
+    fun testUpdatingNonExistingRecord() = runTest {
+        assertThrows<MissingEntityException> {
+            db.update(TestGameData.gameData3)
+                .coAwait()
+        }
+
+        db.getAll()
+            .map {
+                assertEquals(listOf(TestGameData.gameData1, TestGameData.gameData2), it)
             }
+            .coAwait()
     }
 
     @Test
-    fun testUpdateChangePlayers(testContext: VertxTestContext) {
+    fun testUpdateChangePlayers() = runTest {
         assertEquals(listOf(TestPlayer.player1.id), existingRecord1().players)
         val playerChangedRecord = existingRecord1().copy(players = listOf(TestPlayer.player2.id))
         db.update(playerChangedRecord)
-            .compose {
+            .flatMap {
                 db.getById(playerChangedRecord.id)
-            }
-            .map {
-                testContext.verify {
-                    assertEquals(playerChangedRecord, it)
-                }
-                testContext.completeNow()
-            }
-            .onFailure(testContext::failNow)
+            }.map {
+                assertEquals(playerChangedRecord, it)
+            }.coAwait()
     }
 
     @Test
-    fun `player order should stay consistent when players are in multiple games`(testContext: VertxTestContext) {
+    fun `player order should stay consistent when players are in multiple games`() = runTest {
         val playerDb = injector.getInstance(PlayerDatabase::class.java)
 
         fun randomString(length: Int = 10, prefix: String?): String {
             val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-            return (prefix ?: "") +
-                (1..length)
-                    .map { allowedChars.random() }
-                    .joinToString("")
+            return (prefix ?: "") + (1..length).map { allowedChars.random() }.joinToString("")
         }
 
         fun generatePlayer(): Player {
@@ -174,35 +156,30 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
         }
 
         val players = (1..100).map { generatePlayer() }.associateBy { it.id }
-        val games = (1..100).map { generateGame(players.values.shuffled().map { it.id }.subList(0, 80)) }
-            .associateBy { it.id }
+        val games =
+            (1..100).map { generateGame(players.values.shuffled().map { it.id }.subList(0, 80)) }.associateBy { it.id }
 
-        CompositeFuture.all(
+        Future.all(
             db.delete(existingRecord1().id),
             db.delete(existingRecord2().id),
-        )
-            .flatMap {
-                CompositeFuture.all(
-                    players.values.map {
-                        playerDb.add(it)
-                    },
-                )
+        ).flatMap {
+            Future.all(
+                players.values.map {
+                    playerDb.add(it)
+                },
+            )
+        }.flatMap {
+            Future.all(
+                games.values.map {
+                    db.add(it)
+                },
+            )
+        }.flatMap {
+            db.getAll()
+        }.map { res ->
+            res.forEach {
+                assertEquals(games[it.id], it)
             }
-            .flatMap {
-                CompositeFuture.all(
-                    games.values.map {
-                        db.add(it)
-                    },
-                )
-            }.flatMap {
-                db.getAll()
-            }.map { gd ->
-                testContext.verify {
-                    gd.forEach {
-                        assertEquals(games[it.id], it)
-                    }
-                }
-                testContext.completeNow()
-            }
+        }.coAwait()
     }
 }
