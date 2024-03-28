@@ -22,8 +22,10 @@ dependencies {
     runtimeOnly(libs.log4j.slf4j18.impl)
 
     testImplementation(project(path = ":test-data"))
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.testcontainers.junit)
     testImplementation(libs.testcontainers.core)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.vertx.junit5)
+    testImplementation(libs.vertx.lang.kotlincoroutines)
 }
