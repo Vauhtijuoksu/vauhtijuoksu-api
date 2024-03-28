@@ -9,5 +9,6 @@ class ApiConstants private constructor() {
         const val NOT_FOUND = 404
         const val METHOD_NOT_ALLOWED = 405
         const val INTERNAL_SERVER_ERROR = 500
+        val USER_ERROR_CODES = 400..<500
     }
 }
