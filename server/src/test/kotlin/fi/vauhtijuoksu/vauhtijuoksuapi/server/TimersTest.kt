@@ -10,7 +10,8 @@ import io.vertx.core.Future
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.await
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verify
@@ -21,87 +22,63 @@ class TimersTest : ServerTestBase() {
     private val timersEndpoint = "/timers"
 
     @Test
-    fun `get returns an empty list when db is empty`(testContext: VertxTestContext) {
+    fun `get returns an empty list when db is empty`() = runTest {
         `when`(timerDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        client.get(timersEndpoint)
-            .send()
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                    assertEquals("application/json", it.headers().get("Content-Type"))
-                    assertEquals(JsonArray(), it.bodyAsJsonArray())
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+        val res = client.get(timersEndpoint)
+            .send().await()
+        assertEquals(200, res.statusCode())
+        assertEquals("application/json", res.headers().get("Content-Type"))
+        assertEquals(JsonArray(), res.bodyAsJsonArray())
     }
 
     @Test
-    fun `get returns all timers in the database`(testContext: VertxTestContext) {
+    fun `get returns all timers in the database`() = runTest {
         `when`(timerDb.getAll()).thenReturn(Future.succeededFuture(listOf(timer1, timer2)))
 
-        client.get(timersEndpoint)
-            .send()
-            .map {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                    assertEquals("application/json", it.headers().get("Content-Type"))
-                    assertEquals(
-                        JsonArray()
-                            .add(JsonObject.mapFrom(TimerApiModel.from(timer1)))
-                            .add(JsonObject.mapFrom(TimerApiModel.from(timer2))),
-                        it.bodyAsJsonArray(),
-                    )
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+        val res = client.get(timersEndpoint)
+            .send().await()
+
+        assertEquals(200, res.statusCode())
+        assertEquals("application/json", res.headers().get("Content-Type"))
+        assertEquals(
+            JsonArray()
+                .add(JsonObject.mapFrom(TimerApiModel.from(timer1)))
+                .add(JsonObject.mapFrom(TimerApiModel.from(timer2))),
+            res.bodyAsJsonArray(),
+        )
     }
 
     @Test
-    fun `get accepts all origins`(testContext: VertxTestContext) {
-        client.get(timersEndpoint)
+    fun `get accepts all origins`() = runTest {
+        val res = client.get(timersEndpoint)
             .putHeader("Origin", "https://example.com")
-            .send()
-            .map { res ->
-                testContext.verify {
-                    assertEquals("*", res.getHeader("Access-Control-Allow-Origin"))
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+            .send().await()
+        assertEquals("*", res.getHeader("Access-Control-Allow-Origin"))
     }
 
     @Test
-    fun `get by id returns a single timer`(testContext: VertxTestContext) {
+    fun `get by id returns a single timer`() = runTest {
         `when`(timerDb.getById(timer1.id)).thenReturn(Future.succeededFuture(timer1))
 
-        client.get("$timersEndpoint/${timer1.id}")
-            .send()
-            .map {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                    assertEquals("application/json", it.headers().get("Content-Type"))
-                    assertEquals(
-                        JsonObject.mapFrom(TimerApiModel.from(timer1)),
-                        it.bodyAsJsonObject(),
-                    )
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+        val res = client.get("$timersEndpoint/${timer1.id}")
+            .send().await()
+        assertEquals(200, res.statusCode())
+        assertEquals("application/json", res.headers().get("Content-Type"))
+        assertEquals(
+            JsonObject.mapFrom(TimerApiModel.from(timer1)),
+            res.bodyAsJsonObject(),
+        )
     }
 
     @Test
-    fun `post requires credentials`(testContext: VertxTestContext) {
-        client.post(timersEndpoint)
-            .send()
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(401, it.statusCode())
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+    fun `post requires credentials`() = runTest {
+        val res = client.post(timersEndpoint)
+            .send().await()
+        assertEquals(401, res.statusCode())
     }
 
     @Test
-    fun `post adds a new timer`(testContext: VertxTestContext) {
+    fun `post adds a new timer`() = runTest {
         `when`(timerDb.add(any())).thenReturn(Future.succeededFuture())
         val body = JsonObject.mapFrom(
             NewTimerApiModel(
@@ -110,25 +87,20 @@ class TimersTest : ServerTestBase() {
                 timer1.name,
             ),
         )
-        client.post(timersEndpoint)
+        val res = client.post(timersEndpoint)
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
-            .sendJson(body)
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(201, res.statusCode())
-                    assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
-                    val response = res.bodyAsJsonObject().mapTo(TimerApiModel::class.java)
-                    assertEquals(TimerApiModel.from(timer1).copy(id = response.id), response)
-                    verify(timerDb).add(timer1.copy(id = response.id))
-                }
-                testContext.completeNow()
-            }
+            .sendJson(body).await()
+        assertEquals(201, res.statusCode())
+        assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+
+        val responseBody = res.bodyAsJsonObject().mapTo(TimerApiModel::class.java)
+        assertEquals(TimerApiModel.from(timer1).copy(id = responseBody.id), responseBody)
+        verify(timerDb).add(timer1.copy(id = responseBody.id))
     }
 
     @Test
-    fun `post validates input`(testContext: VertxTestContext) {
+    fun `post validates input`() = runTest {
         val body = JsonObject.mapFrom(
             NewTimerApiModel(
                 timer1.startTime,
@@ -138,33 +110,24 @@ class TimersTest : ServerTestBase() {
         )
 
         body.remove("name")
-        client.post(timersEndpoint)
+        val res = client.post(timersEndpoint)
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
-            .sendJson(body)
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(400, res.statusCode())
-                }
-                testContext.completeNow()
-            }
+            .sendJson(body).await()
+
+        assertEquals(400, res.statusCode())
     }
 
     @Test
-    fun `patch requires credentials`(testContext: VertxTestContext) {
-        client.patch("$timersEndpoint/${UUID.randomUUID()}")
-            .send()
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(401, it.statusCode())
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+    fun `patch requires credentials`() = runTest {
+        val res = client.patch("$timersEndpoint/${UUID.randomUUID()}")
+            .send().await()
+
+        assertEquals(401, res.statusCode())
     }
 
     @Test
-    fun `patch modifies existing timer`(testContext: VertxTestContext) {
+    fun `patch modifies existing timer`() = runTest {
         val id = timer1.id
         val expectedTimer = timer1.copy(endTime = null)
         `when`(timerDb.getById(id)).thenReturn(Future.succeededFuture(timer1))
@@ -173,52 +136,39 @@ class TimersTest : ServerTestBase() {
             return@thenAnswer Future.succeededFuture<Void>()
         }
 
-        client.patch("$timersEndpoint/$id")
+        val res = client.patch("$timersEndpoint/$id")
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
-            .sendJson(JsonObject().put("end_time", null))
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(200, res.statusCode())
-                    assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
-                    assertEquals(
-                        JsonObject.mapFrom(TimerApiModel.from(expectedTimer)),
-                        res.bodyAsJsonObject(),
-                    )
-                    verify(timerDb).update(expectedTimer)
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+            .sendJson(JsonObject().put("end_time", null)).await()
+
+        assertEquals(200, res.statusCode())
+        assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+        assertEquals(
+            JsonObject.mapFrom(TimerApiModel.from(expectedTimer)),
+            res.bodyAsJsonObject(),
+        )
+        verify(timerDb).update(expectedTimer)
     }
 
     @Test
-    fun `patch returns 404 when the timer does not exists`(testContext: VertxTestContext) {
+    fun `patch returns 404 when the timer does not exists`() = runTest {
         `when`(timerDb.getById(any())).thenReturn(Future.failedFuture(MissingEntityException("No such row")))
-        client.patch("$timersEndpoint/${UUID.randomUUID()}")
+        val res = client.patch("$timersEndpoint/${UUID.randomUUID()}")
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
-            .sendJson(JsonObject().put("end_time", null))
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(404, res.statusCode())
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+            .sendJson(JsonObject().put("end_time", null)).await()
+
+        assertEquals(404, res.statusCode())
     }
 
     @Test
-    fun `patch validates input`(testContext: VertxTestContext) {
+    fun `patch validates input`() = runTest {
         val id = timer1.id
         `when`(timerDb.getById(id)).thenReturn(Future.succeededFuture(timer1))
-        client.patch("$timersEndpoint/$id")
+        val res = client.patch("$timersEndpoint/$id")
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
-            .sendJson(JsonObject().put("name", null))
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(400, res.statusCode())
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+            .sendJson(JsonObject().put("name", null)).await()
+        assertEquals(400, res.statusCode())
     }
 }
