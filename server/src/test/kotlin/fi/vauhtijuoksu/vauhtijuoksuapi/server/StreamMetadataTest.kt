@@ -141,14 +141,14 @@ class StreamMetadataTest : ServerTestBase() {
     @Test
     fun `patch accepts vauhtijuoksu origins`(testContext: VertxTestContext) {
         client.patch(streamMetadataEndpoint)
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject())
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
-                    assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+                    assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
                     verify(streamMetadataDatabase).save(someMetadataNoTimer)
                 }
                 testContext.completeNow()

@@ -155,14 +155,14 @@ class IncentivesTest : ServerTestBase() {
             ),
         )
         client.post(incentivesEndpoint)
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(201, res.statusCode())
-                    assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+                    assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
                     val response = res.bodyAsJsonObject().mapTo(IncentiveApiModel::class.java)
                     assertEquals(IncentiveApiModel.fromIncentive(someIncentive).copy(id = response.id), response)
                     verify(incentiveDatabase).add(someIncentive.copy(id = response.id))
@@ -187,7 +187,7 @@ class IncentivesTest : ServerTestBase() {
         )
         body.remove("title")
         client.post(incentivesEndpoint)
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
             .onFailure(testContext::failNow)
@@ -223,13 +223,13 @@ class IncentivesTest : ServerTestBase() {
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
         client.patch("$incentivesEndpoint/$id")
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("end_time", null))
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
-                    assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+                    assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
                     assertEquals(
                         IncentiveApiModel.fromIncentiveWithStatuses(
                             IncentiveWithStatuses(
@@ -264,7 +264,7 @@ class IncentivesTest : ServerTestBase() {
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
         client.patch("$incentivesEndpoint/$id")
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("end_time", newTime.toString()))
             .onSuccess { res ->
@@ -295,7 +295,7 @@ class IncentivesTest : ServerTestBase() {
     fun `patch returns 404 when the incentive does not exists`(testContext: VertxTestContext) {
         `when`(incentiveDatabase.getById(any())).thenReturn(Future.failedFuture(MissingEntityException("No such row")))
         client.patch("$incentivesEndpoint/${UUID.randomUUID()}")
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("end_time", null))
             .onSuccess { res ->
@@ -311,7 +311,7 @@ class IncentivesTest : ServerTestBase() {
         val id = someIncentive.id
         `when`(incentiveDatabase.getById(id)).thenReturn(Future.succeededFuture(someIncentive))
         client.patch("$incentivesEndpoint/$id")
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("title", null))
             .onSuccess { res ->

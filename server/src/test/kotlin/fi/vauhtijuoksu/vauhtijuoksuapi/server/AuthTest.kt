@@ -14,7 +14,7 @@ import io.vertx.core.Future
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.WebClientSession
-import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
 import kotlinx.coroutines.test.runTest
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -67,7 +67,7 @@ open class AuthTest : ServerTestBase() {
         val res = client.patch("/player-info")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("message", "ota tää"))
-            .await()
+            .coAwait()
         res.statusCode() shouldBe 200
         verify(playerInfoDb).save(any())
     }
@@ -85,14 +85,14 @@ open class AuthTest : ServerTestBase() {
         val login = sessionClient.get("/login")
             .followRedirects(true)
             .send()
-            .await()
+            .coAwait()
         login.statusCode() shouldBe 200
 
         `when`(discordClient.getUser(any())).thenReturn(DiscordUser("Nörtti", true).right())
 
         val patch = sessionClient.patch("/player-info")
             .sendJson(JsonObject().put("message", "ota tää"))
-            .await()
+            .coAwait()
         patch.statusCode() shouldBe 200
         verify(playerInfoDb).save(any())
     }
@@ -103,14 +103,14 @@ open class AuthTest : ServerTestBase() {
         val login = sessionClient.get("/login")
             .followRedirects(true)
             .send()
-            .await()
+            .coAwait()
         login.statusCode() shouldBe 200
 
         `when`(discordClient.getUser(any())).thenReturn(DiscordUser("Nörtti", false).right())
 
         val patch = sessionClient.patch("/player-info")
             .sendJson(JsonObject().put("message", "ota tää"))
-            .await()
+            .coAwait()
         patch.statusCode() shouldBe 403
     }
 
@@ -120,14 +120,14 @@ open class AuthTest : ServerTestBase() {
         val login = sessionClient.get("/login")
             .followRedirects(true)
             .send()
-            .await()
+            .coAwait()
         login.statusCode() shouldBe 200
 
         `when`(discordClient.getUser(any())).thenReturn(DiscordError.NOT_A_MEMBER.left())
 
         val patch = sessionClient.patch("/player-info")
             .sendJson(JsonObject().put("message", "ota tää"))
-            .await()
+            .coAwait()
         patch.statusCode() shouldBe 403
     }
 }

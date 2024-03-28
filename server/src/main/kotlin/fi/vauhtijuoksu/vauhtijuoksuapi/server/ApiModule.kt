@@ -17,6 +17,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationPostInputVal
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataPatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataPostInputValidator
 import io.vertx.core.Vertx
+import io.vertx.core.http.CookieSameSite
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerOptions
@@ -71,13 +72,18 @@ class ApiModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun getSessionHandler(sessionStore: SessionStore): SessionHandler = SessionHandler.create(sessionStore)
+    fun getSessionHandler(conf: ServerConfiguration, sessionStore: SessionStore): SessionHandler =
+        SessionHandler.create(sessionStore)
+            .setCookieSameSite(CookieSameSite.NONE)
+            .setCookieSecureFlag(conf.sessionCookieSecure)
 
     @Provides
     @Singleton
     @Named(AUTHENTICATED_CORS)
     fun getCorsHandlerAuth(conf: ServerConfiguration): CorsHandler =
-        CorsHandler.create().addRelativeOrigin(conf.corsHeader).allowCredentials(true)
+        CorsHandler.create()
+            .addRelativeOrigin(conf.corsHeader)
+            .allowCredentials(true)
             .allowedMethod(HttpMethod.GET)
             .allowedMethod(HttpMethod.POST)
             .allowedMethod(HttpMethod.OPTIONS)

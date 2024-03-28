@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.kotlin.coroutines.await
+import io.vertx.kotlin.coroutines.coAwait
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -88,11 +89,11 @@ class TimersTest : ServerTestBase() {
             ),
         )
         val res = client.post(timersEndpoint)
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
-            .sendJson(body).await()
+            .sendJson(body).coAwait()
         assertEquals(201, res.statusCode())
-        assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+        assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
 
         val responseBody = res.bodyAsJsonObject().mapTo(TimerApiModel::class.java)
         assertEquals(TimerApiModel.from(timer1).copy(id = responseBody.id), responseBody)
@@ -111,7 +112,7 @@ class TimersTest : ServerTestBase() {
 
         body.remove("name")
         val res = client.post(timersEndpoint)
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body).await()
 
@@ -137,12 +138,12 @@ class TimersTest : ServerTestBase() {
         }
 
         val res = client.patch("$timersEndpoint/$id")
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("end_time", null)).await()
 
         assertEquals(200, res.statusCode())
-        assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+        assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
         assertEquals(
             JsonObject.mapFrom(TimerApiModel.from(expectedTimer)),
             res.bodyAsJsonObject(),
@@ -166,7 +167,7 @@ class TimersTest : ServerTestBase() {
         val id = timer1.id
         `when`(timerDb.getById(id)).thenReturn(Future.succeededFuture(timer1))
         val res = client.patch("$timersEndpoint/$id")
-            .putHeader("Origin", "https://vauhtijuoksu.fi")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("name", null)).await()
         assertEquals(400, res.statusCode())
