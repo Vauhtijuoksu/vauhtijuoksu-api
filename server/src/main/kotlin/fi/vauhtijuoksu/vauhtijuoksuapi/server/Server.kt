@@ -19,6 +19,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentivecodes.IncentiveCodeR
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentivesRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players.PlayersRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.timers.TimerRouter
+import io.vertx.core.Promise
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
@@ -33,6 +34,9 @@ import io.vertx.ext.web.handler.PlatformHandler
 import io.vertx.ext.web.handler.SessionHandler
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import mu.KotlinLogging
 import java.util.concurrent.CountDownLatch
 import kotlin.system.exitProcess

@@ -183,6 +183,24 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/StreamMetadataOk'
+      callbacks:
+        onWsHandle:
+          '{$request.query.websocketUrl}/}':
+            post:
+              description: |
+                Your server implementation should return this HTTP status code
+                if the data was received successfully
+              responses:
+                '202':
+                  $ref: '#/components/responses/WebSocketTemplateOk'
+              requestBody:
+                description: subscription payload
+                content:
+                  application/json:
+                    schema:
+                      properties:
+                        message:
+                          type: string
     patch:
       description: Patch stream metadata.
       security:
@@ -382,6 +400,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/StreamMetadata'
+    WebSocketTemplateOk:
+      description: Template schema
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/WebSocketTemplate'
     PlayerInfoOk:
       description: Player info
       content:
@@ -912,6 +936,13 @@ components:
           type: string
       example:
         message: Lahjoituksia luettavana!!
+    WebsocketTemplate:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: Generic websocket message
     Incentives:
       type: array
       items:
