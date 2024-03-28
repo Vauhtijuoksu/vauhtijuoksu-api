@@ -79,7 +79,7 @@ open class ServerTestBase {
     protected val username = "vauhtijuoksu"
     protected val password = "vauhtijuoksu"
 
-    protected val corsHeaderUrl = "https://vauhtijuoksu.fi"
+    protected val corsHeaderUrl = "https://(\\w+[.])?vauhtijuoksu.fi"
 
     private fun getFreePort(): Int {
         val sock = ServerSocket(0)

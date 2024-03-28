@@ -75,7 +75,7 @@ class ApiModule : AbstractModule() {
     fun getSessionHandler(sessionStore: SessionStore): SessionHandler =
         SessionHandler.create(sessionStore)
             .setCookieSameSite(CookieSameSite.NONE)
-            .setCookieSecureFlag(true)
+            .setCookieSecureFlag(true) // TODO: This breaks tests
 
     @Provides
     @Singleton
