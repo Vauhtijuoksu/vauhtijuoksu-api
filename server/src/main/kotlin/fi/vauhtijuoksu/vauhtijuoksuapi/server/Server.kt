@@ -9,7 +9,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.VauhtijuoksuException
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.BAD_REQUEST
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.INTERNAL_SERVER_ERROR
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.NOT_FOUND
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ConfigurationModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.PlayerInfoRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.StreamMetadataRouter
@@ -56,7 +56,7 @@ class Server @Inject constructor(
     incentiveCodeRouter: IncentiveCodeRouter,
     playersRouter: PlayersRouter,
     timerRouter: TimerRouter,
-    @Named(PUBLIC_CORS) corsHandler: CorsHandler,
+    @Named(AUTHENTICATED_CORS) corsHandler: CorsHandler,
     sessionHandler: SessionHandler,
     oAuthProvider: OAuth2Auth,
     oauth2AuthHandler: OAuth2AuthHandler,
