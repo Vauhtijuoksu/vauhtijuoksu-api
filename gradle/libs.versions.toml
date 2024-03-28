@@ -4,6 +4,7 @@ hoplite = "2.7.5"
 vertx = "4.5.5"
 kotlin = "1.9.23"
 kotest = "5.8.1"
+flyway = "10.10.0"
 
 [libraries]
 # Used in buildSrc
@@ -41,7 +42,8 @@ vertx-lang-kotlincoroutines = { group = "io.vertx", name = "vertx-lang-kotlin-co
 vertx-pg-client = { group = "io.vertx", name = "vertx-pg-client", version.ref = "vertx" }
 vertx-sql-client-templates = { group = "io.vertx", name = "vertx-sql-client-templates", version.ref = "vertx" }
 vertx-session-redis = { group = "io.vertx", name = "vertx-web-sstore-redis", version.ref = "vertx" }
-flyway-core = "org.flywaydb:flyway-core:10.10.0"
+flyway-core = {group = "org.flywaydb", name="flyway-core", version.ref = "flyway"}
+flyway-postgresql = {group = "org.flywaydb", name="flyway-database-postgresql", version.ref = "flyway"}
 postgresql = "org.postgresql:postgresql:42.7.3"
 jakarta-validation-api = 'jakarta.validation:jakarta.validation-api:3.0.2'
 

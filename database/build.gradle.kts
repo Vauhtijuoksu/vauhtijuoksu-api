@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.vertx.pg.client)
     implementation(libs.vertx.sql.client.templates)
     implementation(libs.flyway.core)
+    implementation(libs.flyway.postgresql)
     implementation(libs.postgresql)
 
     runtimeOnly(libs.jackson.dataformat.yaml)
