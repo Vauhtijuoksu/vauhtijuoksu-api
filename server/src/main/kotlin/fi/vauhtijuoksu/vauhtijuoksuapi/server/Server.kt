@@ -9,6 +9,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.VauhtijuoksuException
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.BAD_REQUEST
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.INTERNAL_SERVER_ERROR
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.NOT_FOUND
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.USER_ERROR_CODES
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ConfigurationModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.PlayerInfoRouter
@@ -131,12 +132,15 @@ class Server @Inject constructor(
                 }
 
                 else -> {
-                    logger.warn { "Uncaught error: ${cause.message}" }
-                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
+                    if (ctx.statusCode() in USER_ERROR_CODES) {
+                        ctx.response().setStatusCode(ctx.statusCode()).end()
+                    } else {
+                        logger.warn { "Unexpected status code ${ctx.statusCode()} in failure handler with error $cause" }
+                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
+                    }
                 }
             }
         }
-
         httpServer.requestHandler(router)
     }
 
