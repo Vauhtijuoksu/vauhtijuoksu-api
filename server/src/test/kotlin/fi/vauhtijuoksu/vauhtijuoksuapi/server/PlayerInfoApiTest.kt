@@ -6,7 +6,8 @@ import io.vertx.core.Future
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -43,115 +44,91 @@ class PlayerInfoApiTest : ServerTestBase() {
     }
 
     @Test
-    fun `get returns current player info`(testContext: VertxTestContext) {
+    fun `get returns current player info`() = runTest {
         client.get(playerInfoEndpoint)
             .send()
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(200, res.statusCode())
-                    assertEquals("application/json", res.getHeader("content-type"))
-                    assertEquals(somePlayerInfoJson, res.bodyAsJsonObject())
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { res ->
+                assertEquals(200, res.statusCode())
+                assertEquals("application/json", res.getHeader("content-type"))
+                assertEquals(somePlayerInfoJson, res.bodyAsJsonObject())
             }
     }
 
     @Test
-    fun `get accepts all origins`(testContext: VertxTestContext) {
+    fun `get accepts all origins`() = runTest {
         client.get(playerInfoEndpoint)
             .putHeader("Origin", "https://example.com")
             .send()
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals("*", res.getHeader("Access-Control-Allow-Origin"))
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { res ->
+                assertEquals("*", res.getHeader("Access-Control-Allow-Origin"))
             }
     }
 
     @Test
-    fun `patch requires credentials`(testContext: VertxTestContext) {
+    fun `patch requires credentials`() = runTest {
         client.patch(playerInfoEndpoint)
             .sendJson("{}")
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(401, res.statusCode())
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { res ->
+                assertEquals(401, res.statusCode())
             }
     }
 
     @Test
-    fun `patch accepts vauhtijuoksu origins`(testContext: VertxTestContext) {
+    fun `patch accepts vauhtijuoksu origins`() = runTest {
         client.patch(playerInfoEndpoint)
             .putHeader("Origin", "https://vauhtijuoksu.fi")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject())
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(200, res.statusCode())
-                    assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
-                    verify(playerInfoDb).save(somePlayerInfo)
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { res ->
+                assertEquals(200, res.statusCode())
+                assertEquals(corsHeaderUrl, res.getHeader("Access-Control-Allow-Origin"))
+                verify(playerInfoDb).save(somePlayerInfo)
             }
     }
 
     @Test
-    fun `patch saves updated data and responds with new player info`(testContext: VertxTestContext) {
+    fun `patch saves updated data and responds with new player info`() = runTest {
         patchPlayerInfo(JsonObject().put("message", "Hello world"))
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(200, res.statusCode())
-                    assertEquals("application/json", res.getHeader("content-type"))
-                    somePlayerInfoJson.put("message", "Hello world")
-                    assertEquals(somePlayerInfoJson, res.bodyAsJsonObject())
-                    verify(playerInfoDb).save(somePlayerInfo.copy(message = "Hello world"))
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { res ->
+                assertEquals(200, res.statusCode())
+                assertEquals("application/json", res.getHeader("content-type"))
+                somePlayerInfoJson.put("message", "Hello world")
+                assertEquals(somePlayerInfoJson, res.bodyAsJsonObject())
+                verify(playerInfoDb).save(somePlayerInfo.copy(message = "Hello world"))
             }
     }
 
     @Test
-    fun `patch responds bad request on invalid json`(testContext: VertxTestContext) {
+    fun `patch responds bad request on invalid json`() = runTest {
         client.patch(playerInfoEndpoint)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendBuffer(Buffer.buffer().appendString("hello server"))
-            .onFailure(testContext::failNow)
-            .onSuccess { patchRes ->
-                testContext.verify {
-                    assertEquals(400, patchRes.statusCode())
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { patchRes ->
+                assertEquals(400, patchRes.statusCode())
             }
     }
 
     @Test
-    fun `patch responds bad request when there are unknown fields in input json`(testContext: VertxTestContext) {
+    fun `patch responds bad request when there are unknown fields in input json`() = runTest {
         patchPlayerInfo(JsonObject().put("unknown_field", "value"))
-            .onFailure(testContext::failNow)
-            .onSuccess { patchRes ->
-                testContext.verify {
-                    assertEquals(400, patchRes.statusCode())
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { patchRes ->
+                assertEquals(400, patchRes.statusCode())
             }
     }
 
     @Test
-    fun `patch responds bad request on invalid data format`(testContext: VertxTestContext) {
+    fun `patch responds bad request on invalid data format`() = runTest {
         patchPlayerInfo(JsonObject().put("counters", listOf("sata")))
-            .onFailure(testContext::failNow)
-            .onSuccess { patchRes ->
-                testContext.verify {
-                    assertEquals(400, patchRes.statusCode())
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { patchRes ->
+                assertEquals(400, patchRes.statusCode())
             }
     }
 }
