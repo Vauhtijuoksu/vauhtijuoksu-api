@@ -7,11 +7,14 @@ import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.WebClient
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
+import java.time.OffsetDateTime
+import kotlin.math.abs
 
 @FeatureTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
@@ -115,7 +118,9 @@ class StreamMetadataFeatureTest {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
-                    assertEquals(JsonObject(metadataResponse), res.bodyAsJsonObject())
+                    val body = res.bodyAsJsonObject()
+                    body.remove("server_time")
+                    assertEquals(JsonObject(metadataResponse), body)
                 }
                 testContext.completeNow()
             }
@@ -144,7 +149,11 @@ class StreamMetadataFeatureTest {
                     val expectedData = JsonObject(metadataResponse)
                         .put("donation_goal", 3000)
                         .put("counters", JsonArray())
-                    assertEquals(expectedData, res.bodyAsJsonObject())
+                    val now = OffsetDateTime.now().toEpochSecond()
+                    val body = res.bodyAsJsonObject()
+                    val responseTime = OffsetDateTime.parse(body.remove("server_time") as String).toEpochSecond()
+                    assertTrue(abs(now - responseTime) < 10)
+                    assertEquals(expectedData, body)
                 }
                 testContext.completeNow()
             }
@@ -168,7 +177,9 @@ class StreamMetadataFeatureTest {
                     assertEquals(200, res.statusCode())
                     val expectedData = JsonObject(metadataResponse)
                         .put("heart_rates", listOf(100, 130, 333, 441))
-                    assertEquals(expectedData, res.bodyAsJsonObject())
+                    val body = res.bodyAsJsonObject()
+                    body.remove("server_time")
+                    assertEquals(expectedData, body)
                 }
                 testContext.completeNow()
             }.onFailure(testContext::failNow)
@@ -215,7 +226,9 @@ class StreamMetadataFeatureTest {
                     assertEquals(200, it.res.statusCode())
                     val expectedData = JsonObject(metadataResponse)
                         .put("timers", JsonArray().add(JsonObject(aTimer).put("id", it.id)))
-                    assertEquals(expectedData, it.res.bodyAsJsonObject())
+                    val body = it.res.bodyAsJsonObject()
+                    body.remove("server_time")
+                    assertEquals(expectedData, body)
                 }
                 testContext.completeNow()
             }.onFailure(testContext::failNow)

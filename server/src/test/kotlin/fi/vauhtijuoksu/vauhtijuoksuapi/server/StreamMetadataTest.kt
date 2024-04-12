@@ -12,6 +12,7 @@ import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.junit5.VertxTestContext
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.atLeast
@@ -26,6 +27,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 class StreamMetadataTest : ServerTestBase() {
+    private val now = OffsetDateTime.now(clock)
     private val streamMetadataEndpoint = "/stream-metadata"
     private val someUuid = UUID.randomUUID()
     private val someTimer = Timer(
@@ -73,6 +75,7 @@ class StreamMetadataTest : ServerTestBase() {
         listOf(100, 120),
         listOf(someApiTimer),
         "Deerboy - Biisi",
+        OffsetDateTime.now(clock),
     )
 
     @BeforeEach
@@ -105,7 +108,10 @@ class StreamMetadataTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    assertEquals(someMetadataApi, res.bodyAsJson(StreamMetaDataApiModel::class.java))
+                    // Timezone is changed along the way so test time separately
+                    val response = res.bodyAsJson(StreamMetaDataApiModel::class.java)
+                    assertTrue(someMetadataApi.serverTime.isEqual(response.serverTime))
+                    assertEquals(someMetadataApi.copy(), response.copy(serverTime = now))
                 }
                 testContext.completeNow()
             }
@@ -166,9 +172,10 @@ class StreamMetadataTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    val original = StreamMetaDataApiModel.from(someMetadataNoTimer.copy(donationGoal = 1000), listOf())
+                    val original = StreamMetaDataApiModel.from(someMetadataNoTimer.copy(donationGoal = 1000), listOf(), now)
                     val response = res.bodyAsJson(StreamMetaDataApiModel::class.java)
-                    assertEquals(original, response)
+                    assertTrue(original.serverTime.isEqual(response.serverTime))
+                    assertEquals(original, response.copy(serverTime = now))
                     verify(streamMetadataDatabase).save(someMetadataNoTimer.copy(donationGoal = 1000))
                 }
                 testContext.completeNow()

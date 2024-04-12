@@ -5,6 +5,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.timers.TimerApiModel
 import io.vertx.core.json.JsonObject
+import java.time.OffsetDateTime
 import java.util.UUID
 
 internal data class StreamMetaDataApiModel(
@@ -22,9 +23,11 @@ internal data class StreamMetaDataApiModel(
     val timers: List<TimerApiModel>,
     @JsonProperty("now_playing")
     val nowPlaying: String?,
+    @JsonProperty("server_time")
+    val serverTime: OffsetDateTime,
 ) {
     companion object {
-        fun from(data: StreamMetadata, timers: List<Timer>): StreamMetaDataApiModel {
+        fun from(data: StreamMetadata, timers: List<Timer>, now: OffsetDateTime): StreamMetaDataApiModel {
             return StreamMetaDataApiModel(
                 data.donationGoal,
                 data.currentGameId,
@@ -35,6 +38,7 @@ internal data class StreamMetaDataApiModel(
                     TimerApiModel.from(it)
                 },
                 data.nowPlaying,
+                now,
             )
         }
     }

@@ -5,6 +5,7 @@ import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
 import com.google.inject.TypeLiteral
+import com.google.inject.util.Modules
 import com.google.inject.util.Providers
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.GeneratedIncentiveCodeDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
@@ -37,6 +38,9 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.net.ServerSocket
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 
 @ExtendWith(MockitoExtension::class)
 @ExtendWith(VertxExtension::class)
@@ -72,6 +76,8 @@ open class ServerTestBase {
     @Mock
     protected lateinit var playerDatabase: VauhtijuoksuDatabase<Player>
 
+    protected val clock: Clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Helsinki"))
+
     @TempDir
     lateinit var tmpDir: File
     lateinit var htpasswdFile: String
@@ -104,7 +110,11 @@ open class ServerTestBase {
         )
 
     open fun modules(serverPort: Int): List<Module> = listOf(
-        ApiModule(),
+        Modules.override(ApiModule()).with(object : AbstractModule() {
+            override fun configure() {
+                bind(Clock::class.java).toInstance(clock)
+            }
+        }),
         AuthModule(),
         object : AbstractModule() {
             override fun configure() {
