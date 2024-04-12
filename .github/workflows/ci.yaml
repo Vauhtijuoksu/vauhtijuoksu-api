@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "VERSION=$(./scripts/version.sh)" >> $GITHUB_ENV
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3.2.1
+        uses: gradle/actions/setup-gradle@v3.3.0
       - name: Build and test
         run: ./gradlew build --info
       - name: Add coverage report to PR
