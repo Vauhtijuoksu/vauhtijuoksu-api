@@ -30,6 +30,8 @@ import io.vertx.ext.web.sstore.redis.RedisSessionStore
 import io.vertx.redis.client.Redis
 import io.vertx.redis.client.RedisOptions
 import jakarta.inject.Named
+import java.time.Clock
+import java.time.ZoneId
 import javax.annotation.Nullable
 
 class ApiModule : AbstractModule() {
@@ -100,4 +102,8 @@ class ApiModule : AbstractModule() {
             .allowedMethod(HttpMethod.OPTIONS)
             .allowedMethod(HttpMethod.PATCH)
             .allowedMethod(HttpMethod.DELETE)
+
+    @Provides
+    @Singleton
+    fun clock(): Clock = Clock.system(ZoneId.of("Europe/Helsinki"))
 }

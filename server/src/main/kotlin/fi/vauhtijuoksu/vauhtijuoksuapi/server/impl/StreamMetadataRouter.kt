@@ -20,6 +20,8 @@ import io.vertx.ext.web.handler.CorsHandler
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import mu.KotlinLogging
+import java.time.Clock
+import java.time.OffsetDateTime
 
 // Throwing as soon as some validation fails is the simplest way
 @Suppress("ThrowsCount")
@@ -33,6 +35,7 @@ class StreamMetadataRouter
     private val authenticatedEndpointCorsHandler: CorsHandler,
     @Named(DependencyInjectionConstants.PUBLIC_CORS)
     private val publicEndpointCorsHandler: CorsHandler,
+    private val clock: Clock,
 ) {
     private val streamMetadata = JsonObject(
         """{
@@ -69,6 +72,7 @@ class StreamMetadataRouter
                             StreamMetaDataApiModel.from(
                                 streamMetadata,
                                 timers,
+                                OffsetDateTime.now(clock),
                             )
                         }
                     }
@@ -113,6 +117,7 @@ class StreamMetadataRouter
                             StreamMetaDataApiModel.from(
                                 streamMetadata,
                                 timers,
+                                OffsetDateTime.now(clock),
                             )
                         }
                     }

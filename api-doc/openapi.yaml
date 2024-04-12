@@ -820,6 +820,9 @@ components:
           type: array
           items:
             type: integer
+        server_time:
+          type: string
+          format: date-time
         timers:
           type: array
           items:
