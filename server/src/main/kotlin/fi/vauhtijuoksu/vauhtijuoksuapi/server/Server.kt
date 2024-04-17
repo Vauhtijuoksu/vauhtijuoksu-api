@@ -18,6 +18,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentivecodes.IncentiveCodeRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentivesRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.participants.ParticipantsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players.PlayersRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.timers.TimerRouter
 import io.vertx.core.http.HttpHeaders
@@ -56,6 +57,7 @@ class Server @Inject constructor(
     incentivesRouter: IncentivesRouter,
     incentiveCodeRouter: IncentiveCodeRouter,
     playersRouter: PlayersRouter,
+    participantsRouter: ParticipantsRouter,
     timerRouter: TimerRouter,
     @Named(AUTHENTICATED_CORS) corsHandler: CorsHandler,
     sessionHandler: SessionHandler,
@@ -109,6 +111,7 @@ class Server @Inject constructor(
         incentivesRouter.configure(router)
         incentiveCodeRouter.configure(router)
         playersRouter.configure(router)
+        participantsRouter.configure(router)
         timerRouter.configure(router)
         router.route().failureHandler { ctx ->
             when (val cause = ctx.failure()) {

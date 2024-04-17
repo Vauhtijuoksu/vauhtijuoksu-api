@@ -1,7 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.PostRouter
 import io.vertx.ext.web.handler.AuthenticationHandler
@@ -17,13 +17,13 @@ class AddPlayerRouter
     adminRequired: AuthorizationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
     private val authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Player>,
-) : PostRouter<Player>(
+    db: VauhtijuoksuDatabase<Participant>,
+) : PostRouter<Participant>(
     authenticationHandler,
     adminRequired,
     authenticatedEndpointCorsHandler,
     db,
-    { json -> json.mapTo(NewPlayerRequest::class.java).toPlayer(UUID.randomUUID()) },
-    { player -> PlayerResponse.fromPlayer(player).toJson() },
+    { json -> json.mapTo(NewPlayerRequest::class.java).toParticipant(UUID.randomUUID()) },
+    { player -> PlayerResponse.fromParticipant(player).toJson() },
     { null },
 )

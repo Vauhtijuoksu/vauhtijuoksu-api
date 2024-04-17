@@ -1,4 +1,4 @@
-package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players
+package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.participants
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
@@ -8,7 +8,7 @@ import io.vertx.ext.web.handler.CorsHandler
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
-class GetPlayersRouter
+class GetParticipantsRouter
 @Inject constructor(
     @Named(DependencyInjectionConstants.PUBLIC_CORS)
     publicEndpointCorsHandler: CorsHandler,
@@ -16,5 +16,5 @@ class GetPlayersRouter
 ) : GetRouter<Participant>(
     publicEndpointCorsHandler,
     participantDatabase,
-    { participant: Participant -> PlayerResponse.fromParticipant(participant).toJson() },
+    { participant: Participant -> ParticipantResponse.fromParticipant(participant).toJson() },
 )

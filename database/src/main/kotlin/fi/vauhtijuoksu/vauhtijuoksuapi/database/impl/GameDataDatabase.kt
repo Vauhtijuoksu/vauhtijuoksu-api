@@ -11,8 +11,8 @@ import io.vertx.pgclient.PgPool
 import io.vertx.sqlclient.Tuple
 import io.vertx.sqlclient.templates.SqlTemplate
 import jakarta.inject.Inject
+import mu.KotlinLogging
 import java.util.UUID
-import kotlin.NoSuchElementException
 
 internal class GameDataDatabase
 @Inject constructor(
@@ -20,25 +20,39 @@ internal class GameDataDatabase
     configuration: DatabaseConfiguration,
 ) : BaseDatabase(configuration),
     VauhtijuoksuDatabase<GameData> {
+
+    private val logger = KotlinLogging.logger {}
+
     private val selectClause =
-        """SELECT gamedata.*, 
-    |array_remove(array_agg(players_in_game.player_id ORDER BY players_in_game.player_order ASC), NULL) as player_ids 
-    |FROM gamedata LEFT JOIN players_in_game ON gamedata.id = players_in_game.game_id 
-    |GROUP BY gamedata.id 
-    |ORDER BY start_time ASC
-        """.trimMargin()
+        """
+        SELECT gamedata.*, 
+        COALESCE(json_agg(participant_in_game ORDER BY participant_order), '[]') AS participants
+        FROM gamedata 
+        LEFT JOIN participant_in_game ON gamedata.id = participant_in_game.game_id
+        GROUP BY gamedata.id 
+        ORDER BY start_time ASC
+        """
     private val getAllQuery = pool.preparedQuery(selectClause)
 
     private val getByIdQuery =
         pool.preparedQuery(
-            """SELECT gamedata.*,
-    | array_remove(array_agg(players_in_game.player_id ORDER BY players_in_game.player_order ASC), NULL) as player_ids 
-    |FROM gamedata LEFT JOIN players_in_game ON gamedata.id = players_in_game.game_id 
-    |WHERE gamedata.id=$1 
-    |GROUP BY gamedata.id
-            """.trimMargin(),
+            """
+            SELECT gamedata.*,
+            COALESCE(json_agg(participant_in_game ORDER BY participant_order) FILTER (WHERE participant_in_game.game_id IS NOT NULL), '[]') AS participants
+            FROM gamedata 
+            LEFT JOIN participant_in_game ON gamedata.id = participant_in_game.game_id
+            WHERE gamedata.id=$1 
+            GROUP BY gamedata.id
+            """,
         )
     private val deleteQuery = pool.preparedQuery("DELETE FROM gamedata WHERE id = $1")
+
+    private val insertParticipant =
+        """
+        INSERT INTO participant_in_game 
+        (game_id, participant_id, role_in_game, participant_order) VALUES 
+        ($1, $2, $3, $4)
+        """
 
     @Suppress("MaxLineLength") // SQL is prettier without too many splits
     override fun add(record: GameData): Future<Unit> {
@@ -53,10 +67,19 @@ internal class GameDataDatabase
                 .mapFrom(GameDataDbModel::class.java)
                 .execute(GameDataDbModel.fromGameData(record))
                 .flatMap {
-                    if (record.players.isNotEmpty()) {
+                    if (record.participants.isNotEmpty()) {
                         client
-                            .preparedQuery("""INSERT INTO players_in_game (game_id, player_id, player_order) VALUES ($1, $2, $3)""")
-                            .executeBatch(record.players.mapIndexed { i, playerId -> Tuple.of(record.id, playerId, i) })
+                            .preparedQuery("""INSERT INTO participant_in_game (game_id, participant_id, role_in_game, participant_order) VALUES ($1, $2, $3, $4)""")
+                            .executeBatch(
+                                record.participants.mapIndexed { i, p ->
+                                    Tuple.of(
+                                        record.id,
+                                        p.participantId,
+                                        p.role,
+                                        i,
+                                    )
+                                },
+                            )
                     } else {
                         Future.succeededFuture()
                     }
@@ -69,6 +92,7 @@ internal class GameDataDatabase
     }
 
     override fun update(record: GameData): Future<Unit> {
+        logger.debug { "Updating $record" }
         return pool.withTransaction { client ->
             SqlTemplate
                 .forUpdate(
@@ -89,15 +113,22 @@ internal class GameDataDatabase
                 .execute(GameDataDbModel.fromGameData(record))
                 .expectOneChangedRow()
                 .flatMap {
-                    client.preparedQuery("DELETE FROM players_in_game WHERE game_id=$1")
+                    client.preparedQuery("DELETE FROM participant_in_game WHERE game_id=$1")
                         .execute(Tuple.of(record.id))
                 }
                 .flatMap {
-                    if (record.players.isNotEmpty()) {
-                        client.preparedQuery(
-                            """INSERT INTO players_in_game (game_id, player_id, player_order) VALUES ($1, $2, $3)""",
-                        )
-                            .executeBatch(record.players.mapIndexed { i, playerId -> Tuple.of(record.id, playerId, i) })
+                    if (record.participants.isNotEmpty()) {
+                        client.preparedQuery(insertParticipant)
+                            .executeBatch(
+                                record.participants.mapIndexed { i, p ->
+                                    Tuple.of(
+                                        record.id,
+                                        p.participantId,
+                                        p.role.name,
+                                        i,
+                                    )
+                                },
+                            )
                     } else {
                         Future.succeededFuture()
                     }
@@ -115,6 +146,7 @@ internal class GameDataDatabase
     }
 
     override fun getById(id: UUID): Future<GameData> {
+        logger.debug { "Getting game data by id $id" }
         return getByIdQuery.execute(Tuple.of(id))
             .map {
                 return@map it.first()
@@ -125,8 +157,12 @@ internal class GameDataDatabase
                     throw it
                 }
             }
-            .map(mapperToType<GameDataDbModel>())
-            .map(GameDataDbModel::toGameData)
+            .map {
+                mapperToType<GameDataDbModel>()(it)
+            }
+            .map {
+                it.toGameData()
+            }
     }
 
     override fun delete(id: UUID): Future<Unit> {

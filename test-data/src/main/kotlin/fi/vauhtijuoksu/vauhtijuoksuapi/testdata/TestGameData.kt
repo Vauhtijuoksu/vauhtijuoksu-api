@@ -1,6 +1,8 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.testdata
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
 import java.net.URL
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -25,7 +27,7 @@ class TestGameData private constructor() {
             URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
             "tetris.png",
             "k18",
-            listOf(TestPlayer.player1.id),
+            listOf(GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER)),
         )
 
         val gameData2 = GameData(
@@ -39,7 +41,7 @@ class TestGameData private constructor() {
             URL("https://www.youtube.com/watch?v=this is glukoosi"),
             "chicken.png",
             "kid friendly",
-            listOf(TestPlayer.player2.id),
+            listOf(GameParticipant(TestParticipant.participant2.id, ParticipantRole.PLAYER)),
         )
 
         val gameData3 = GameData(
@@ -53,7 +55,10 @@ class TestGameData private constructor() {
             null,
             "chief.png",
             "space themed",
-            listOf(TestPlayer.player2.id, TestPlayer.player1.id),
+            listOf(
+                GameParticipant(TestParticipant.participant2.id, ParticipantRole.PLAYER),
+                GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER),
+            ),
         )
     }
 }

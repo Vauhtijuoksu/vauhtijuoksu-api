@@ -1,6 +1,8 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataApiModel
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameParticipantApiModel
 import io.vertx.core.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -41,6 +43,7 @@ internal class GameDataApiModelTest {
             .put("img_filename", "tetris.png")
             .put("meta", "k18")
             .put("players", listOf(playerId.toString()))
+            .put("participants", listOf(JsonObject().put("participant_id", playerId.toString()).put("role", "PLAYER")))
     }
 
     @Test
@@ -57,6 +60,12 @@ internal class GameDataApiModelTest {
             "tetris.png",
             "k18",
             listOf(playerId),
+            listOf(
+                GameParticipantApiModel(
+                    playerId,
+                    ParticipantRole.PLAYER,
+                ),
+            ),
         )
 
         val gameDataAsJson = gameData.toJson()
@@ -78,6 +87,12 @@ internal class GameDataApiModelTest {
             "tetris.png",
             "k18",
             listOf(playerId),
+            listOf(
+                GameParticipantApiModel(
+                    playerId,
+                    ParticipantRole.PLAYER,
+                ),
+            ),
         )
 
         val gameDataAsJson = gameDataApiModel.toJson()

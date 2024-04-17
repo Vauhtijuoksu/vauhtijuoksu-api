@@ -6,5 +6,5 @@ oAuth:
   callbackUrl: "https://api.localhost/callback"
   baseAuthorizationUrl: "https://discord.com"
   authorizationPath: "/oauth2/authorize"
-  tokenPath:  "/api/oauth2/token"
+  tokenPath: "/api/oauth2/token"
   tokenRevocationUrl: "/api/oauth2/token/revoke"

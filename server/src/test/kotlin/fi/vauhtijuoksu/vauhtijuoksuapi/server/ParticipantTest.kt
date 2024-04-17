@@ -2,39 +2,36 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Platform
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.SocialMedia
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players.ModifyPlayerRequest
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players.NewPlayerRequest
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players.PlayerResponse
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.participants.NewParticipantRequest
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.participants.NewSocialMediaRequest
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.participants.ParticipantResponse
 import io.vertx.core.Future
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import java.util.UUID
 
-class PlayerTest : ServerTestBase() {
+class ParticipantTest : ServerTestBase() {
     @Test
-    fun `get all players returns an empty list when there are no players`(testContext: VertxTestContext) {
+    fun `get all participants returns an empty list when there are no participants`() = runTest {
         `when`(participantDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        client.get("/players").send()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                    assertEquals(JsonArray(), it.body().toJsonArray())
-                }
-                testContext.completeNow()
+        client.get("/participants").send()
+            .coAwait()
+            .let {
+                assertEquals(200, it.statusCode())
+                assertEquals(JsonArray(), it.body().toJsonArray())
             }
     }
 
     @Test
-    fun `add a player`(testContext: VertxTestContext) {
+    fun `add a participant`() = runTest {
         val createdParticipant = Participant(
             UUID.randomUUID(),
             "it's a me",
@@ -50,30 +47,31 @@ class PlayerTest : ServerTestBase() {
             return@thenAnswer Future.succeededFuture<Unit>()
         }
 
-        client.post("/players")
+        client.post("/participants")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(
-                NewPlayerRequest(
+                NewParticipantRequest(
                     createdParticipant.displayName,
-                    createdParticipant.socialMedias.find { it.platform == Platform.TWITCH }?.username,
-                    createdParticipant.socialMedias.find { it.platform == Platform.DISCORD }?.username,
+                    createdParticipant.socialMedias.map {
+                        NewSocialMediaRequest(
+                            it.platform.name,
+                            it.username,
+                        )
+                    },
                 ),
             )
-            .onFailure(testContext::failNow)
-            .map {
-                testContext.verify {
-                    assertEquals(201, it.statusCode())
-                    assertEquals(
-                        JsonObject.mapFrom(PlayerResponse.fromParticipant(createdParticipant.copy(id = createdId))),
-                        it.body().toJsonObject(),
-                    )
-                    testContext.completeNow()
-                }
+            .coAwait()
+            .let {
+                assertEquals(201, it.statusCode())
+                assertEquals(
+                    JsonObject.mapFrom(ParticipantResponse.fromParticipant(createdParticipant.copy(id = createdId))),
+                    it.body().toJsonObject(),
+                )
             }
     }
 
     @Test
-    fun `modify a player`(testContext: VertxTestContext) {
+    fun `modify a participant`() = runTest {
         val id = UUID.randomUUID()
 
         val existingParticipant = Participant(
@@ -93,41 +91,34 @@ class PlayerTest : ServerTestBase() {
         )
         `when`(participantDatabase.update(newPlayer)).thenReturn(Future.succeededFuture())
 
-        client.patch("/players/$id")
+        client.patch("/participants/$id")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(
-                ModifyPlayerRequest(
+                NewParticipantRequest(
                     "Glukoosi",
-                    null,
-                    null,
+                    listOf(),
                 ),
             )
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(
-                        JsonObject.mapFrom(PlayerResponse.fromParticipant(newPlayer)),
-                        it.body().toJsonObject(),
-                    )
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let {
+                assertEquals(
+                    JsonObject.mapFrom(ParticipantResponse.fromParticipant(newPlayer)),
+                    it.body().toJsonObject(),
+                )
             }
     }
 
     @Test
-    fun `remove a player`(testContext: VertxTestContext) {
+    fun `remove a participant`() = runTest {
         val id = UUID.randomUUID()
         `when`(participantDatabase.delete(any())).thenReturn(Future.succeededFuture())
-        client.delete("/players/$id")
+        client.delete("/participants/$id")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(204, it.statusCode())
-                    verify(participantDatabase).delete(id)
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let {
+                assertEquals(204, it.statusCode())
+                verify(participantDatabase).delete(id)
             }
     }
 }

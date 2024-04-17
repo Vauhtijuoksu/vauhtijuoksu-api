@@ -1,4 +1,4 @@
-package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players
+package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.participants
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
@@ -10,7 +10,7 @@ import io.vertx.ext.web.handler.CorsHandler
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
-class RemovePlayerRouter
+class RemoveParticipantRouter
 @Inject constructor(
     authenticationHandler: AuthenticationHandler,
     adminRequired: AuthorizationHandler,

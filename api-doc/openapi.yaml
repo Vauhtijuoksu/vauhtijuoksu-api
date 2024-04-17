@@ -18,7 +18,7 @@ paths:
     post:
       description: Add a new donation object.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -45,7 +45,7 @@ paths:
     patch:
       description: Patch donation data.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -58,7 +58,7 @@ paths:
     delete:
       description: Delete donation.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       responses:
         '204':
           $ref: '#/components/responses/Empty'
@@ -66,14 +66,13 @@ paths:
     get:
       description:
         Get list of all game data. List of games that are scheduled for the event.
-
       responses:
         '200':
           $ref: '#/components/responses/AllGameData'
     post:
       description: Add a new gamedata object.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -100,7 +99,7 @@ paths:
     patch:
       description: Patch game data.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -113,22 +112,84 @@ paths:
     delete:
       description: Delete game data.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       responses:
         '204':
           $ref: '#/components/responses/Empty'
-  /players:
+  /participants:
     get:
       description:
-        Get all players
+        Get all participants, such as players and couch people
+      responses:
+        '200':
+          $ref: '#/components/responses/ParticipantList'
+    post:
+      description:
+        Add a participant
+      security:
+        - basicAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantAdd'
+      responses:
+        '201':
+          $ref: '#/components/responses/Participant'
+
+  /participants/{participantId}:
+    parameters:
+      - name: participantId
+        in: path
+        required: true
+        description: An unique identifier for a participant
+        schema:
+          type: string
+          format: uuid
+    get:
+      description:
+        Get a participant by id
+      responses:
+        '200':
+          $ref: '#/components/responses/Participant'
+    patch:
+      description:
+        Modify participant info
+      security:
+        - basicAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantPatch'
+      responses:
+        '200':
+          $ref: '#/components/responses/Participant'
+    delete:
+      description:
+        Remove a participant by id
+      security:
+        - basicAuth: [ ]
+      responses:
+        '204':
+          $ref: '#/components/responses/Empty'
+
+  /players:
+    get:
+      deprecated: true
+      description:
+        Get all players. Deprecated. Use participants instead
       responses:
         '200':
           $ref: '#/components/responses/PlayerList'
     post:
+      deprecated: true
       description:
-        Add a player
+        Add a player. Deprecated. Use participants instead
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -148,16 +209,18 @@ paths:
           type: string
           format: uuid
     get:
+      deprecated: true
       description:
-        Get a player by id
+        Get a player by id. Deprecated. Use participants instead
       responses:
         '200':
           $ref: '#/components/responses/PlayerOk'
     patch:
+      deprecated: true
       description:
-        Modify player info
+        Modify player info. Deprecated. Use participants instead
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       responses:
         '200':
           $ref: '#/components/responses/PlayerOk'
@@ -168,10 +231,11 @@ paths:
             schema:
               $ref: '#/components/schemas/PlayerPatch'
     delete:
+      deprecated: true
       description:
-        Remove a player by id
+        Remove a player by id. Deprecated. Use participants instead
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       responses:
         '204':
           $ref: '#/components/responses/Empty'
@@ -186,7 +250,7 @@ paths:
     patch:
       description: Patch stream metadata.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -200,7 +264,7 @@ paths:
     post:
       description: Add a new timer object.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -222,7 +286,7 @@ paths:
     patch:
       description: Patch timer
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -235,7 +299,7 @@ paths:
     delete:
       description: Delete timer
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       responses:
         '204':
           $ref: '#/components/responses/Empty'
@@ -250,7 +314,7 @@ paths:
     patch:
       description: Patch player info.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -271,7 +335,7 @@ paths:
     post:
       description: Add a new incentive object.
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -298,7 +362,7 @@ paths:
     patch:
       description: Patch incentive
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -311,7 +375,7 @@ paths:
     delete:
       description: Delete incentive
       security:
-        - basicAuth: []
+        - basicAuth: [ ]
       responses:
         '204':
           $ref: '#/components/responses/Empty'
@@ -364,12 +428,28 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GameDataOutput'
+    Participant:
+      description: A single participant
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Participant'
+    ParticipantList:
+      description: A list of participants
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Participant'
     PlayerList:
       description: A list of players
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/PlayerList'
+            type: array
+            items:
+              $ref: '#/components/schemas/Player'
     PlayerOk:
       description: A player
       content:
@@ -518,18 +598,18 @@ components:
         - timestamp
         - amount
       example:
-      - id: 021c2143-5400-4087-92e8-0c67252685b5
-        timestamp: '2021-09-21T15:05:47.000+00:00'
-        name: jsloth
-        message: 'ota tää :D 🤔🤔 {Vj#2020}'
-        read: false
-        amount: 10
-        external_id: "a non unique string"
-        incentives:
-        - code: '{Vj#2020}'
-          chosen_incentives:
-          - incentive_id: d3fed394-193b-493b-b670-c9bea2bdfab0
-            parameter: kissa
+        - id: 021c2143-5400-4087-92e8-0c67252685b5
+          timestamp: '2021-09-21T15:05:47.000+00:00'
+          name: jsloth
+          message: 'ota tää :D 🤔🤔 {Vj#2020}'
+          read: false
+          amount: 10
+          external_id: "a non unique string"
+          incentives:
+            - code: '{Vj#2020}'
+              chosen_incentives:
+                - incentive_id: d3fed394-193b-493b-b670-c9bea2bdfab0
+                  parameter: kissa
     GameData:
       type: object
       properties:
@@ -538,6 +618,10 @@ components:
           format: uuid
         game:
           type: string
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameParticipant'
         players:
           type: array
           items:
@@ -564,6 +648,7 @@ components:
       required:
         - id
         - game
+        - participants
         - players
         - start_time
         - end_time
@@ -573,7 +658,12 @@ components:
       example:
         id: 1fbdc860-170c-4231-b354-464a2dfab94b
         game: Tetris
-        players: [be3649a7-50e4-44e9-b157-05a3fbcf738c, 91aee618-2c62-42a1-b025-106baf6b71e7]
+        participants:
+          - id: be3649a7-50e4-44e9-b157-05a3fbcf738c
+            role: PLAYER
+          - id: 91aee618-2c62-42a1-b025-106baf6b71e7
+            role: COUCH
+        players: [ be3649a7-50e4-44e9-b157-05a3fbcf738c ]
         start_time: '2021-09-21T15:05:47.000+00:00'
         end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
@@ -589,7 +679,12 @@ components:
       example:
         - id: 1fbdc860-170c-4231-b354-464a2dfab94b
           game: Tetris
-          players: [be3649a7-50e4-44e9-b157-05a3fbcf738c, 91aee618-2c62-42a1-b025-106baf6b71e7]
+          participants:
+            - id: be3649a7-50e4-44e9-b157-05a3fbcf738c
+              role: PLAYER
+            - id: 91aee618-2c62-42a1-b025-106baf6b71e7
+              role: COUCH
+          players: [ be3649a7-50e4-44e9-b157-05a3fbcf738c ]
           start_time: '2021-09-21T15:05:47.000+00:00'
           end_time: '2021-09-21T16:05:47.000+00:00'
           category: any%
@@ -600,7 +695,10 @@ components:
           meta: k18
         - id: 1571fccf-cc89-48ce-82d4-6b2173d782ec
           game: Tetris2
-          players: [91aee618-2c62-42a1-b025-106baf6b71e7]
+          participants:
+            - id: 91aee618-2c62-42a1-b025-106baf6b71e7
+              role: PLAYER
+          players: [ 91aee618-2c62-42a1-b025-106baf6b71e7 ]
           start_time: '2021-09-21T15:07:47.000+00:00'
           end_time: '2021-09-21T16:08:47.000+00:00'
           category: any% no t
@@ -619,6 +717,10 @@ components:
           items:
             type: string
             format: uuid
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameParticipant'
         start_time:
           type: string
           format: date-time
@@ -647,6 +749,7 @@ components:
         - published
       example:
         game: Tetris
+        players: [ ]
         start_time: '2021-09-21T15:05:47.000+00:00'
         end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
@@ -665,6 +768,10 @@ components:
           items:
             type: string
             format: uuid
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameParticipant'
         start_time:
           type: string
           format: date-time
@@ -697,6 +804,10 @@ components:
           items:
             type: string
             format: uuid
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameParticipant'
         start_time:
           type: string
           format: date-time
@@ -718,6 +829,7 @@ components:
       required:
         - game
         - players
+        - participants
         - start_time
         - end_time
         - category
@@ -726,7 +838,10 @@ components:
       example:
         id: 1571fccf-cc89-48ce-82d4-6b2173d782ec
         game: Tetris2
-        players: [91aee618-2c62-42a1-b025-106baf6b71e7]
+        players: [ 91aee618-2c62-42a1-b025-106baf6b71e7 ]
+        participants:
+          - id: 91aee618-2c62-42a1-b025-106baf6b71e7
+            role: PLAYER
         start_time: '2021-09-21T15:07:47.000+00:00'
         end_time: '2021-09-21T16:08:47.000+00:00'
         category: any% no t
@@ -735,6 +850,27 @@ components:
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
         meta: k18
+    GameParticipant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [ PLAYER, COUCH ]
+      required:
+        - id
+        - role
+    GameParticipantPatch:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [ PLAYER, COUCH ]
     PlayerList:
       type: array
       items:
@@ -748,6 +884,65 @@ components:
           display_name: jiisloth
           twitch_channel: jeesloth
           discord_nick: jooosloth#1234
+    Participant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        social_medias:
+          type: array
+          items:
+            type: object
+            properties:
+              nick:
+                type: string
+              platform:
+                type: string
+                enum: [ TWITCH, DISCORD ]
+            required:
+              - nick
+              - platform
+      required:
+        - id
+        - display_name
+        - social_medias
+      example:
+        id: 91aee618-2c62-42a1-b025-106baf6b71e7
+        role: player
+        social_medias:
+          - type: TWITCH
+            nick: jiisloth
+          - type: DISCORD
+            nick: joosloth#1234
+    ParticipantAdd:
+      type: object
+      properties:
+        display_name:
+          type: string
+        social_medias:
+          type: array
+          items:
+            $ref: '#/components/schemas/SocialMedia'
+      required:
+        - display_name
+        - social_medias
+      example:
+        display_name: jiisloth
+        social_medias: [ ]
+    ParticipantPatch:
+      type: object
+      properties:
+        display_name:
+          type: string
+        social_medias:
+          type: array
+          items:
+            $ref: '#/components/schemas/SocialMedia'
+      example:
+        display_name: jiisloth
     Player:
       type: object
       properties:
@@ -798,6 +993,18 @@ components:
           type: string
       example:
         discord_nick: juusloth#4321
+    SocialMedia:
+      properties:
+        username:
+          type: string
+        platform:
+          type: string
+          enum:
+            - TWITCH
+            - YOUTUBE
+      required:
+        - username
+        - platform
     StreamMetadata:
       type: object
       properties:
@@ -948,12 +1155,12 @@ components:
           info: Saa kattoa vaan kissoja tai koiria
           total_amount: 250
           status:
-             - type: option
-               option: kissa
-               amount: 100
-             - type: option
-               option: koira
-               amount: 150
+            - type: option
+              option: kissa
+              amount: 100
+            - type: option
+              option: koira
+              amount: 150
         - id: 3a896646-70e0-4943-a3e3-01f29d0541f1
           game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
           title: Tetrispakikan nimi
@@ -963,12 +1170,12 @@ components:
           info: Nimeä tetrispalikka poggers
           total_amount: 250
           status:
-             - type: option
-               option: palikke
-               amount: 100
-             - type: option
-               option: joku_muu
-               amount: 150
+            - type: option
+              option: palikke
+              amount: 100
+            - type: option
+              option: joku_muu
+              amount: 150
     IncentiveInput:
       type: object
       properties:

@@ -17,7 +17,7 @@ import org.mockito.Mockito.lenient
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 
-class PlayerInfoApiTest : ServerTestBase() {
+class ParticipantInfoApiTest : ServerTestBase() {
     private val playerInfoEndpoint = "/player-info"
     private val somePlayerInfo = PlayerInfo("This is a test")
     private val somePlayerInfoJson = JsonObject()

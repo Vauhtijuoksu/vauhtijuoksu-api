@@ -4,9 +4,11 @@ import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
-import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
+import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestParticipant
 import io.vertx.kotlin.coroutines.coAwait
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 class MetadataTimerDatabaseTest {
     private lateinit var db: StreamMetadataDatabase
     private lateinit var gameDataDb: GameDataDatabase
-    private lateinit var playerDatabase: PlayerDatabase
+    private lateinit var participantDatabase: ParticipantDatabase
 
     private val emptyData = StreamMetadata(
         null,
@@ -65,7 +67,7 @@ class MetadataTimerDatabaseTest {
         )
         db = injector.getInstance(StreamMetadataDatabase::class.java)
         gameDataDb = injector.getInstance(GameDataDatabase::class.java)
-        playerDatabase = injector.getInstance(PlayerDatabase::class.java)
+        participantDatabase = injector.getInstance(ParticipantDatabase::class.java)
     }
 
     @Test
@@ -80,9 +82,9 @@ class MetadataTimerDatabaseTest {
     @Test
     fun `database saves given data`() = runTest {
         val gameData = TestGameData.gameData1
-        assertEquals(1, gameData.players.size)
-        assertEquals(TestPlayer.player1.id, gameData.players.first())
-        playerDatabase.add(TestPlayer.player1)
+        assertEquals(1, gameData.participants.size)
+        assertEquals(GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER), gameData.participants.first())
+        participantDatabase.add(TestParticipant.participant1)
             .compose {
                 gameDataDb.add(gameData)
             }
@@ -110,9 +112,9 @@ class MetadataTimerDatabaseTest {
     @Test
     fun `current game is set to null when the game is deleted`() = runTest {
         val gameData = TestGameData.gameData1
-        assertEquals(1, gameData.players.size)
-        assertEquals(TestPlayer.player1.id, gameData.players.first())
-        playerDatabase.add(TestPlayer.player1)
+        assertEquals(1, gameData.participants.size)
+        assertEquals(GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER), gameData.participants.first())
+        participantDatabase.add(TestParticipant.participant1)
             .compose {
                 gameDataDb.add(TestGameData.gameData1)
             }

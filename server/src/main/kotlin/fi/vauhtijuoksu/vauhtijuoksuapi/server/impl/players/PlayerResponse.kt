@@ -1,7 +1,9 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Platform
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.SocialMedia
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
 import io.vertx.core.json.JsonObject
 import java.util.UUID
@@ -14,24 +16,26 @@ data class PlayerResponse(
     val twitchChannel: String?,
     @JsonProperty("discord_nick")
     val discordNick: String?,
-) : ApiModel<Player> {
+) : ApiModel<Participant> {
     companion object {
-        fun fromPlayer(player: Player): PlayerResponse {
+        fun fromParticipant(participant: Participant): PlayerResponse {
             return PlayerResponse(
-                player.id,
-                player.displayName,
-                player.twitchChannel,
-                player.discordNick,
+                participant.id,
+                participant.displayName,
+                participant.socialMedias.find { it.platform == Platform.TWITCH }?.username,
+                participant.socialMedias.find { it.platform == Platform.DISCORD }?.username,
             )
         }
     }
 
-    override fun toModel(): Player {
-        return Player(
+    override fun toModel(): Participant {
+        return Participant(
             id,
             displayName,
-            twitchChannel,
-            discordNick,
+            listOfNotNull(
+                if (twitchChannel != null) SocialMedia(Platform.TWITCH, twitchChannel) else null,
+                if (discordNick != null) SocialMedia(Platform.DISCORD, discordNick) else null,
+            ),
         )
     }
 
