@@ -3,6 +3,7 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData2
@@ -281,7 +282,10 @@ class GameDataApiTest : ServerTestBase() {
                     .put("vod_link", newGame.vodLink)
                     .put("img_filename", newGame.imgFilename)
                     .put("meta", newGame.meta)
-                    .put("players", newGame.players),
+                    .put(
+                        "players",
+                        newGame.participants.filter { it.role == ParticipantRole.PLAYER }.map { it.participantId },
+                    ).put("participants", emptyList<Any>()),
             )
             .onFailure(testContext::failNow)
             .onSuccess { res ->

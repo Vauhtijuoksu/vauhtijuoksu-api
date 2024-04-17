@@ -1,7 +1,7 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.PatchRouter
@@ -17,12 +17,12 @@ class ModifyPlayerRouter
     adminRequired: AuthorizationHandler,
     @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
     private val authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Player>,
-) : PatchRouter<Player, ApiModel<Player>>(
+    db: VauhtijuoksuDatabase<Participant>,
+) : PatchRouter<Participant, ApiModel<Participant>>(
     authenticationHandler,
     adminRequired,
     authenticatedEndpointCorsHandler,
     db,
     { null },
-    PlayerResponse::fromPlayer,
+    PlayerResponse::fromParticipant,
 )

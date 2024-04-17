@@ -4,9 +4,12 @@ import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.SocialMedia
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
-import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
+import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestParticipant
 import io.vertx.core.Future
 import io.vertx.kotlin.coroutines.coAwait
 import kotlinx.coroutines.test.runTest
@@ -21,11 +24,10 @@ import java.util.UUID
 
 class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
     override fun insertExistingRecords(): Future<Unit> {
-        val playerDb = injector.getInstance(PlayerDatabase::class.java)
-        return playerDb
-            .add(TestPlayer.player1)
+        val participantDb = injector.getInstance(ParticipantDatabase::class.java)
+        return participantDb.add(TestParticipant.participant1)
             .flatMap {
-                playerDb.add(TestPlayer.player2)
+                participantDb.add(TestParticipant.participant2)
             }
             .flatMap {
                 db.add(existingRecord1())
@@ -79,44 +81,53 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
     @Test
     fun testUpdatingNonExistingRecord() = runTest {
         assertThrows<MissingEntityException> {
-            db.update(TestGameData.gameData3)
-                .coAwait()
+            db.update(TestGameData.gameData3).coAwait()
         }
 
-        db.getAll()
-            .map {
-                assertEquals(listOf(TestGameData.gameData1, TestGameData.gameData2), it)
-            }
-            .coAwait()
+        db.getAll().map {
+            assertEquals(listOf(TestGameData.gameData1, TestGameData.gameData2), it)
+        }.coAwait()
     }
 
     @Test
     fun testUpdateChangePlayers() = runTest {
-        assertEquals(listOf(TestPlayer.player1.id), existingRecord1().players)
-        val playerChangedRecord = existingRecord1().copy(players = listOf(TestPlayer.player2.id))
-        db.update(playerChangedRecord)
-            .flatMap {
-                db.getById(playerChangedRecord.id)
-            }.map {
+        assertEquals(
+            listOf(GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER)),
+            existingRecord1().participants,
+        )
+        val playerChangedRecord = existingRecord1().copy(
+            participants = listOf(
+                GameParticipant(
+                    TestParticipant.participant2.id,
+                    ParticipantRole.PLAYER,
+                ),
+            ),
+        )
+        db.update(playerChangedRecord).flatMap {
+            db.getById(playerChangedRecord.id)
+        }.coAwait()
+            .let {
                 assertEquals(playerChangedRecord, it)
-            }.coAwait()
+            }
     }
 
     @Test
     fun `player order should stay consistent when players are in multiple games`() = runTest {
-        val playerDb = injector.getInstance(PlayerDatabase::class.java)
+        val playerDb = injector.getInstance(ParticipantDatabase::class.java)
 
         fun randomString(length: Int = 10, prefix: String?): String {
             val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
             return (prefix ?: "") + (1..length).map { allowedChars.random() }.joinToString("")
         }
 
-        fun generatePlayer(): Player {
-            return Player(
+        fun generatePlayer(): Participant {
+            return Participant(
                 UUID.randomUUID(),
                 randomString(prefix = "name-"),
-                randomString(prefix = "twitch-"),
-                randomString(prefix = "discord-"),
+                listOf(
+                    SocialMedia.twitch(randomString(prefix = "twitch-")),
+                    SocialMedia.discord(randomString(prefix = "discord-")),
+                ),
             )
         }
 
@@ -132,7 +143,7 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
                 URL("https://${randomString(prefix = "vodlink-")}"),
                 randomString(prefix = "img-"),
                 randomString(prefix = "meta-"),
-                players,
+                players.map { GameParticipant(it, ParticipantRole.PLAYER) },
             )
         }
 
@@ -157,10 +168,11 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
             )
         }.flatMap {
             db.getAll()
-        }.map { res ->
-            res.forEach {
-                assertEquals(games[it.id], it)
-            }
         }.coAwait()
+            .let { res ->
+                res.forEach {
+                    assertEquals(games[it.id], it)
+                }
+            }
     }
 }

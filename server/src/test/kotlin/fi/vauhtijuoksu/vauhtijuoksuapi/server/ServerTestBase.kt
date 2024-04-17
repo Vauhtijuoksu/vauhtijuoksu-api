@@ -14,7 +14,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.StreamMetadataDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.PlayerInfo
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
@@ -74,7 +74,7 @@ open class ServerTestBase {
     protected lateinit var streamMetadataDatabase: StreamMetadataDatabase
 
     @Mock
-    protected lateinit var playerDatabase: VauhtijuoksuDatabase<Player>
+    protected lateinit var participantDatabase: VauhtijuoksuDatabase<Participant>
 
     protected val clock: Clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Helsinki"))
 
@@ -126,7 +126,7 @@ open class ServerTestBase {
                 bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
                 bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
                 bind(object : TypeLiteral<StreamMetadataDatabase>() {}).toInstance(streamMetadataDatabase)
-                bind(object : TypeLiteral<VauhtijuoksuDatabase<Player>>() {}).toInstance(playerDatabase)
+                bind(object : TypeLiteral<VauhtijuoksuDatabase<Participant>>() {}).toInstance(participantDatabase)
                 bind(ServerConfiguration::class.java).toInstance(
                     ServerConfiguration(
                         serverPort,

@@ -1,10 +1,11 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.featuretest
 
-import io.vertx.core.CompositeFuture
+import io.vertx.core.Future
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.WebClient
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.MethodOrderer
@@ -31,6 +32,18 @@ class GameDataAndPlayersTest {
           "display_name": "hluposti",
           "twitch_channel": "kustipolkee",
           "discord_nick": "poosi#8080"
+        }
+    """
+    private val participantData1 = """
+        {
+          "display_name": "kustiposti",
+          "social_medias": [{
+            "platform": "TWITCH",
+            "username": "kusti"
+          },{
+            "platform": "DISCORD",
+            "username": "kusti"
+          }]
         }
     """
 
@@ -65,6 +78,7 @@ class GameDataAndPlayersTest {
     companion object {
         private lateinit var player1Id: UUID
         private lateinit var player2Id: UUID
+        private lateinit var participant1Id: UUID
         private lateinit var game1Id: UUID
         private lateinit var game2Id: UUID
     }
@@ -76,51 +90,66 @@ class GameDataAndPlayersTest {
 
     @Test
     @Order(1)
-    fun `add a couple of players`(testContext: VertxTestContext) {
-        CompositeFuture.all(
+    fun `add a couple of players`() = runTest {
+        Future.all(
             client.post("/players")
                 .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                 .sendJson(JsonObject(playerData1))
                 .map {
                     val resJson = it.bodyAsJsonObject()
-                    testContext.verify {
-                        assertEquals(201, it.statusCode())
-                        val sentData = JsonObject(playerData1)
-                        sentData.put("id", resJson.getString("id"))
-                        assertEquals(sentData, resJson)
-                    }
+                    assertEquals(201, it.statusCode())
+                    val sentData = JsonObject(playerData1)
+                    sentData.put("id", resJson.getString("id"))
+                    assertEquals(sentData, resJson)
                     player1Id = UUID.fromString(resJson.getString("id"))
                 },
             client.post("/players")
                 .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                 .sendJson(JsonObject(playerData2))
                 .map {
-                    testContext.verify {
-                        assertEquals(201, it.statusCode())
-                    }
+                    assertEquals(201, it.statusCode())
                     player2Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
                 },
-        )
-            .map { testContext.completeNow() }
-            .onFailure(testContext::failNow)
+            client.post("/participants")
+                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                .sendJson(JsonObject(participantData1))
+                .map {
+                    assertEquals(201, it.statusCode())
+                    participant1Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
+                },
+
+        ).coAwait()
     }
 
     @Test
     @Order(2)
-    fun `create new games`(testContext: VertxTestContext) {
-        CompositeFuture.all(
+    fun `create new games`() = runTest {
+        Future.all(
             client.post("/gamedata")
                 .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-                .sendJson(JsonObject(gameData1).put("players", listOf(player1Id, player2Id)))
+                .sendJson(
+                    JsonObject(gameData1)
+                        .put("players", listOf(player1Id, player2Id))
+                        .put(
+                            "participants",
+                            listOf(JsonObject().put("participant_id", participant1Id).put("role", "COUCH")),
+                        ),
+                )
                 .map { res ->
                     val resJson = res.bodyAsJsonObject()
-                    testContext.verify {
-                        assertEquals(201, res.statusCode())
-                        val original = JsonObject(gameData1)
-                            .put("id", resJson.getString("id"))
-                            .put("players", listOf(player1Id.toString(), player2Id.toString()))
-                        assertEquals(original, res.bodyAsJsonObject())
-                    }
+                    assertEquals(201, res.statusCode())
+                    val original = JsonObject(gameData1)
+                        .put("id", resJson.getString("id"))
+                        .put("players", listOf(player1Id.toString(), player2Id.toString()))
+                        .put(
+                            "participants",
+                            listOf(
+                                JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER"),
+                                JsonObject().put("participant_id", player2Id.toString()).put("role", "PLAYER"),
+                                JsonObject().put("participant_id", participant1Id.toString()).put("role", "COUCH"),
+                            ),
+                        )
+                    assertEquals(original, res.bodyAsJsonObject())
                     game1Id = UUID.fromString(res.bodyAsJsonObject().getString("id"))
                 },
             client.post("/gamedata")
@@ -129,111 +158,96 @@ class GameDataAndPlayersTest {
                 .map {
                     game2Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
                 },
-        )
-            .map { testContext.completeNow() }
-            .onFailure(testContext::failNow)
+        ).coAwait()
     }
 
     @Test
     @Order(3)
-    fun `change a game`(testContext: VertxTestContext) {
+    fun `change a game`() = runTest {
         client.patch("/gamedata/$game1Id")
             .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
             .sendJson(
                 JsonObject(gameData1)
                     .put("game", "Pacman")
-                    .put("players", listOf(player1Id)),
+                    .put("players", listOf(player1Id))
+                    .put("participants", listOf<String>()),
             )
             .map {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                    val expectedData = JsonObject(gameData1)
-                        .put("id", game1Id.toString())
-                        .put("game", "Pacman")
-                        .put("players", listOf(player1Id.toString()))
-                    assertEquals(expectedData, it.bodyAsJsonObject())
-                }
-                testContext.completeNow()
+                assertEquals(200, it.statusCode())
+                val expectedData = JsonObject(gameData1)
+                    .put("id", game1Id.toString())
+                    .put("game", "Pacman")
+                    .put("players", listOf(player1Id.toString()))
+                    .put(
+                        "participants",
+                        listOf(JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER")),
+                    )
+                assertEquals(expectedData, it.bodyAsJsonObject())
             }
-            .onFailure(testContext::failNow)
+            .coAwait()
     }
 
     @Test
     @Order(4)
-    fun `remove a game`(testContext: VertxTestContext) {
+    fun `remove a game`() = runTest {
         client.delete("/gamedata/$game1Id")
             .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
             .send()
             .map {
-                testContext.verify {
-                    assertEquals(204, it.statusCode())
-                }
+                assertEquals(204, it.statusCode())
             }
             .compose {
                 client.get("/gamedata/$game1Id")
                     .send()
             }
             .map {
-                testContext.verify {
-                    assertEquals(404, it.statusCode())
-                }
+                assertEquals(404, it.statusCode())
             }
             .compose {
                 client.get("/players/$player1Id")
                     .send()
             }
             .map {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                }
-                testContext.completeNow()
-            }
-            .onFailure(testContext::failNow)
+                assertEquals(200, it.statusCode())
+            }.coAwait()
     }
 
     @Test
     @Order(5)
-    fun `remove a player`(testContext: VertxTestContext) {
+    fun `remove a player`() = runTest {
         client.delete("/players/$player2Id")
             .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
             .send()
             .map {
-                testContext.verify {
-                    assertEquals(204, it.statusCode())
-                }
+                assertEquals(204, it.statusCode())
             }
             .compose {
                 client.get("/players/$player2Id")
                     .send()
             }
             .map {
-                testContext.verify {
-                    assertEquals(404, it.statusCode())
-                }
+                assertEquals(404, it.statusCode())
             }
             .compose {
                 client.get("/gamedata/$game2Id")
                     .send()
             }
             .map {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                    val expectedResponse = JsonObject(gameData2)
-                        .put("id", game2Id.toString())
-                        .put("players", listOf<String>())
-                    assertEquals(expectedResponse, it.bodyAsJsonObject())
-                }
-                testContext.completeNow()
-            }
-            .onFailure(testContext::failNow)
+                assertEquals(200, it.statusCode())
+                val expectedResponse = JsonObject(gameData2)
+                    .put("id", game2Id.toString())
+                    .put("players", listOf<String>())
+                    .put("participants", listOf<String>())
+                assertEquals(expectedResponse, it.bodyAsJsonObject())
+            }.coAwait()
     }
 
     @Test
     @Order(6)
-    fun `modify player info`(testContext: VertxTestContext) {
+    fun `modify player info`() = runTest {
         client.patch("/players/$player1Id")
             .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
@@ -242,27 +256,21 @@ class GameDataAndPlayersTest {
                     .put("display_name", "Pekka"),
             )
             .map {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                    val expectedResponse = JsonObject(playerData1)
-                        .put("id", player1Id.toString())
-                        .put("display_name", "Pekka")
-                    assertEquals(expectedResponse, it.bodyAsJsonObject())
-                }
+                assertEquals(200, it.statusCode())
+                val expectedResponse = JsonObject(playerData1)
+                    .put("id", player1Id.toString())
+                    .put("display_name", "Pekka")
+                assertEquals(expectedResponse, it.bodyAsJsonObject())
             }
             .compose {
                 client.get("/players/$player1Id")
                     .send()
             }.map {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                    val expectedResponse = JsonObject(playerData1)
-                        .put("id", player1Id.toString())
-                        .put("display_name", "Pekka")
-                    assertEquals(expectedResponse, it.bodyAsJsonObject())
-                }
-                testContext.completeNow()
-            }
-            .onFailure(testContext::failNow)
+                assertEquals(200, it.statusCode())
+                val expectedResponse = JsonObject(playerData1)
+                    .put("id", player1Id.toString())
+                    .put("display_name", "Pekka")
+                assertEquals(expectedResponse, it.bodyAsJsonObject())
+            }.coAwait()
     }
 }

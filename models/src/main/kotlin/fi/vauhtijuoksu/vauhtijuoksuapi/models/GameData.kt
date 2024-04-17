@@ -4,6 +4,16 @@ import java.net.URL
 import java.util.Date
 import java.util.UUID
 
+enum class ParticipantRole {
+    PLAYER,
+    COUCH,
+}
+
+data class GameParticipant(
+    val participantId: UUID,
+    val role: ParticipantRole,
+)
+
 data class GameData(
     override val id: UUID,
     val game: String,
@@ -15,5 +25,5 @@ data class GameData(
     val vodLink: URL?,
     val imgFilename: String?,
     val meta: String?,
-    val players: List<UUID>,
+    val participants: List<GameParticipant>,
 ) : Model

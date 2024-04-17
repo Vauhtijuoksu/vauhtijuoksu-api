@@ -21,7 +21,7 @@ open class GameDataInputValidator {
             input::category to "category",
             input::device to "device",
             input::published to "published",
-            input::players to "players",
+            input::participants to "participants",
         )
         ) {
             val v = getter()

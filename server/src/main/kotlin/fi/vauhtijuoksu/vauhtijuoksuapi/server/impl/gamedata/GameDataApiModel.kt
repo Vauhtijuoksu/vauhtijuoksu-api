@@ -5,11 +5,19 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
 import io.vertx.core.json.JsonObject
 import java.net.URL
 import java.util.Date
 import java.util.UUID
+
+@Suppress("ConstructorParameterNaming")
+data class GameParticipantApiModel(
+    val participant_id: UUID,
+    val role: ParticipantRole,
+)
 
 data class GameDataApiModel(
     val id: UUID,
@@ -30,6 +38,7 @@ data class GameDataApiModel(
     val imgFilename: String?,
     val meta: String?,
     val players: List<UUID>,
+    val participants: List<GameParticipantApiModel>,
 ) : ApiModel<GameData> {
     companion object {
         fun fromGameData(gameData: GameData): GameDataApiModel {
@@ -44,7 +53,8 @@ data class GameDataApiModel(
                 gameData.vodLink,
                 gameData.imgFilename,
                 gameData.meta,
-                gameData.players,
+                gameData.participants.filter { it.role == ParticipantRole.PLAYER }.map { it.participantId },
+                gameData.participants.map { GameParticipantApiModel(it.participantId, it.role) },
             )
         }
     }
@@ -65,7 +75,17 @@ data class GameDataApiModel(
             vodLink,
             imgFilename,
             meta,
-            players,
+            players
+                .map {
+                    GameParticipant(
+                        it,
+                        ParticipantRole.PLAYER,
+                    )
+                } + participants
+                .filter { it.participant_id !in players }
+                .map {
+                    GameParticipant(it.participant_id, it.role)
+                },
         )
     }
 }

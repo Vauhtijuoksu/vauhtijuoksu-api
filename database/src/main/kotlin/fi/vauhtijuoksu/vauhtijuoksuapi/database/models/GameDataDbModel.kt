@@ -4,9 +4,19 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
 import java.net.URL
 import java.util.Date
 import java.util.UUID
+
+@Suppress("ConstructorParameterNaming") // This is cleaner than annotations
+data class GameParticipantDbModel(
+    val game_id: UUID,
+    val participant_id: UUID,
+    val role_in_game: ParticipantRole,
+    val participant_order: Int,
+)
 
 data class GameDataDbModel(
     val id: UUID,
@@ -26,8 +36,7 @@ data class GameDataDbModel(
     @JsonProperty("img_filename")
     val imgFilename: String?,
     val meta: String?,
-    @JsonProperty("player_ids")
-    val playerIds: List<UUID>,
+    val participants: List<GameParticipantDbModel>,
 ) {
     companion object {
         fun fromGameData(gameData: GameData): GameDataDbModel {
@@ -42,7 +51,7 @@ data class GameDataDbModel(
                 gameData.vodLink,
                 gameData.imgFilename,
                 gameData.meta,
-                gameData.players,
+                listOf(),
             )
         }
     }
@@ -59,7 +68,7 @@ data class GameDataDbModel(
             vodLink,
             imgFilename,
             meta,
-            playerIds,
+            participants.map { GameParticipant(it.participant_id, it.role_in_game) },
         )
     }
 }

@@ -2,50 +2,50 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 
 import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
-import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
+import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestParticipant
 import io.vertx.kotlin.coroutines.coAwait
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class PlayerDatabaseTest : VauhtijuoksuDatabaseTest<Player>() {
-    override fun existingRecord1(): Player {
-        return TestPlayer.player1
+class ParticipantDatabaseTest : VauhtijuoksuDatabaseTest<Participant>() {
+    override fun existingRecord1(): Participant {
+        return TestParticipant.participant1
     }
 
-    override fun existingRecord2(): Player {
-        return TestPlayer.player2
+    override fun existingRecord2(): Participant {
+        return TestParticipant.participant2
     }
 
-    override fun newRecord(): Player {
-        return TestPlayer.player3
+    override fun newRecord(): Participant {
+        return TestParticipant.participant3
     }
 
     override fun tableName(): String {
-        return "players"
+        return "participants"
     }
 
-    override fun copyWithId(oldRecord: Player, newId: UUID): Player {
+    override fun copyWithId(oldRecord: Participant, newId: UUID): Participant {
         return oldRecord.copy(id = newId)
     }
 
-    override fun getDatabase(injector: Injector): VauhtijuoksuDatabase<Player> {
-        return injector.getInstance(PlayerDatabase::class.java)
+    override fun getDatabase(injector: Injector): VauhtijuoksuDatabase<Participant> {
+        return injector.getInstance(ParticipantDatabase::class.java)
     }
 
     @Test
     fun testUpdate() = runTest {
         val oldId = existingRecord1().id
-        val newPlayer = existingRecord2().copy(id = oldId)
+        val newPlayer = newRecord().copy(id = oldId)
         db.update(newPlayer)
-            .flatMap {
-                db.getAll()
-            }
+            .coAwait()
+
+        db.getAll()
             .coAwait()
             .let {
-                assertEquals(listOf(existingRecord2(), newPlayer), it)
+                assertEquals(listOf(newPlayer, existingRecord2()).sortedBy { it.displayName }, it)
             }
     }
 

@@ -17,7 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 
 @Testcontainers
 @ExtendWith(VertxExtension::class)
-class PlayerInfoDatabaseTest {
+class ParticipantInfoDatabaseTest {
     private lateinit var db: PlayerInfoDatabase
 
     private val emptyData = PlayerInfo(
