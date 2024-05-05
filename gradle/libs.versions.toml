@@ -1,5 +1,5 @@
 [versions]
-jackson = "2.17.0"
+jackson = "2.17.1"
 hoplite = "2.7.5"
 vertx = "4.5.5"
 kotlin = "1.9.23"
