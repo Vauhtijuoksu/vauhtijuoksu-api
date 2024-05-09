@@ -56,7 +56,7 @@ jackson-dataformat-yaml = { group = "com.fasterxml.jackson.dataformat", name = "
 junit-bom = "org.junit:junit-bom:5.10.2"
 junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api" }
 junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine" }
-testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version = "1.19.7" }
+testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version = "1.19.8" }
 testcontainers-core = { group = "org.testcontainers", name = "testcontainers" }
 testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter" }
 testcontainers-postgresql = { group = "org.testcontainers", name = "postgresql" }
