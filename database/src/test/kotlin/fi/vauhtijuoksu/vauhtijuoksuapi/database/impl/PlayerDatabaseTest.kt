@@ -10,18 +10,6 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class PlayerDatabaseTest : VauhtijuoksuDatabaseTest<Player>() {
-    override fun insertStatement(data: List<Player>): String {
-        fun valuesStringForPlayer(player: Player): String {
-            return "('${player.id}', '${player.displayName}', '${player.twitchChannel}', '${player.discordNick}')"
-        }
-
-        var statement = "INSERT INTO players VALUES "
-        for (player in data) {
-            statement += "${valuesStringForPlayer(player)},"
-        }
-        return statement.trim(',')
-    }
-
     override fun existingRecord1(): Player {
         return TestPlayer.player1
     }

@@ -10,50 +10,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class IncentiveDatabaseTest : VauhtijuoksuDatabaseTest<Incentive>() {
-    override fun insertStatement(data: List<Incentive>): String {
-        fun valuesStringForIncentive(incentive: Incentive): String {
-            fun intArrayOrNull(value: List<Int>?): String {
-                return value?.joinToString(",", "'{", "}'") ?: "NULL"
-            }
-
-            fun arrayOrNull(value: List<Any>?): String {
-                return value?.stream()?.map { "$it" }?.toList()?.joinToString(",", "'{", "}'") ?: "NULL"
-            }
-
-            fun valueOrNULL(value: Any?): String? {
-                return if (value != null) {
-                    "'$value'"
-                } else {
-                    null
-                }
-            }
-
-            return """(
-                '${incentive.id}',
-                ${valueOrNULL(incentive.gameId)},
-                '${incentive.title}',
-                '${incentive.endTime}',
-                '${incentive.type}',
-                '${incentive.info}',
-                ${intArrayOrNull(incentive.milestones)},
-                ${arrayOrNull(incentive.optionParameters)},
-                ${
-                if (incentive.openCharLimit == null) {
-                    "NULL"
-                } else {
-                    "${incentive.openCharLimit}"
-                }
-            }
-                )"""
-        }
-
-        var statement = "INSERT INTO incentives VALUES "
-        for (incentive in data) {
-            statement += "${valuesStringForIncentive(incentive)},"
-        }
-        return statement.trim(',')
-    }
-
     override fun existingRecord1(): Incentive {
         return TestIncentive.incentive1
     }

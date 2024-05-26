@@ -9,7 +9,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
 import io.vertx.core.Future
 import io.vertx.kotlin.coroutines.coAwait
-import io.vertx.sqlclient.SqlClient
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -17,42 +16,24 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.net.URL
 import java.time.Instant
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
-
-    override fun insertStatement(data: List<GameData>): String {
-        fun valuesStringForGameData(gd: GameData): String {
-            @Suppress("MaxLineLength")
-            return "('${gd.id}', '${gd.game}', '${df.format(gd.startTime)}', '${df.format(gd.endTime)}', '${gd.category}', '${gd.device}', '${gd.published}', '${gd.vodLink}', '${gd.imgFilename}', '${gd.meta}')"
-        }
-
-        var statement = "INSERT INTO gamedata VALUES "
-        for (gd in data) {
-            statement += "${valuesStringForGameData(gd)},"
-        }
-        return statement.trim(',')
-    }
-
     override fun insertExistingRecords(): Future<Unit> {
         val playerDb = injector.getInstance(PlayerDatabase::class.java)
-        val client = injector.getInstance(SqlClient::class.java)
         return playerDb
             .add(TestPlayer.player1)
             .flatMap {
                 playerDb.add(TestPlayer.player2)
-            }.flatMap {
-                super.insertExistingRecords()
             }
             .flatMap {
-                client
-                    .query(
-                        @Suppress("MaxLineLength")
-                        """INSERT INTO players_in_game (game_id, player_id, player_order) VALUES ('${existingRecord1().id}', '${existingRecord1().players.first()}', 1), ('${existingRecord2().id}', '${existingRecord2().players.first()}', 2)""",
-                    )
-                    .execute()
-                    .mapEmpty()
+                db.add(existingRecord1())
             }
+            .flatMap {
+                db.add(existingRecord2())
+            }
+            .mapEmpty()
     }
 
     override fun existingRecord1(): GameData {
