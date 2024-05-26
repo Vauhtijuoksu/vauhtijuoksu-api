@@ -18,6 +18,7 @@ tasks {
     generateSwaggerUI {
         swaggerSources {
             inputFile = swaggerInput
+            options["docExpansion"] = "none"
         }
     }
 
