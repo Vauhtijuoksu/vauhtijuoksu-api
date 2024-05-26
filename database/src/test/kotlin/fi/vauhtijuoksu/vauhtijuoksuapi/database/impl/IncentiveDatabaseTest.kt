@@ -4,7 +4,8 @@ import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestIncentive
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -35,32 +36,29 @@ class IncentiveDatabaseTest : VauhtijuoksuDatabaseTest<Incentive>() {
     }
 
     @Test
-    fun testUpdate(testContext: VertxTestContext) {
+    fun testUpdate() = runTest {
         val expectedIncentive = existingRecord1().copy(title = "Changed the title")
         db.update(existingRecord1().copy(title = "Changed the title"))
-            .onFailure(testContext::failNow)
-            .compose { db.getAll() }
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(listOf(expectedIncentive, existingRecord2()), res)
-                }
-                testContext.completeNow()
+            .coAwait()
+
+        db.getAll()
+            .coAwait()
+            .let { res ->
+                assertEquals(listOf(expectedIncentive, existingRecord2()), res)
             }
     }
 
     @Test
-    fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
+    fun testUpdatingNonExistingRecord() = runTest {
         db.update(newRecord())
-            .failOnSuccess(testContext)
-            .recoverIfMissingEntity(testContext)
-            .compose { db.getAll() }
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(listOf(existingRecord1(), existingRecord2()), res)
-                }
-                testContext.completeNow()
+            .failOnSuccess()
+            .recoverIfMissingEntity()
+            .coAwait()
+
+        db.getAll()
+            .coAwait()
+            .let { res ->
+                assertEquals(listOf(existingRecord1(), existingRecord2()), res)
             }
     }
 }

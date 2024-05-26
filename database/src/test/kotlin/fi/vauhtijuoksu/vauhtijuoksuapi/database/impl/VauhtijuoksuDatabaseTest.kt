@@ -6,17 +6,15 @@ import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.DatabaseModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
-import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import io.vertx.core.Future
-import io.vertx.junit5.VertxExtension
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
 import io.vertx.sqlclient.SqlClient
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -24,7 +22,6 @@ import java.text.SimpleDateFormat
 import java.util.UUID
 
 @Testcontainers
-@ExtendWith(VertxExtension::class)
 abstract class VauhtijuoksuDatabaseTest<T : Model> {
     protected lateinit var db: VauhtijuoksuDatabase<T>
     private lateinit var sqlClient: SqlClient
@@ -43,7 +40,7 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
     abstract fun getDatabase(injector: Injector): VauhtijuoksuDatabase<T>
 
     @BeforeEach
-    fun beforeEach(testContext: VertxTestContext) {
+    fun beforeEach() = runTest {
         injector = Guice.createInjector(
             DatabaseModule(),
             object : AbstractModule() {
@@ -65,11 +62,7 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
         db = getDatabase(injector)
         sqlClient = injector.getInstance(SqlClient::class.java)
 
-        insertExistingRecords()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.completeNow()
-            }
+        insertExistingRecords().coAwait()
     }
 
     protected open fun insertExistingRecords(): Future<Unit> {
@@ -80,97 +73,79 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
     }
 
     @Test
-    fun testGetAllOnEmptyDatabase(testContext: VertxTestContext) {
+    fun testGetAllOnEmptyDatabase() = runTest {
         sqlClient.query("DELETE FROM ${tableName()}")
             .execute()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                db.getAll()
-                    .onFailure(testContext::failNow)
-                    .onSuccess { result ->
-                        testContext.verify {
-                            assertTrue(result.isEmpty())
-                        }
-                        testContext.completeNow()
-                    }
-            }
-    }
+            .coAwait()
 
-    @Test
-    fun testGetAll(testContext: VertxTestContext) {
         db.getAll()
-            .onFailure(testContext::failNow)
-            .onSuccess { records ->
-                testContext.verify {
-                    assertEquals(listOf(existingRecord1(), existingRecord2()), records)
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { result ->
+                assertTrue(result.isEmpty())
             }
     }
 
     @Test
-    fun testGetByNonExistingId(testContext: VertxTestContext) {
+    fun testGetAll() = runTest {
+        db.getAll()
+            .coAwait()
+            .let { records ->
+                assertEquals(listOf(existingRecord1(), existingRecord2()), records)
+            }
+    }
+
+    @Test
+    fun testGetByNonExistingId() = runTest {
         db.getById(UUID.randomUUID())
-            .failOnSuccess(testContext)
-            .recoverIfMissingEntity(testContext)
-            .completeOnSuccessOrFail(testContext)
+            .failOnSuccess()
+            .recoverIfMissingEntity()
+            .coAwait()
     }
 
     @Test
-    fun testGetById(testContext: VertxTestContext) {
+    fun testGetById() = runTest {
         db.getById(existingRecord1().id)
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(existingRecord1(), res)
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { res ->
+                assertEquals(existingRecord1(), res)
             }
     }
 
     @Test
-    fun testAdd(testContext: VertxTestContext) {
+    fun testAdd() = runTest {
         val insertedRecord = newRecord()
         db.add(insertedRecord)
             .flatMap {
                 db.getById(insertedRecord.id)
             }
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(insertedRecord, res)
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let { res ->
+                assertEquals(insertedRecord, res)
             }
     }
 
     @Test
-    fun testDeleteExisting(testContext: VertxTestContext) {
-        val deletedCp = testContext.checkpoint()
-        val verifiedDeletionCp = testContext.checkpoint()
+    fun testDeleteExisting() = runTest {
         db.delete(existingRecord1().id)
-            .onFailure(testContext::failNow)
-            .map { deletedCp.flag() }
-            .compose { db.getById(existingRecord1().id) }
-            .onFailure {
-                testContext.verify {
-                    assertTrue(it is MissingEntityException)
-                }
-                verifiedDeletionCp.flag()
-            }
+            .coAwait()
+
+        db.getById(existingRecord1().id)
+            .failOnSuccess()
+            .recoverIfMissingEntity()
+            .coAwait()
     }
 
     @Test
-    fun testDeleteNonExisting(testContext: VertxTestContext) {
+    fun testDeleteNonExisting() = runTest {
         db.delete(UUID.randomUUID())
-            .failOnSuccess(testContext)
-            .recoverIfMissingEntity(testContext)
-            .compose { db.getAll() }
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(2, res.count())
-                }
-                testContext.completeNow()
-            }.onFailure(testContext::failNow)
+            .failOnSuccess()
+            .recoverIfMissingEntity()
+            .coAwait()
+
+        db.getAll()
+            .coAwait()
+            .let { res ->
+                assertEquals(2, res.count())
+            }
     }
 }

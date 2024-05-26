@@ -3,7 +3,8 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -77,7 +78,7 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
     }
 
     @Test
-    fun testUpdate(testContext: VertxTestContext) {
+    fun testUpdate() = runTest {
         val newTimer = timer1.copy(
             startTime = OffsetDateTime.ofInstant(
                 Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-06-05T16:00:00Z")),
@@ -90,32 +91,30 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
             name = "new timer name",
         )
         db.update(newTimer)
-            .compose { db.getAll() }
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    val list1 = mutableListOf(newTimer, timer2)
-                    list1.sortBy { it.id }
-                    val results = res.toMutableList()
-                    results.sortBy { it.id }
-                    assertEquals(list1, results)
-                }
-                testContext.completeNow()
+            .coAwait()
+
+        db.getAll()
+            .coAwait()
+            .let { res ->
+                val list1 = mutableListOf(newTimer, timer2)
+                list1.sortBy { it.id }
+                val results = res.toMutableList()
+                results.sortBy { it.id }
+                assertEquals(list1, results)
             }
     }
 
     @Test
-    fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
+    fun testUpdatingNonExistingRecord() = runTest {
         db.update(timer3)
-            .failOnSuccess(testContext)
-            .recoverIfMissingEntity(testContext)
-            .compose { db.getAll() }
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(listOf(timer1, timer2), res)
-                }
-                testContext.completeNow()
+            .failOnSuccess()
+            .recoverIfMissingEntity()
+            .coAwait()
+
+        db.getAll()
+            .coAwait()
+            .let { res ->
+                assertEquals(listOf(timer1, timer2), res)
             }
     }
 }

@@ -6,7 +6,8 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation2
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation3
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -37,31 +38,29 @@ class DonationDatabaseTest : VauhtijuoksuDatabaseTest<Donation>() {
     }
 
     @Test
-    fun testUpdate(testContext: VertxTestContext) {
+    fun testUpdate() = runTest {
         val newDonation = donation1.copy(read = true, message = null)
         db.update(donation1.copy(read = true, message = null))
-            .compose { db.getAll() }
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(listOf(newDonation, donation2), res)
-                }
-                testContext.completeNow()
+            .coAwait()
+
+        db.getAll()
+            .coAwait()
+            .let { res ->
+                assertEquals(listOf(newDonation, donation2), res)
             }
     }
 
     @Test
-    fun testUpdatingNonExistingRecord(testContext: VertxTestContext) {
+    fun testUpdatingNonExistingRecord() = runTest {
         db.update(donation3)
-            .failOnSuccess(testContext)
-            .recoverIfMissingEntity(testContext)
-            .compose { db.getAll() }
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(listOf(donation1, donation2), res)
-                }
-                testContext.completeNow()
+            .failOnSuccess()
+            .recoverIfMissingEntity()
+            .coAwait()
+
+        db.getAll()
+            .coAwait()
+            .let { res ->
+                assertEquals(listOf(donation1, donation2), res)
             }
-            .onFailure(testContext::failNow)
     }
 }

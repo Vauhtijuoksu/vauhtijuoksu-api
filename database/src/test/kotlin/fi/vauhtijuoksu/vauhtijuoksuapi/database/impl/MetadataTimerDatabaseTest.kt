@@ -7,18 +7,16 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfigurat
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
-import io.vertx.junit5.VertxExtension
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
 @Testcontainers
-@ExtendWith(VertxExtension::class)
 class MetadataTimerDatabaseTest {
     private lateinit var db: StreamMetadataDatabase
     private lateinit var gameDataDb: GameDataDatabase
@@ -71,19 +69,16 @@ class MetadataTimerDatabaseTest {
     }
 
     @Test
-    fun `database returns empty data initially`(testContext: VertxTestContext) {
+    fun `database returns empty data initially`() = runTest {
         db.get()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(emptyData, it)
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let {
+                assertEquals(emptyData, it)
             }
     }
 
     @Test
-    fun `database saves given data`(testContext: VertxTestContext) {
+    fun `database saves given data`() = runTest {
         val gameData = TestGameData.gameData1
         assertEquals(1, gameData.players.size)
         assertEquals(TestPlayer.player1.id, gameData.players.first())
@@ -100,23 +95,20 @@ class MetadataTimerDatabaseTest {
                 )
             }
             .compose { db.get() }
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(
-                        someData.copy(
-                            currentGameId = gameData.id,
-                            counters = listOf(1, 3, 100),
-                        ),
-                        it,
-                    )
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let {
+                assertEquals(
+                    someData.copy(
+                        currentGameId = gameData.id,
+                        counters = listOf(1, 3, 100),
+                    ),
+                    it,
+                )
             }
     }
 
     @Test
-    fun `current game is set to null when the game is deleted`(testContext: VertxTestContext) {
+    fun `current game is set to null when the game is deleted`() = runTest {
         val gameData = TestGameData.gameData1
         assertEquals(1, gameData.players.size)
         assertEquals(TestPlayer.player1.id, gameData.players.first())
@@ -129,12 +121,9 @@ class MetadataTimerDatabaseTest {
             }
             .compose { gameDataDb.delete(gameData.id) }
             .compose { db.get() }
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(someData.copy(currentGameId = null), it)
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let {
+                assertEquals(someData.copy(currentGameId = null), it)
             }
     }
 }

@@ -4,10 +4,11 @@ import com.google.inject.Injector
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Player
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestPlayer
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 class PlayerDatabaseTest : VauhtijuoksuDatabaseTest<Player>() {
     override fun existingRecord1(): Player {
@@ -35,37 +36,31 @@ class PlayerDatabaseTest : VauhtijuoksuDatabaseTest<Player>() {
     }
 
     @Test
-    fun testUpdate(testContext: VertxTestContext) {
+    fun testUpdate() = runTest {
         val oldId = existingRecord1().id
         val newPlayer = existingRecord2().copy(id = oldId)
         db.update(newPlayer)
-            .compose {
+            .flatMap {
                 db.getAll()
             }
-            .map {
-                testContext.verify {
-                    assertEquals(listOf(existingRecord2(), newPlayer), it)
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let {
+                assertEquals(listOf(existingRecord2(), newPlayer), it)
             }
-            .onFailure(testContext::failNow)
     }
 
     @Test
-    fun testUpdateNonExisting(testContext: VertxTestContext) {
+    fun testUpdateNonExisting() = runTest {
         val newUuid = UUID.randomUUID()
         db.update(existingRecord2().copy(id = newUuid))
-            .failOnSuccess(testContext)
-            .recoverIfMissingEntity(testContext)
-            .compose {
-                db.getAll()
+            .failOnSuccess()
+            .recoverIfMissingEntity()
+            .coAwait()
+
+        db.getAll()
+            .coAwait()
+            .let {
+                assertEquals(listOf(existingRecord1(), existingRecord2()), it)
             }
-            .map {
-                testContext.verify {
-                    assertEquals(listOf(existingRecord1(), existingRecord2()), it)
-                }
-                testContext.completeNow()
-            }
-            .onFailure(testContext::failNow)
     }
 }
