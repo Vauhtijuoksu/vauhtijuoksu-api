@@ -12,19 +12,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class DonationDatabaseTest : VauhtijuoksuDatabaseTest<Donation>() {
-    override fun insertStatement(data: List<Donation>): String {
-        fun valuesStringForDonation(donation: Donation): String {
-            @Suppress("MaxLineLength")
-            return "('${donation.id}', '${donation.name}', '${donation.message}', '${df.format(donation.timestamp)}','${donation.amount}', '${donation.read}', ${donation.externalId?.run { "'${donation.externalId}'" } ?: "NULL"})"
-        }
-
-        var statement = "INSERT INTO donations VALUES "
-        for (donation in data) {
-            statement += "${valuesStringForDonation(donation)},"
-        }
-        return statement.trim(',')
-    }
-
     override fun existingRecord1(): Donation {
         return donation1
     }

@@ -52,18 +52,6 @@ class TimerDatabaseTest : VauhtijuoksuDatabaseTest<Timer>() {
         "timer 3",
     )
 
-    override fun insertStatement(data: List<Timer>): String {
-        fun valuesStringForTimer(timer: Timer): String {
-            return "('${timer.id}', '${timer.startTime}', '${timer.endTime}', '${timer.name}')"
-        }
-
-        var statement = "INSERT INTO timers VALUES "
-        for (timer in data) {
-            statement += "${valuesStringForTimer(timer)},"
-        }
-        return statement.trim(',')
-    }
-
     override fun existingRecord1(): Timer {
         return timer1
     }

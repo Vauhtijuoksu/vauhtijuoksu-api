@@ -35,8 +35,6 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
     var pg: PostgreSQLContainer<Nothing> =
         PostgreSQLContainer<Nothing>("postgres:10").withDatabaseName("vauhtijuoksu-api")
 
-    abstract fun insertStatement(data: List<T>): String
-
     abstract fun existingRecord1(): T
     abstract fun existingRecord2(): T
     abstract fun newRecord(): T
@@ -75,9 +73,10 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
     }
 
     protected open fun insertExistingRecords(): Future<Unit> {
-        return sqlClient.query(insertStatement(listOf(existingRecord1(), existingRecord2())))
-            .execute()
-            .mapEmpty()
+        return db.add(existingRecord1())
+            .flatMap {
+                db.add(existingRecord2())
+            }.mapEmpty()
     }
 
     @Test
