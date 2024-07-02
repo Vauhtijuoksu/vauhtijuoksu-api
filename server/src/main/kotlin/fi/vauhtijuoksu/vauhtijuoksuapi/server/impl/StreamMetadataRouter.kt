@@ -7,6 +7,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.SubRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.streammetadata.StreamMetaDataApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.streammetadata.UpdateStreamMetaDataApiModel
 import io.vertx.core.json.DecodeException
@@ -36,7 +37,7 @@ class StreamMetadataRouter
     @Named(DependencyInjectionConstants.PUBLIC_CORS)
     private val publicEndpointCorsHandler: CorsHandler,
     private val clock: Clock,
-) {
+) : SubRouter {
     private val streamMetadata = JsonObject(
         """{
             "donation_goal": null,
@@ -52,7 +53,7 @@ class StreamMetadataRouter
     private val logger = KotlinLogging.logger {}
 
     @Suppress("SwallowedException") // Not swallowed, the message is used in augmented error
-    fun configure(router: Router) {
+    override fun configure(router: Router) {
         router.route("/stream-metadata").handler { ctx ->
             ctx.response().putHeader("content-type", "application/json")
             ctx.next()

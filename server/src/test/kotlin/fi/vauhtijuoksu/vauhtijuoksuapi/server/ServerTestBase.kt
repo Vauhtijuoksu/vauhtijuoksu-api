@@ -8,6 +8,7 @@ import com.google.inject.TypeLiteral
 import com.google.inject.util.Modules
 import com.google.inject.util.Providers
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.GeneratedIncentiveCodeDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.ObservableDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.StreamMetadataDatabase
@@ -27,7 +28,9 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.client.WebClientOptions
 import io.vertx.junit5.VertxExtension
-import io.vertx.junit5.VertxTestContext
+import io.vertx.kotlin.coroutines.coAwait
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -50,7 +53,7 @@ open class ServerTestBase {
     protected lateinit var client: WebClient
 
     @Mock
-    protected lateinit var gameDataDb: VauhtijuoksuDatabase<GameData>
+    protected lateinit var gameDataDb: ObservableDatabase<GameData>
 
     @Mock
     protected lateinit var donationDb: VauhtijuoksuDatabase<Donation>
@@ -119,6 +122,7 @@ open class ServerTestBase {
         object : AbstractModule() {
             override fun configure() {
                 bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
+                bind(object : TypeLiteral<ObservableDatabase<GameData>>() {}).toInstance(gameDataDb)
                 bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
                 bind(object : TypeLiteral<VauhtijuoksuDatabase<Timer>>() {}).toInstance(timerDb)
                 bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).toInstance(streamMetadataDb)
@@ -150,7 +154,7 @@ open class ServerTestBase {
     open fun injector(modules: List<Module>): Injector = Guice.createInjector(modules)
 
     @BeforeEach
-    fun beforeEach(testContext: VertxTestContext) {
+    fun beforeEach() = runTest {
         htpasswdFile = "${tmpDir.path}/.htpasswd"
         val writer = BufferedWriter(FileWriter(File(htpasswdFile)))
         // Pre-generated credentials vauhtijuoksu / vauhtijuoksu
@@ -162,29 +166,28 @@ open class ServerTestBase {
 
         vertx = injector.getInstance(Vertx::class.java)
         server = injector.getInstance(Server::class.java)
-        server.start()
+        vertx.deployVerticle(server).coAwait()
+
         client = WebClient.create(vertx, WebClientOptions().setDefaultPort(serverPort))
         var runs = 0
-        vertx.setPeriodic(0, 5) { timerId ->
-            client.request(HttpMethod.OPTIONS, "/")
-                .send()
-                .onSuccess {
-                    vertx.cancelTimer(timerId)
-                    testContext.completeNow()
+
+        do {
+            try {
+                client.request(HttpMethod.OPTIONS, "/").send().coAwait()
+                break
+            } catch (e: Exception) {
+                runs += 1
+                if (runs > 10) {
+                    throw Exception("Server not responding after 10 tries")
                 }
-                .onFailure {
-                    runs += 1
-                    if (runs > 10) {
-                        testContext.failNow("Server not responding after 10 tries")
-                    }
-                }
-        }
+            }
+            delay(10)
+        } while (true)
     }
 
     @AfterEach
-    fun afterEach(testContext: VertxTestContext) {
-        server.stop()
+    fun afterEach() = runTest {
         client.close()
-        vertx.close { testContext.completeNow() }
+        vertx.close().coAwait()
     }
 }

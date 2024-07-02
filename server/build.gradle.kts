@@ -16,6 +16,7 @@ dependencies {
 
     implementation(libs.arrow.kt)
     implementation(libs.guice)
+    implementation(libs.kotlinx.coroutines)
     implementation(libs.kotlinx.serialization)
     implementation(libs.jackson.datatype.jsr310)
     implementation(libs.jackson.module.kotlin)

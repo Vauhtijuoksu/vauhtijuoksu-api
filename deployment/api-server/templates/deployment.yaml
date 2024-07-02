@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "vauhtijuoksu-api.labels" . | nindent 4 }}
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       {{- include "vauhtijuoksu-api.selectorLabels" . | nindent 6 }}

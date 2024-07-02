@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.METHOD_NOT_ALLOWED
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PartialRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.SubRouter
 import io.vertx.core.json.jackson.DatabindCodec
 import io.vertx.ext.web.Router
 
@@ -12,7 +13,7 @@ open class BaseRouter
 protected constructor(
     private val endpoint: String,
     private val routers: List<PartialRouter>,
-) {
+) : SubRouter {
     init {
         DatabindCodec.mapper()
             .registerModule(kotlinModule())
@@ -24,7 +25,7 @@ protected constructor(
         }
     }
 
-    fun configure(router: Router) {
+    override fun configure(router: Router) {
         configureContentType(router)
         configureSubRouters(router)
         configureNotAllowedMethods(router)

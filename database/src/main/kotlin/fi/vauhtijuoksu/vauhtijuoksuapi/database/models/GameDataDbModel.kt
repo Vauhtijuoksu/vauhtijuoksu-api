@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
+import mu.KotlinLogging
 import java.net.URL
 import java.util.Date
 import java.util.UUID
@@ -38,6 +39,8 @@ data class GameDataDbModel(
     val meta: String?,
     val participants: List<GameParticipantDbModel>,
 ) {
+    private val logger = KotlinLogging.logger {}
+
     companion object {
         fun fromGameData(gameData: GameData): GameDataDbModel {
             return GameDataDbModel(

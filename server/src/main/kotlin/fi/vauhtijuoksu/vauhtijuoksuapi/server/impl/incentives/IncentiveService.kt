@@ -211,10 +211,12 @@ class IncentiveService
                     ),
                 )
             }
+
             IncentiveType.OPTION -> {
                 val options = incentive.optionParameters!!.map { it }
                 calculateOptionIncentiveStatuses(incentive, options, parameterDonation)
             }
+
             IncentiveType.OPEN -> {
                 val options = parameterDonation.mapNotNull { it.parameter }.distinct()
                 calculateOptionIncentiveStatuses(incentive, options, parameterDonation)

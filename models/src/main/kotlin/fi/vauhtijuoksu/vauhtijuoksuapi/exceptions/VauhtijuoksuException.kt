@@ -16,3 +16,7 @@ class ServerError : VauhtijuoksuException {
     constructor(message: String) : super(message)
     constructor(throwable: Throwable) : super(throwable)
 }
+
+sealed interface VauhtijuoksuError
+
+sealed class MissingEntityError : VauhtijuoksuError

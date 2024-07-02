@@ -1,6 +1,5 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 
-import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.models.GameDataDbModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
@@ -19,14 +18,14 @@ internal class GameDataDatabase
     private val pool: PgPool,
     configuration: DatabaseConfiguration,
 ) : BaseDatabase(configuration),
-    VauhtijuoksuDatabase<GameData> {
+    InternalDatabase<GameData> {
 
     private val logger = KotlinLogging.logger {}
 
     private val selectClause =
         """
         SELECT gamedata.*, 
-        COALESCE(json_agg(participant_in_game ORDER BY participant_order), '[]') AS participants
+        COALESCE(json_agg(participant_in_game ORDER BY participant_order) FILTER (WHERE participant_in_game.game_id IS NOT NULL), '[]') AS participants
         FROM gamedata 
         LEFT JOIN participant_in_game ON gamedata.id = participant_in_game.game_id
         GROUP BY gamedata.id 

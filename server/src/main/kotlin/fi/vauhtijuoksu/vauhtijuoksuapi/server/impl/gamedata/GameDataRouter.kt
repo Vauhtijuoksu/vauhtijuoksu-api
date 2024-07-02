@@ -8,13 +8,12 @@ class GameDataRouter @Inject constructor(
     postRouter: GameDataPostRouter,
     patchRouter: GameDataPatchRouter,
     deleteRouter: GameDataDeleteRouter,
-) :
-    BaseRouter(
-        "/gamedata",
-        listOf(
-            getRouter,
-            postRouter,
-            patchRouter,
-            deleteRouter,
-        ),
-    )
+) : BaseRouter(
+    "/gamedata",
+    listOf(
+        getRouter,
+        postRouter,
+        patchRouter,
+        deleteRouter,
+    ),
+)

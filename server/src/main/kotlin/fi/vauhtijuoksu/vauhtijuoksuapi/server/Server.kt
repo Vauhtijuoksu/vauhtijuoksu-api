@@ -11,16 +11,10 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.INTERNAL_SE
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.NOT_FOUND
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.USER_ERROR_CODES
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.SubRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.WebsocketRouterForModels
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ConfigurationModule
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.PlayerInfoRouter
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.StreamMetadataRouter
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationsRouter
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataRouter
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentivecodes.IncentiveCodeRouter
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentivesRouter
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.participants.ParticipantsRouter
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players.PlayersRouter
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.timers.TimerRouter
+import io.vertx.core.Vertx
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
@@ -33,11 +27,11 @@ import io.vertx.ext.web.handler.HttpException
 import io.vertx.ext.web.handler.OAuth2AuthHandler
 import io.vertx.ext.web.handler.PlatformHandler
 import io.vertx.ext.web.handler.SessionHandler
+import io.vertx.kotlin.coroutines.CoroutineVerticle
+import io.vertx.kotlin.coroutines.coAwait
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import mu.KotlinLogging
-import java.util.concurrent.CountDownLatch
-import kotlin.system.exitProcess
 
 private fun HttpServerRequest.referer(): String? = headers().get("referer")
 private var Session.referer: String?
@@ -49,25 +43,22 @@ private var Session.referer: String?
 @Suppress("LongParameterList")
 class Server @Inject constructor(
     private val httpServer: HttpServer,
-    router: Router,
-    gameDataRouter: GameDataRouter,
-    donationsRouter: DonationsRouter,
-    streamMetadataRouter: StreamMetadataRouter,
-    playerInfoRouter: PlayerInfoRouter,
-    incentivesRouter: IncentivesRouter,
-    incentiveCodeRouter: IncentiveCodeRouter,
-    playersRouter: PlayersRouter,
-    participantsRouter: ParticipantsRouter,
-    timerRouter: TimerRouter,
-    @Named(AUTHENTICATED_CORS) corsHandler: CorsHandler,
-    sessionHandler: SessionHandler,
-    oAuthProvider: OAuth2Auth,
-    oauth2AuthHandler: OAuth2AuthHandler,
-) {
+    val router: Router,
+    // Needed for guice to find the correct implementation
+    private val subRouters: List<@JvmSuppressWildcards SubRouter>,
+    private val wsHandler: WebsocketRouterForModels<*>,
+    @Named(AUTHENTICATED_CORS) val corsHandler: CorsHandler,
+    private val sessionHandler: SessionHandler,
+    private val oAuthProvider: OAuth2Auth,
+    private val oauth2AuthHandler: OAuth2AuthHandler,
+) : CoroutineVerticle() {
     private val logger = KotlinLogging.logger {}
 
-    init {
+    @Suppress("LongMethod") // TODO separate error handler
+    override suspend fun start() {
         router.route().handler(sessionHandler)
+
+        httpServer.webSocketHandler(wsHandler.handler())
 
         router.get("/login")
             .handler(
@@ -104,15 +95,10 @@ class Server @Inject constructor(
             ctx.response().end()
         }
 
-        gameDataRouter.configure(router)
-        donationsRouter.configure(router)
-        streamMetadataRouter.configure(router)
-        playerInfoRouter.configure(router)
-        incentivesRouter.configure(router)
-        incentiveCodeRouter.configure(router)
-        playersRouter.configure(router)
-        participantsRouter.configure(router)
-        timerRouter.configure(router)
+        subRouters.forEach {
+            it.configure(router)
+        }
+
         router.route().failureHandler { ctx ->
             when (val cause = ctx.failure()) {
                 is UserError -> {
@@ -138,35 +124,29 @@ class Server @Inject constructor(
                     if (ctx.statusCode() in USER_ERROR_CODES) {
                         ctx.response().setStatusCode(ctx.statusCode()).end()
                     } else {
-                        logger.warn { "Unexpected status code ${ctx.statusCode()} in failure handler with error $cause" }
+                        logger.warn(cause) { "Unexpected status code ${ctx.statusCode()} in failure handler" }
                         ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
                     }
                 }
             }
         }
         httpServer.requestHandler(router)
+        httpServer.listen().coAwait()
     }
 
-    fun start() {
-        val latch = CountDownLatch(1)
-        httpServer.listen().onSuccess {
-            logger.info { "Server listening on port ${httpServer.actualPort()}" }
-            latch.countDown()
-        }.onFailure { t ->
-            logger.error { "Server could not start because ${t.message}. Exiting" }
-            exitProcess(1)
-        }
-    }
-
-    fun stop() {
-        val latch = CountDownLatch(1)
-        httpServer.close { latch.countDown() }
-        latch.await()
+    override suspend fun stop() {
+        httpServer.close().coAwait()
     }
 }
 
 fun main() {
-    val injector = Guice.createInjector(ConfigurationModule(), ApiModule(), AuthModule(), DatabaseModule())
+    val injector = Guice.createInjector(
+        ConfigurationModule(),
+        ApiModule(),
+        AuthModule(),
+        DatabaseModule(),
+    )
     val server = injector.getInstance(Server::class.java)
-    server.start()
+    val vertx = injector.getInstance(Vertx::class.java)
+    vertx.deployVerticle(server)
 }

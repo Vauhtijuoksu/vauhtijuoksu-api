@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.jackson.annotations)
+    api(libs.jackson.annotations)
+    api(libs.kotlinx.coroutines)
 
     testImplementation(libs.vertx.core)
     testImplementation(libs.jackson.module.kotlin)

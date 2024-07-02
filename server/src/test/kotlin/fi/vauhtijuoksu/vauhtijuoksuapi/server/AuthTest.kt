@@ -48,11 +48,11 @@ open class AuthTest : ServerTestBase() {
     }
 
     override fun modules(serverPort: Int): List<Module> {
-        return super.modules(serverPort) + listOf(object : AbstractModule() {
+        return super.modules(serverPort) + object : AbstractModule() {
             override fun configure() {
                 bind(DiscordClient::class.java).toInstance(discordClient)
             }
-        })
+        }
     }
 
     @Test

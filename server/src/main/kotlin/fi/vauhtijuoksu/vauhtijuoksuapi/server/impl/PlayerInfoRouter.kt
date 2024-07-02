@@ -6,6 +6,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.PlayerInfo
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.SubRouter
 import io.vertx.core.Future.future
 import io.vertx.core.Promise
 import io.vertx.core.json.DecodeException
@@ -29,7 +30,7 @@ class PlayerInfoRouter
     private val authenticatedEndpointCorsHandler: CorsHandler,
     @Named(DependencyInjectionConstants.PUBLIC_CORS)
     private val publicEndpointCorsHandler: CorsHandler,
-) {
+) : SubRouter {
     private val playerInfo = JsonObject(
         """{
             "message": null
@@ -37,7 +38,7 @@ class PlayerInfoRouter
     )
 
     @Suppress("SwallowedException") // Not swallowed, the message is used in augmented error
-    fun configure(router: Router) {
+    override fun configure(router: Router) {
         router.route("/player-info").handler { ctx ->
             ctx.response().putHeader("content-type", "application/json")
             ctx.next()

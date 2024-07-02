@@ -10,12 +10,24 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Compa
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PostInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.SubRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.WebsocketRouterForModels
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.RedisConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ServerConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.PlayerInfoRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.StreamMetadataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationPatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationPostInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationsRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataGetRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataPatchInputValidator
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataPostInputValidator
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentivecodes.IncentiveCodeRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentivesRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.participants.ParticipantsRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.players.PlayersRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.timers.TimerRouter
 import io.vertx.core.Vertx
 import io.vertx.core.http.CookieSameSite
 import io.vertx.core.http.HttpMethod
@@ -27,9 +39,11 @@ import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.sstore.LocalSessionStore
 import io.vertx.ext.web.sstore.SessionStore
 import io.vertx.ext.web.sstore.redis.RedisSessionStore
+import io.vertx.kotlin.coroutines.dispatcher
 import io.vertx.redis.client.Redis
 import io.vertx.redis.client.RedisOptions
 import jakarta.inject.Named
+import kotlinx.coroutines.CoroutineDispatcher
 import java.time.Clock
 import java.time.ZoneId
 import javax.annotation.Nullable
@@ -37,6 +51,7 @@ import javax.annotation.Nullable
 class ApiModule : AbstractModule() {
 
     override fun configure() {
+        bind(object : TypeLiteral<WebsocketRouterForModels<*>>() {}).to(GameDataGetRouter::class.java)
         bind(object : TypeLiteral<PostInputValidator<GameData>>() {}).to(GameDataPostInputValidator::class.java)
         bind(object : TypeLiteral<PatchInputValidator<GameData>>() {}).to(GameDataPatchInputValidator::class.java)
         bind(object : TypeLiteral<PostInputValidator<Donation>>() {}).to(DonationPostInputValidator::class.java)
@@ -46,6 +61,9 @@ class ApiModule : AbstractModule() {
     @Provides
     @Singleton
     fun getVertx(): Vertx = Vertx.vertx()
+
+    @Provides
+    fun dispatcher(vertx: Vertx): CoroutineDispatcher = vertx.dispatcher()
 
     @Provides
     @Singleton
@@ -106,4 +124,29 @@ class ApiModule : AbstractModule() {
     @Provides
     @Singleton
     fun clock(): Clock = Clock.system(ZoneId.of("Europe/Helsinki"))
+
+    @Suppress("LongParameterList")
+    @Provides
+    @Singleton
+    fun routers(
+        gameDataRouter: GameDataRouter,
+        donationsRouter: DonationsRouter,
+        streamMetadataRouter: StreamMetadataRouter,
+        playerInfoRouter: PlayerInfoRouter,
+        incentivesRouter: IncentivesRouter,
+        incentiveCodeRouter: IncentiveCodeRouter,
+        playersRouter: PlayersRouter,
+        participantsRouter: ParticipantsRouter,
+        timerRouter: TimerRouter,
+    ): List<SubRouter> = listOf(
+        gameDataRouter,
+        donationsRouter,
+        streamMetadataRouter,
+        playerInfoRouter,
+        incentivesRouter,
+        incentiveCodeRouter,
+        playersRouter,
+        participantsRouter,
+        timerRouter,
+    )
 }
