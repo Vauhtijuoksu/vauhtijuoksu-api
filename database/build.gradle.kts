@@ -5,7 +5,6 @@ plugins {
 dependencies {
     implementation(project(path = ":models"))
     implementation(project(path = ":database-api"))
-    implementation(libs.flyway.core)
     implementation(libs.flyway.postgresql)
     implementation(libs.guice)
     implementation(libs.jackson.databind)

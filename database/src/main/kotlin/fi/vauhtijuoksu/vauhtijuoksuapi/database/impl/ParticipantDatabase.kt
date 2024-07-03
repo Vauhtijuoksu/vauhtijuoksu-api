@@ -7,7 +7,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Participant
 import io.vertx.core.Future
-import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Tuple
 import jakarta.inject.Inject
 import mu.KotlinLogging
@@ -15,7 +15,7 @@ import java.util.UUID
 
 class ParticipantDatabase
 @Inject constructor(
-    private val pool: PgPool,
+    private val pool: Pool,
     configuration: DatabaseConfiguration,
 ) :
     BaseDatabase(configuration),

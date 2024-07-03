@@ -79,14 +79,14 @@ tasks {
                         helm repo update
                         # Download postgres image to docker on host so it's not downloaded for each new cluster
                         # Upgrade version for image tag in deployment/kind-cluster/psql-values.yaml when upgrading this
-                        docker image pull postgres:10.20
-                        kind load docker-image postgres:10.20 --name vauhtijuoksu
+                        docker image pull postgres:16.3
+                        kind load docker-image postgres:16.3 --name vauhtijuoksu
                         """,
                     )
                 }
                 exec {
                     workingDir = projectDir
-                    bashCommand("helm install postgres bitnami/postgresql -f kind-cluster/psql-values.yaml --version 12.1.5")
+                    bashCommand("helm install postgres bitnami/postgresql -f kind-cluster/psql-values.yaml --version 15.5.12")
                 }
                 // Postgres secrets for vauhtijuoksu api. Created manually on production environment
                 exec {

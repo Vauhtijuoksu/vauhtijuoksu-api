@@ -104,7 +104,7 @@ sealed class SingletonWebSocketRouter<T> @Inject constructor(
             initialValue,
             flow,
             interesting,
-            toApiResponse
+            toApiResponse,
         ) { msg: String -> ws.writeTextMessage(msg) }
 
         flow.onCompletion {
@@ -158,4 +158,3 @@ class ModelWebSocketRouter<T : Model> @Inject constructor(
         }
     }
 }
-

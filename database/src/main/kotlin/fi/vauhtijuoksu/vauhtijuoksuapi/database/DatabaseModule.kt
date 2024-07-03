@@ -28,6 +28,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import io.vertx.pgclient.PgConnectOptions
 import io.vertx.pgclient.PgPool
 import io.vertx.pgclient.SslMode
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.PoolOptions
 import io.vertx.sqlclient.SqlClient
 
@@ -50,6 +51,7 @@ class DatabaseModule : AbstractModule() {
         bind(object : TypeLiteral<VauhtijuoksuDatabase<Timer>>() {}).to(TimerDatabase::class.java)
         bind(GeneratedIncentiveCodeDatabase::class.java).to(GeneratedIncentiveCodeDatabaseImpl::class.java)
         bind(SqlClient::class.java).to(PgPool::class.java)
+        bind(Pool::class.java).to(PgPool::class.java)
     }
 
     @Provides

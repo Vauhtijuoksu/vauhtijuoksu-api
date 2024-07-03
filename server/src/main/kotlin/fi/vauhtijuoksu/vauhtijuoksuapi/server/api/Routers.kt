@@ -18,6 +18,6 @@ interface WebSocketRouter<T> {
     suspend fun handler(): Handler<ServerWebSocket>
 }
 
-interface WebsocketRouterForModels<T : Model>: WebSocketRouter<T> {
+interface WebsocketRouterForModels<T : Model> : WebSocketRouter<T> {
     suspend fun handlerForId(id: UUID): Handler<ServerWebSocket>
 }

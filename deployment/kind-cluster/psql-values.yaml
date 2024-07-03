@@ -3,7 +3,7 @@ global:
     auth:
       database: vauhtijuoksu-api
       postgresPassword: topsecret
-image:
+#image:
   # Upgrade version for pull command in deployment/build.gradle.kts when upgrading this
-  repository: postgres
-  tag: 10.20-stretch
+  #repository: postgres
+  #tag: 16.3

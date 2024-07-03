@@ -8,14 +8,14 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.GeneratedIncentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveCode
 import io.vertx.core.CompositeFuture
 import io.vertx.core.Future
-import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Pool
 import io.vertx.sqlclient.Tuple
 import jakarta.inject.Inject
 
 internal class GeneratedIncentiveCodeDatabaseImpl
 @Inject constructor(
     configuration: DatabaseConfiguration,
-    private val client: PgPool,
+    private val client: Pool,
 ) : GeneratedIncentiveCodeDatabase, BaseDatabase(configuration) {
 
     override fun getAll(): Future<List<GeneratedIncentive>> {

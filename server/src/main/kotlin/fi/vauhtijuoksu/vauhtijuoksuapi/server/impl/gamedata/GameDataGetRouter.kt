@@ -22,7 +22,9 @@ class GameDataGetRouter
     publicEndpointCorsHandler,
     db,
     { gd: GameData -> GameDataApiModel.fromGameData(gd).toJson() },
-), WebsocketRouterForModels<GameData> by ModelWebSocketRouter(
-    coroutineDispatcher,
-    db,
-    { gd: GameData -> jacksonObjectMapper().writeValueAsString(GameDataApiModel.fromGameData(gd)) })
+),
+    WebsocketRouterForModels<GameData> by ModelWebSocketRouter(
+        coroutineDispatcher,
+        db,
+        { gd: GameData -> jacksonObjectMapper().writeValueAsString(GameDataApiModel.fromGameData(gd)) },
+    )

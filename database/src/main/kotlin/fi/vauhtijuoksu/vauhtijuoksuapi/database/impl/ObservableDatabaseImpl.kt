@@ -13,6 +13,7 @@ import io.vertx.kotlin.coroutines.coAwait
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -39,8 +40,9 @@ constructor(
 
     private val logger = KotlinLogging.logger {}
 
+    @OptIn(DelicateCoroutinesApi::class) // Should stay alive as long as the server
     private fun emit(event: Event<T>) = GlobalScope.launch(coroutineDispatcher) {
-        logger.info { "Emiting an event $event to flow $flow" }
+        logger.info { "Emitting an event $event to flow $flow" }
         flow.emit(event)
     }
 
@@ -66,14 +68,15 @@ constructor(
 
     override fun update(record: T): Future<Unit> {
         logger.info { "Updating record $record" }
-        return vertx.sharedData().getLock(lockName).compose { lock ->
-            db.update(record).map { lock }
-        }.map { lock ->
-            logger.info { "Udate done. Sending event" }
-            val c = counter.incrementAndGet()
-            emit(Modified(record, c))
-            lock.release()
-            logger.info { "Done with the update" }
-        }
+        return vertx.sharedData().getLock(lockName)
+            .compose { lock ->
+                db.update(record).map { lock }
+            }.map { lock ->
+                logger.info { "Udate done. Sending event" }
+                val c = counter.incrementAndGet()
+                emit(Modified(record, c))
+                lock.release()
+                logger.info { "Done with the update" }
+            }
     }
 }
