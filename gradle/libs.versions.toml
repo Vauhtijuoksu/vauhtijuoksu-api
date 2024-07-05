@@ -35,6 +35,7 @@ jakarta-inject = "jakarta.inject:jakarta.inject-api:2.0.1"
 hoplite-core = { group = "com.sksamuel.hoplite", name = "hoplite-core", version.ref = "hoplite" }
 hoplite-yaml = { group = "com.sksamuel.hoplite", name = "hoplite-yaml", version.ref = "hoplite" }
 mu-logging = "io.github.microutils:kotlin-logging-jvm:3.0.5"
+scram = "com.ongres.scram:client:2.1"
 vertx-auth-htpasswd = { group = "io.vertx", name = "vertx-auth-htpasswd", version.ref = "vertx" }
 vertx-auth-oauth = { group = "io.vertx", name = "vertx-auth-oauth2", version.ref = "vertx" }
 vertx-core = { group = "io.vertx", name = "vertx-core", version.ref = "vertx" }
@@ -44,7 +45,7 @@ vertx-lang-kotlincoroutines = { group = "io.vertx", name = "vertx-lang-kotlin-co
 vertx-pg-client = { group = "io.vertx", name = "vertx-pg-client", version.ref = "vertx" }
 vertx-sql-client-templates = { group = "io.vertx", name = "vertx-sql-client-templates", version.ref = "vertx" }
 vertx-session-redis = { group = "io.vertx", name = "vertx-web-sstore-redis", version.ref = "vertx" }
-flyway-postgresql = {group = "org.flywaydb", name="flyway-database-postgresql", version.ref = "flyway"}
+flyway-postgresql = { group = "org.flywaydb", name = "flyway-database-postgresql", version.ref = "flyway" }
 postgresql = "org.postgresql:postgresql:42.7.3"
 jakarta-validation-api = 'jakarta.validation:jakarta.validation-api:3.0.2'
 

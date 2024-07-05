@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines)
     implementation(libs.mu.logging)
     implementation(libs.postgresql)
+    implementation(libs.scram)
     implementation(libs.vertx.core)
     implementation(libs.vertx.lang.kotlin)
     implementation(libs.vertx.pg.client)

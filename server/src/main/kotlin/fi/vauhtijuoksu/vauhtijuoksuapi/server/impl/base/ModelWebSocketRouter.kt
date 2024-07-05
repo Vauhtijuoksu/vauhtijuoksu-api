@@ -20,14 +20,23 @@ import io.vertx.kotlin.coroutines.coAwait
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import java.util.UUID
+
+suspend fun consumeChannel(
+    channel: Channel<String>,
+    writeFun: (String) -> Future<Void>,
+) {
+    for (event in channel) {
+        writeFun(event).coAwait()
+    }
+}
 
 context(CoroutineScope)
 private suspend fun <T> sendUpdates(
@@ -39,6 +48,9 @@ private suspend fun <T> sendUpdates(
     write: ((String) -> Future<Void>),
 ) {
     val logger = KotlinLogging.logger {}
+
+    logger.info { "Collecting from flow $events" }
+    val channel = Channel<String>(Channel.BUFFERED, BufferOverflow.SUSPEND)
     var (lastSeen, initial) = initialValue()
 
     val firstBatchId = launch(coroutineDispatcher) {
@@ -46,18 +58,23 @@ private suspend fun <T> sendUpdates(
         write(initial).coAwait()
     }
 
-    logger.info { "Collecting from flow $events" }
+    launch {
+        firstBatchId.join()
+        consumeChannel(channel, write)
+    }
+
     events.collect { event ->
         logger.info { "Collecting event $event" }
-        firstBatchId.join()
-
         lastSeen =
             if (lastSeen > event.counter) { // An old event - update happened before fetching the data -- update lastSeen
-                event.counter
+                lastSeen
             } else if (lastSeen == event.counter.dec()) { // Next event -- send update and update lastSeen
                 if (interesting(event)) {
-                    logger.info { "Sending event $event" }
-                    write(jacksonObjectMapper().writeValueAsString(event.map(toApiResponse))).coAwait()
+                    if (channel.trySend(jacksonObjectMapper().writeValueAsString(event.map(toApiResponse))).isFailure) {
+                        logger.warn { "Consumer couldn't keep up with the updates" }
+                        channel.close()
+                        cancel()
+                    }
                 }
                 event.counter
             } else { // Got from the buffer an event newer than lastSeen + 1 -- updates were missed and websocket should be closed
@@ -109,6 +126,7 @@ sealed class SingletonWebSocketRouter<T> @Inject constructor(
 
         flow.onCompletion {
             ws.close()
+            cancel()
         }
 
         ws.closeHandler {
@@ -122,8 +140,7 @@ sealed class SingletonWebSocketRouter<T> @Inject constructor(
 
     override suspend fun handler(): Handler<ServerWebSocket> {
         return Handler { ws ->
-            @OptIn(DelicateCoroutinesApi::class) // Alive until the websocket is closed
-            GlobalScope.launch(coroutineDispatcher) {
+            CoroutineScope(coroutineDispatcher).launch {
                 handle(::initialValue, db.flow, { true }, toApiResponse, ws)
             }
         }
@@ -137,8 +154,7 @@ class ModelWebSocketRouter<T : Model> @Inject constructor(
 ) : WebsocketRouterForModels<T>, SingletonWebSocketRouter<T>(coroutineDispatcher, db, toApiResponse) {
     override suspend fun handlerForId(id: UUID): Handler<ServerWebSocket> {
         return Handler { ws ->
-            @OptIn(DelicateCoroutinesApi::class) // Alive until the websocket is closed
-            GlobalScope.launch(coroutineDispatcher) {
+            CoroutineScope(coroutineDispatcher).launch {
                 handle(
                     suspend {
                         db.getAllAndCounter().let { it.first to it.second.first { t -> t.id == id }.let(toApiResponse) }
