@@ -46,7 +46,7 @@ vertx-session-redis = { group = "io.vertx", name = "vertx-web-sstore-redis", ver
 flyway-core = {group = "org.flywaydb", name="flyway-core", version.ref = "flyway"}
 flyway-postgresql = {group = "org.flywaydb", name="flyway-database-postgresql", version.ref = "flyway"}
 postgresql = "org.postgresql:postgresql:42.7.5"
-jakarta-validation-api = 'jakarta.validation:jakarta.validation-api:3.0.2'
+jakarta-validation-api = 'jakarta.validation:jakarta.validation-api:3.1.1'
 
 log4j-slf4j18-impl = "org.apache.logging.log4j:log4j-slf4j18-impl:2.18.0"
 # Jackson databind required by log4j2 to read yaml configuration files
