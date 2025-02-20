@@ -24,7 +24,7 @@ swagger-generator-plugin = "gradle.plugin.org.hidetake:gradle-swagger-generator-
 swagger-ui = "org.webjars:swagger-ui:5.18.3"
 
 arrow-kt = "io.arrow-kt:arrow-core:1.2.4"
-kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.6.3" }
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.8.0" }
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
 jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
