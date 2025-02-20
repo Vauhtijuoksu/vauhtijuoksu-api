@@ -1,6 +1,6 @@
 [versions]
 jackson = "2.18.2"
-hoplite = "2.7.5"
+hoplite = "2.9.0"
 vertx = "4.5.13"
 kotlin = "2.1.10"
 kotest = "5.9.1"
