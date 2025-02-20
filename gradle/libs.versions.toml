@@ -13,7 +13,7 @@ kotlin-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin",
 kotlin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin" }
 spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:6.25.0"
 detekt-plugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.6"
-detekt-formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6"
+detekt-formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7"
 # Used by feature tests to gather coverage
 jacoco-core = { group = "org.jacoco", name = "org.jacoco.core", version.ref = "jacoco" }
 jacoco-agent = { group = "org.jacoco", name = "org.jacoco.agent", version.ref = "jacoco" }
