@@ -2,7 +2,7 @@
 jackson = "2.18.2"
 hoplite = "2.7.5"
 vertx = "4.5.13"
-kotlin = "1.9.25"
+kotlin = "2.1.10"
 kotest = "5.9.1"
 flyway = "10.22.0"
 jacoco = "0.8.12"
