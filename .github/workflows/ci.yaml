@@ -111,7 +111,7 @@ jobs:
           path: .
       - run: |
           docker load --input vauhtijuoksu-api.tar
-      - uses: azure/docker-login@v1
+      - uses: azure/docker-login@v2
         with:
           login-server: vauhtijuoksu.azurecr.io
           username: ${{ secrets.ACR_USERNAME }}
