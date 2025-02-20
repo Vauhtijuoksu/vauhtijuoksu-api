@@ -4,7 +4,7 @@ hoplite = "2.7.5"
 vertx = "4.5.13"
 kotlin = "2.1.10"
 kotest = "5.9.1"
-flyway = "10.22.0"
+flyway = "11.3.3"
 jacoco = "0.8.12"
 
 [libraries]
