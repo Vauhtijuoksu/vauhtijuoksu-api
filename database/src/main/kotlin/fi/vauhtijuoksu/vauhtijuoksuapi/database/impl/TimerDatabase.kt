@@ -58,7 +58,7 @@ class TimerDatabase
                 |id = #{id}, 
                 |start_time = #{start_time},
                 |end_time = #{end_time},
-                |name = #{name}WHERE id = #{id}
+                |name = #{name} WHERE id = #{id}
             """.trimMargin(),
         )
             .mapFrom(
