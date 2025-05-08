@@ -30,7 +30,7 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
 
     @Container
     var pg: PostgreSQLContainer<Nothing> =
-        PostgreSQLContainer<Nothing>("postgres:10").withDatabaseName("vauhtijuoksu-api")
+        PostgreSQLContainer<Nothing>("postgres:16.8").withDatabaseName("vauhtijuoksu-api")
 
     abstract fun existingRecord1(): T
     abstract fun existingRecord2(): T
