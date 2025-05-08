@@ -7,7 +7,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/use-regex: "true"
     # To work on kind cluster
     nginx.ingress.kubernetes.io/server-alias: api.localhost
@@ -20,7 +20,7 @@ spec:
     - host: api.dev.vauhtijuoksu.fi
       http:
         paths:
-          - path: /(.*)
+          - path: /
             pathType: Prefix
             backend:
               service:

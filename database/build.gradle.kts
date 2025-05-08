@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.flyway.core)
     implementation(libs.flyway.postgresql)
     implementation(libs.postgresql)
+    runtimeOnly(libs.scram)
 
     runtimeOnly(libs.jackson.dataformat.yaml)
     runtimeOnly(libs.log4j.slf4j18.impl)
