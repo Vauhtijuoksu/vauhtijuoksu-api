@@ -1,7 +1,7 @@
 [versions]
 jackson = "2.18.3"
 hoplite = "2.9.0"
-vertx = "4.5.16"
+vertx = "4.5.21"
 kotlin = "2.1.20"
 kotest = "5.9.1"
 flyway = "11.3.4"
