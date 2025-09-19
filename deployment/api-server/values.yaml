@@ -1,5 +1,5 @@
 image:
-  registry: vauhtijuoksu.azurecr.io/
+  registry: ghcr.io/
   repository: vauhtijuoksu/vauhtijuoksu-api
   tag: "dev"
   imagePullPolicy: IfNotPresent
@@ -33,8 +33,10 @@ discord:
   adminRoleId: "1062745397518422046"
 
 redis:
-  host: redis-master.default.svc.cluster.local
+  host: valkey.vauhtijuoksu-api.svc.cluster.local
   secret: vauhtijuoksu-api-redis
 
 logging:
   level: info
+
+ingress: traefik

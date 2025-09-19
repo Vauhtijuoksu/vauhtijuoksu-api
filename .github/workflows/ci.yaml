@@ -83,6 +83,8 @@ jobs:
     if: github.ref == 'refs/heads/main' && vars.DEPLOY_TO_PROD == 'true'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v5
@@ -92,54 +94,50 @@ jobs:
       - name: Set version
         run: |
           echo "VERSION=$(./scripts/version.sh)" >> $GITHUB_ENV
-      - uses: actions/download-artifact@v5
+      - name: Login to to Tailscale
+        uses: tailscale/github-action@v3
         with:
-          name: swagger ui
-          path: swagger-ui
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Upload rendered specification to Azure
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:gh-runner
+          use-cache: 'true'
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v4
+      - name: Setup kubeconfig
         run: |
-          az storage blob upload-batch -s swagger-ui -d '$web' --account-name vauhtijuoksu --overwrite
-      - uses: actions/download-artifact@v5
+          mkdir ~/.kube
+          echo "${{ vars.KUBECONFIG }}" > ~/.kube/config
+          kubectl get all
+      - uses: actions/download-artifact@v4
         with:
           name: vauhtijuosu-api.tar
           path: .
       - run: |
           docker load --input vauhtijuoksu-api.tar
-      - uses: azure/docker-login@v2
-        with:
-          login-server: vauhtijuoksu.azurecr.io
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
-      - name: Push docker image to ACR
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Push docker image to GHCR
         run: |
-          docker tag vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
-          docker push vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
-      - uses: azure/aks-set-context@v3.2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          cluster-name: vauhtijuoksu
-          resource-group: Vauhtijuoksu-Azure-Sponsorship
+          docker tag vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} ghcr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
+          docker push ghcr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
       - uses: azure/setup-helm@v3.5
         id: install
       - name: Deploy mock server to AKS
         run: |
-          helm upgrade --install mockserver deployment/mockserver
+          helm upgrade --install mockserver deployment/mockserver -n vauhtijuoksu-api --create-namespace
       - name: Deploy Redis to AKS
         run: |
-          kubectl delete secret vauhtijuoksu-api-redis --ignore-not-found
-          kubectl create secret generic vauhtijuoksu-api-redis --from-literal=REDIS__PASSWORD=${{ secrets.REDIS_PASSWORD }}
-          helm upgrade --install redis oci://registry-1.docker.io/bitnamicharts/redis \
-            --set architecture=standalone \
-            --set auth.existingSecret=vauhtijuoksu-api-redis \
-            --set auth.existingSecretPasswordKey=REDIS__PASSWORD \
-            --version 18.1.5
+          kubectl delete secret vauhtijuoksu-api-redis --ignore-not-found -n vauhtijuoksu-api
+          kubectl create secret generic vauhtijuoksu-api-redis --from-literal=REDIS__PASSWORD=${{ secrets.REDIS_PASSWORD }} -n vauhtijuoksu-api
+          helm repo add valkey https://valkey.io/valkey-helm/
+          helm repo update
+          helm upgrade --install valkey valkey/valkey -n vauhtijuoksu-api --create-namespace
       - name: Deploy API server to AKS
         run: |
           helm upgrade --install vauhtijuoksu-api deployment/api-server \
+            -n vauhtijuoksu-api --create-namespace \
             --set database.address=${{ secrets.DATABASE_ADDRESS }} \
             --set database.user=${{ secrets.DATABASE_USERNAME }} \
             --set database.database=${{ secrets.DATABASE_DATABASE }} \
-            --set image.tag=${{ env.VERSION }}
+            --set ingress=traefik \
+            --set image.tag=${{ env.VERSION }} 

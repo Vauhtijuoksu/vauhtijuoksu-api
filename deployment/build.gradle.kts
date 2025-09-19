@@ -97,16 +97,14 @@ tasks {
                     workingDir = projectDir
                     bashCommand("kubectl create secret generic vauhtijuoksu-api-htpasswd --from-file kind-cluster/htpasswd")
                 }
-                // Install redis
+                // Install valkey
                 exec {
                     bashCommand(
                         """
-                        kubectl create secret generic --from-literal=REDIS__PASSWORD=topsecret vauhtijuoksu-api-redis
-                        helm upgrade --install redis oci://registry-1.docker.io/bitnamicharts/redis \
-                            --set architecture=standalone \
-                            --set auth.existingSecret=vauhtijuoksu-api-redis \
-                            --set auth.existingSecretPasswordKey=REDIS__PASSWORD \
-                            --version 18.1.5
+                        kubectl create secret generic --from-literal=REDIS__PASSWORD="not used" vauhtijuoksu-api-redis
+                        helm repo add valkey https://valkey.io/valkey-helm/
+                        helm repo update
+                        helm install valkey valkey/valkey
                         """.trimIndent(),
                     )
                 }

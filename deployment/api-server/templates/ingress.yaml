@@ -5,17 +5,20 @@ metadata:
   labels:
     {{- include "vauhtijuoksu-api.labels" . | nindent 4 }}
   annotations:
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/use-regex: "true"
+    {{- if eq .Values.ingress "nginx" }}
     # To work on kind cluster
     nginx.ingress.kubernetes.io/server-alias: api.localhost
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    {{- end }}
 spec:
+  {{- if eq .Values.ingress "traefik"}}
+  ingressClassName: traefik
+  {{- end }}
   tls:
     - hosts:
         - api.dev.vauhtijuoksu.fi
-      secretName: api.dev.vauhtijuoksu.fi
   rules:
     - host: api.dev.vauhtijuoksu.fi
       http:
