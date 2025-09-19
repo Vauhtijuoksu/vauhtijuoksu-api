@@ -22,16 +22,24 @@ class GameDataAndPlayersTest {
     private val playerData1 = """
         {
           "display_name": "jiisloth",
-          "twitch_channel": "jeesloth",
-          "discord_nick": "jooosloth#1234"
+          "social_medias": [
+            { "platform": "TWITCH",
+              "username": "jeesloth" },
+            { "platform": "DISCORD",
+              "username": "jooosloth#1234" }
+          ]
         }
     """
 
     private val playerData2 = """
         {
           "display_name": "hluposti",
-          "twitch_channel": "kustipolkee",
-          "discord_nick": "poosi#8080"
+          "social_medias": [
+            { "platform": "TWITCH",
+              "username": "kustipolkee" },
+            { "platform": "DISCORD",
+              "username": "poosi#8080" }
+          ]
         }
     """
     private val participantData1 = """
@@ -92,7 +100,7 @@ class GameDataAndPlayersTest {
     @Order(1)
     fun `add a couple of players`() = runTest {
         Future.all(
-            client.post("/players")
+            client.post("/participants")
                 .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                 .sendJson(JsonObject(playerData1))
                 .map {
@@ -103,7 +111,7 @@ class GameDataAndPlayersTest {
                     assertEquals(sentData, resJson)
                     player1Id = UUID.fromString(resJson.getString("id"))
                 },
-            client.post("/players")
+            client.post("/participants")
                 .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                 .sendJson(JsonObject(playerData2))
                 .map {
@@ -129,10 +137,13 @@ class GameDataAndPlayersTest {
                 .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                 .sendJson(
                     JsonObject(gameData1)
-                        .put("players", listOf(player1Id, player2Id))
                         .put(
                             "participants",
-                            listOf(JsonObject().put("participant_id", participant1Id).put("role", "COUCH")),
+                            listOf(
+                                JsonObject().put("participant_id", player1Id).put("role", "PLAYER"),
+                                JsonObject().put("participant_id", player2Id).put("role", "PLAYER"),
+                                JsonObject().put("participant_id", participant1Id).put("role", "COUCH"),
+                            ),
                         ),
                 )
                 .map { res ->
@@ -140,7 +151,6 @@ class GameDataAndPlayersTest {
                     assertEquals(201, res.statusCode())
                     val original = JsonObject(gameData1)
                         .put("id", resJson.getString("id"))
-                        .put("players", listOf(player1Id.toString(), player2Id.toString()))
                         .put(
                             "participants",
                             listOf(
@@ -149,12 +159,17 @@ class GameDataAndPlayersTest {
                                 JsonObject().put("participant_id", participant1Id.toString()).put("role", "COUCH"),
                             ),
                         )
-                    assertEquals(original, res.bodyAsJsonObject())
+                    assertEquals(original, resJson)
                     game1Id = UUID.fromString(res.bodyAsJsonObject().getString("id"))
                 },
             client.post("/gamedata")
                 .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-                .sendJson(JsonObject(gameData2).put("players", listOf(player2Id)))
+                .sendJson(
+                    JsonObject(gameData2).put(
+                        "participants",
+                        listOf(JsonObject().put("participant_id", player2Id).put("role", "PLAYER")),
+                    ),
+                )
                 .map {
                     game2Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
                 },
@@ -170,15 +185,16 @@ class GameDataAndPlayersTest {
             .sendJson(
                 JsonObject(gameData1)
                     .put("game", "Pacman")
-                    .put("players", listOf(player1Id))
-                    .put("participants", listOf<String>()),
+                    .put(
+                        "participants",
+                        listOf(JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER")),
+                    ),
             )
             .map {
                 assertEquals(200, it.statusCode())
                 val expectedData = JsonObject(gameData1)
                     .put("id", game1Id.toString())
                     .put("game", "Pacman")
-                    .put("players", listOf(player1Id.toString()))
                     .put(
                         "participants",
                         listOf(JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER")),
@@ -206,7 +222,7 @@ class GameDataAndPlayersTest {
                 assertEquals(404, it.statusCode())
             }
             .compose {
-                client.get("/players/$player1Id")
+                client.get("/participants/$player1Id")
                     .send()
             }
             .map {
@@ -217,7 +233,7 @@ class GameDataAndPlayersTest {
     @Test
     @Order(5)
     fun `remove a player`() = runTest {
-        client.delete("/players/$player2Id")
+        client.delete("/participants/$player2Id")
             .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
             .send()
@@ -225,7 +241,7 @@ class GameDataAndPlayersTest {
                 assertEquals(204, it.statusCode())
             }
             .compose {
-                client.get("/players/$player2Id")
+                client.get("/participants/$player2Id")
                     .send()
             }
             .map {
@@ -239,7 +255,6 @@ class GameDataAndPlayersTest {
                 assertEquals(200, it.statusCode())
                 val expectedResponse = JsonObject(gameData2)
                     .put("id", game2Id.toString())
-                    .put("players", listOf<String>())
                     .put("participants", listOf<String>())
                 assertEquals(expectedResponse, it.bodyAsJsonObject())
             }.coAwait()
@@ -248,7 +263,7 @@ class GameDataAndPlayersTest {
     @Test
     @Order(6)
     fun `modify player info`() = runTest {
-        client.patch("/players/$player1Id")
+        client.patch("/participants/$player1Id")
             .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
             .sendJson(
@@ -263,7 +278,7 @@ class GameDataAndPlayersTest {
                 assertEquals(expectedResponse, it.bodyAsJsonObject())
             }
             .compose {
-                client.get("/players/$player1Id")
+                client.get("/participants/$player1Id")
                     .send()
             }.map {
                 assertEquals(200, it.statusCode())

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: 0.0.7
+  version: 1.0.0
   title: Vauhtijuoksu API
 servers:
   - url: https://api.dev.vauhtijuoksu.fi
@@ -176,69 +176,6 @@ paths:
         '204':
           $ref: '#/components/responses/Empty'
 
-  /players:
-    get:
-      deprecated: true
-      description:
-        Get all players. Deprecated. Use participants instead
-      responses:
-        '200':
-          $ref: '#/components/responses/PlayerList'
-    post:
-      deprecated: true
-      description:
-        Add a player. Deprecated. Use participants instead
-      security:
-        - basicAuth: [ ]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PlayerInput'
-      responses:
-        '201':
-          $ref: '#/components/responses/PlayerOk'
-  /players/{playerId}:
-    parameters:
-      - name: playerId
-        in: path
-        required: true
-        description: An unique identifier for a player
-        schema:
-          type: string
-          format: uuid
-    get:
-      deprecated: true
-      description:
-        Get a player by id. Deprecated. Use participants instead
-      responses:
-        '200':
-          $ref: '#/components/responses/PlayerOk'
-    patch:
-      deprecated: true
-      description:
-        Modify player info. Deprecated. Use participants instead
-      security:
-        - basicAuth: [ ]
-      responses:
-        '200':
-          $ref: '#/components/responses/PlayerOk'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PlayerPatch'
-    delete:
-      deprecated: true
-      description:
-        Remove a player by id. Deprecated. Use participants instead
-      security:
-        - basicAuth: [ ]
-      responses:
-        '204':
-          $ref: '#/components/responses/Empty'
   /stream-metadata:
     get:
       description:
@@ -442,20 +379,6 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Participant'
-    PlayerList:
-      description: A list of players
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/Player'
-    PlayerOk:
-      description: A player
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Player'
     StreamMetadataOk:
       description: Stream metadata
       content:
@@ -622,11 +545,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GameParticipant'
-        players:
-          type: array
-          items:
-            type: string
-            format: uuid
         start_time:
           type: string
           format: date-time
@@ -649,7 +567,6 @@ components:
         - id
         - game
         - participants
-        - players
         - start_time
         - end_time
         - category
@@ -663,7 +580,6 @@ components:
             role: PLAYER
           - id: 91aee618-2c62-42a1-b025-106baf6b71e7
             role: COUCH
-        players: [ be3649a7-50e4-44e9-b157-05a3fbcf738c ]
         start_time: '2021-09-21T15:05:47.000+00:00'
         end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
@@ -684,7 +600,6 @@ components:
               role: PLAYER
             - id: 91aee618-2c62-42a1-b025-106baf6b71e7
               role: COUCH
-          players: [ be3649a7-50e4-44e9-b157-05a3fbcf738c ]
           start_time: '2021-09-21T15:05:47.000+00:00'
           end_time: '2021-09-21T16:05:47.000+00:00'
           category: any%
@@ -698,7 +613,6 @@ components:
           participants:
             - id: 91aee618-2c62-42a1-b025-106baf6b71e7
               role: PLAYER
-          players: [ 91aee618-2c62-42a1-b025-106baf6b71e7 ]
           start_time: '2021-09-21T15:07:47.000+00:00'
           end_time: '2021-09-21T16:08:47.000+00:00'
           category: any% no t
@@ -712,11 +626,6 @@ components:
       properties:
         game:
           type: string
-        players:
-          type: array
-          items:
-            type: string
-            format: uuid
         participants:
           type: array
           items:
@@ -741,7 +650,6 @@ components:
           type: string
       required:
         - game
-        - players
         - start_time
         - end_time
         - category
@@ -749,7 +657,6 @@ components:
         - published
       example:
         game: Tetris
-        players: [ ]
         start_time: '2021-09-21T15:05:47.000+00:00'
         end_time: '2021-09-21T16:05:47.000+00:00'
         category: any%
@@ -763,11 +670,6 @@ components:
       properties:
         game:
           type: string
-        players:
-          type: array
-          items:
-            type: string
-            format: uuid
         participants:
           type: array
           items:
@@ -799,11 +701,6 @@ components:
       properties:
         game:
           type: string
-        players:
-          type: array
-          items:
-            type: string
-            format: uuid
         participants:
           type: array
           items:
@@ -828,7 +725,6 @@ components:
           type: string
       required:
         - game
-        - players
         - participants
         - start_time
         - end_time
@@ -838,7 +734,6 @@ components:
       example:
         id: 1571fccf-cc89-48ce-82d4-6b2173d782ec
         game: Tetris2
-        players: [ 91aee618-2c62-42a1-b025-106baf6b71e7 ]
         participants:
           - id: 91aee618-2c62-42a1-b025-106baf6b71e7
             role: PLAYER

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
 import java.net.URL
 import java.util.Date
 import java.util.UUID
@@ -27,7 +26,6 @@ data class NewGameDataApiModel(
     @JsonProperty("img_filename")
     val imgFilename: String?,
     val meta: String?,
-    val players: List<UUID>,
     val participants: List<GameParticipantApiModel> = listOf(),
 ) {
     fun toGameData(id: UUID): GameData {
@@ -42,13 +40,7 @@ data class NewGameDataApiModel(
             vodLink,
             imgFilename,
             meta,
-            players.map {
-                GameParticipant(
-                    it,
-                    ParticipantRole.PLAYER,
-                )
-            } + participants.filter { it.participant_id !in players }
-                .map { GameParticipant(it.participant_id, it.role) },
+            participants.map { GameParticipant(it.participant_id, it.role) },
         )
     }
 }

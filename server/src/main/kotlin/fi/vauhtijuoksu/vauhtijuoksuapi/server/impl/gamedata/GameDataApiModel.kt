@@ -37,7 +37,6 @@ data class GameDataApiModel(
     @JsonProperty("img_filename")
     val imgFilename: String?,
     val meta: String?,
-    val players: List<UUID>,
     val participants: List<GameParticipantApiModel>,
 ) : ApiModel<GameData> {
     companion object {
@@ -53,7 +52,6 @@ data class GameDataApiModel(
                 gameData.vodLink,
                 gameData.imgFilename,
                 gameData.meta,
-                gameData.participants.filter { it.role == ParticipantRole.PLAYER }.map { it.participantId },
                 gameData.participants.map { GameParticipantApiModel(it.participantId, it.role) },
             )
         }
@@ -75,17 +73,9 @@ data class GameDataApiModel(
             vodLink,
             imgFilename,
             meta,
-            players
-                .map {
-                    GameParticipant(
-                        it,
-                        ParticipantRole.PLAYER,
-                    )
-                } + participants
-                .filter { it.participant_id !in players }
-                .map {
-                    GameParticipant(it.participant_id, it.role)
-                },
+            participants.map {
+                GameParticipant(it.participant_id, it.role)
+            },
         )
     }
 }
