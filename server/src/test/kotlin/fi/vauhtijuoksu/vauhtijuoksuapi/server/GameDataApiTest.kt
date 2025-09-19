@@ -3,7 +3,6 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.server
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import fi.vauhtijuoksu.vauhtijuoksuapi.MockitoUtils.Companion.any
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
-import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestGameData.Companion.gameData2
@@ -177,7 +176,7 @@ class GameDataApiTest : ServerTestBase() {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["game", "start_time", "end_time", "category", "device", "published", "players"])
+    @ValueSource(strings = ["game", "start_time", "end_time", "category", "device", "published"])
     fun testMandatoryFieldsAreRequiredWhenAddingGameData(missingField: String, testContext: VertxTestContext) {
         val json = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         json.remove("id")
@@ -283,9 +282,11 @@ class GameDataApiTest : ServerTestBase() {
                     .put("img_filename", newGame.imgFilename)
                     .put("meta", newGame.meta)
                     .put(
-                        "players",
-                        newGame.participants.filter { it.role == ParticipantRole.PLAYER }.map { it.participantId },
-                    ).put("participants", emptyList<Any>()),
+                        "participants",
+                        newGame.participants.map {
+                            JsonObject().put("participant_id", it.participantId).put("role", it.role.name)
+                        },
+                    ),
             )
             .onFailure(testContext::failNow)
             .onSuccess { res ->

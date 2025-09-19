@@ -42,7 +42,6 @@ internal class GameDataApiModelTest {
             .put("vod_link", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             .put("img_filename", "tetris.png")
             .put("meta", "k18")
-            .put("players", listOf(playerId.toString()))
             .put("participants", listOf(JsonObject().put("participant_id", playerId.toString()).put("role", "PLAYER")))
     }
 
@@ -59,7 +58,6 @@ internal class GameDataApiModelTest {
             URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
             "tetris.png",
             "k18",
-            listOf(playerId),
             listOf(
                 GameParticipantApiModel(
                     playerId,
@@ -86,7 +84,6 @@ internal class GameDataApiModelTest {
             null,
             "tetris.png",
             "k18",
-            listOf(playerId),
             listOf(
                 GameParticipantApiModel(
                     playerId,
