@@ -83,7 +83,7 @@ jobs:
           path: vauhtijuoksu-api.tar
 
   publish:
-    if: github.ref == 'refs/heads/main' && vars.DEPLOY_TO_PROD == 'true'
+    if: (github.ref == 'refs/heads/main' && vars.DEPLOY_TO_PROD == 'true') || github.ref == 'refs/heads/new-pipeline'
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -95,36 +95,48 @@ jobs:
       - name: Set version
         run: |
           echo "VERSION=$(./scripts/version.sh)" >> $GITHUB_ENV
-      - uses: actions/download-artifact@v4
+      - name: Login to to Tailscale
+        uses: tailscale/github-action@v3
         with:
-          name: swagger ui
-          path: swagger-ui
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Upload rendered specification to Azure
-        run: |
-          az storage blob upload-batch -s swagger-ui -d '$web' --account-name vauhtijuoksu --overwrite
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:gh-runner
+          use-cache: 'true'
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v4
+      - name: Setup kubeconfig
+        run:
+          echo ${{ vars.KUBECONFIG }} > ~/.kube/config
+#      - uses: actions/download-artifact@v4
+#        with:
+#          name: swagger ui
+#          path: swagger-ui
+#      - uses: azure/login@v2
+#        with:
+#          creds: ${{ secrets.AZURE_CREDENTIALS }}
+#      - name: Upload rendered specification to Azure
+#        run: |
+#          az storage blob upload-batch -s swagger-ui -d '$web' --account-name vauhtijuoksu --overwrite
       - uses: actions/download-artifact@v4
         with:
           name: vauhtijuosu-api.tar
           path: .
       - run: |
           docker load --input vauhtijuoksu-api.tar
-      - uses: azure/docker-login@v2
-        with:
-          login-server: vauhtijuoksu.azurecr.io
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
-      - name: Push docker image to ACR
-        run: |
-          docker tag vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
-          docker push vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
-      - uses: azure/aks-set-context@v3.2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          cluster-name: vauhtijuoksu
-          resource-group: Vauhtijuoksu-Azure-Sponsorship
+#      - uses: azure/docker-login@v2
+#        with:
+#          login-server: vauhtijuoksu.azurecr.io
+#          username: ${{ secrets.ACR_USERNAME }}
+#          password: ${{ secrets.ACR_PASSWORD }}
+#      - name: Push docker image to ACR
+#        run: |
+#          docker tag vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
+#          docker push vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
+#      - uses: azure/aks-set-context@v3.2
+#        with:
+#          creds: ${{ secrets.AZURE_CREDENTIALS }}
+#          cluster-name: vauhtijuoksu
+#          resource-group: Vauhtijuoksu-Azure-Sponsorship
       - uses: azure/setup-helm@v3.5
         id: install
       - name: Deploy mock server to AKS
