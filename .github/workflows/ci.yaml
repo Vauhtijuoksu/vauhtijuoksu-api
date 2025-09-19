@@ -101,7 +101,7 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:gh-runner
-          use-cache: 'true'
+#          use-cache: 'true'
       - name: Setup Kubectl
         uses: azure/setup-kubectl@v4
       - name: Setup kubeconfig
