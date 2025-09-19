@@ -8,3 +8,7 @@ oAuth:
   authorizationPath: "/oauth2/authorize"
   tokenPath: "/api/oauth2/token"
   tokenRevocationUrl: "/api/oauth2/token/revoke"
+ingress: nginx
+redis:
+  host: valkey
+
