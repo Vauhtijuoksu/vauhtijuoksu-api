@@ -125,20 +125,15 @@ jobs:
           path: .
       - run: |
           docker load --input vauhtijuoksu-api.tar
-#      - uses: azure/docker-login@v2
-#        with:
-#          login-server: vauhtijuoksu.azurecr.io
-#          username: ${{ secrets.ACR_USERNAME }}
-#          password: ${{ secrets.ACR_PASSWORD }}
-#      - name: Push docker image to ACR
-#        run: |
-#          docker tag vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
-#          docker push vauhtijuoksu.azurecr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
-#      - uses: azure/aks-set-context@v3.2
-#        with:
-#          creds: ${{ secrets.AZURE_CREDENTIALS }}
-#          cluster-name: vauhtijuoksu
-#          resource-group: Vauhtijuoksu-Azure-Sponsorship
+      - uses: azure/docker-login@v2
+        with:
+          login-server: ghcr.io
+          username: Moetto
+          password: ${{ secrets.PUSH_TOKEN }}
+      - name: Push docker image to ACR
+        run: |
+          docker tag vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} ghcr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
+          docker push ghcr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
       - uses: azure/setup-helm@v3.5
         id: install
       - name: Deploy mock server to AKS
