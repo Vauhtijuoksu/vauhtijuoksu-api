@@ -16,7 +16,7 @@ jobs:
     - name: Setup Kubectl
       uses: azure/setup-kubectl@v4
     - name: Setup kubeconfig
-      run:
+      run: |
         mkdir ~/.kube
         echo "${{ vars.KUBECONFIG }}" > ~/.kube/config
         kubectl get all
