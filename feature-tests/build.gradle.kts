@@ -159,7 +159,6 @@ tasks {
 
     test {
         description = "Run feature tests against local cluster and gather coverage with jacoco"
-        outputs.upToDateWhen { false }
         useJUnitPlatform()
         dependsOn(clusterWithJacoco)
         finalizedBy(dumpJacoco, jacocoTestReport)
