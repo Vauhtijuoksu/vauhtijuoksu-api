@@ -135,8 +135,8 @@ jobs:
           helm upgrade --install mockserver deployment/mockserver -n vauhtijuoksu-api --create-namespace
       - name: Deploy Redis to AKS
         run: |
-          kubectl delete secret vauhtijuoksu-api-redis --ignore-not-found
-          kubectl create secret generic vauhtijuoksu-api-redis --from-literal=REDIS__PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          kubectl delete secret vauhtijuoksu-api-redis --ignore-not-found -n vauhtijuoksu-api
+          kubectl create secret generic vauhtijuoksu-api-redis --from-literal=REDIS__PASSWORD=${{ secrets.REDIS_PASSWORD }} -n vauhtijuoksu-api
           helm upgrade --install redis oci://registry-1.docker.io/bitnamicharts/redis \
             -n vauhtijuoksu-api --create-namespace \
             --set architecture=standalone \

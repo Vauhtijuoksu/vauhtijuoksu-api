@@ -5,13 +5,13 @@ metadata:
   labels:
     {{- include "mockserver.labels" . | nindent 4 }}
   annotations:
-    kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: "true"
     # To work on kind cluster
     nginx.ingress.kubernetes.io/server-alias: mockapi.localhost
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - mockapi.dev.vauhtijuoksu.fi
