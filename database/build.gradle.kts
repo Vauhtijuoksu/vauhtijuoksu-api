@@ -21,6 +21,7 @@ dependencies {
 
     runtimeOnly(libs.jackson.dataformat.yaml)
     runtimeOnly(libs.log4j.slf4j18.impl)
+    runtimeOnly(libs.scram)
 
     testImplementation(project(path = ":test-data"))
     testImplementation(libs.kotlinx.coroutines.test)
