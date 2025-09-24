@@ -1,5 +1,5 @@
 image:
-  registry: vauhtijuoksu.azurecr.io/
+  registry: ghcr.io/
   repository: vauhtijuoksu/vauhtijuoksu-api
   tag: "dev"
   imagePullPolicy: IfNotPresent
