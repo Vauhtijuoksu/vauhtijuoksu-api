@@ -92,7 +92,7 @@ jobs:
       - name: Set version
         run: |
           echo "VERSION=$(./scripts/version.sh)" >> $GITHUB_ENV
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: swagger ui
           path: swagger-ui
@@ -102,7 +102,7 @@ jobs:
       - name: Upload rendered specification to Azure
         run: |
           az storage blob upload-batch -s swagger-ui -d '$web' --account-name vauhtijuoksu --overwrite
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: vauhtijuosu-api.tar
           path: .
