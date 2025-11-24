@@ -1,3 +1,4 @@
+import fi.vauhtijuoksu.utilities.ExecOperationsProvider
 import fi.vauhtijuoksu.utilities.bashCommand
 import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import io.fabric8.kubernetes.client.LocalPortForward
@@ -16,6 +17,8 @@ plugins {
 
 val featureTests: Configuration by configurations.creating {
 }
+
+val execOperations = objects.newInstance(ExecOperationsProvider::class).execOperations
 
 val buildId = Random.nextInt(0, Int.MAX_VALUE)
 
@@ -38,7 +41,7 @@ tasks {
         outputs.file(jacocoPath)
         doLast {
             val agentJar: File = AgentJar.extractToTempLocation()
-            exec {
+            execOperations.exec {
                 bashCommand("mkdir -p build/tmp && cp \"${agentJar.absolutePath}\" $jacocoPath")
             }
         }
@@ -108,7 +111,7 @@ tasks {
         """.trimIndent()
         dependsOn(findJacoco, getByPath(":deployment:runInCluster"))
         doLast {
-            exec {
+            execOperations.exec {
                 bashCommand(
                     """
                     kubectl delete cm jacoco --ignore-not-found=true
@@ -123,7 +126,7 @@ tasks {
                 vauhtijuoksuApiDeployment.patch(patch)
                 logger.debug("Deployment patched")
             }
-            exec {
+            execOperations.exec {
                 bashCommand("kubectl rollout status deployment vauhtijuoksu-api")
             }
             logger.debug("Patched deployment rolled out")
