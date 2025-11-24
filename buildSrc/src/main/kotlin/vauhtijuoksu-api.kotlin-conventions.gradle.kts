@@ -27,11 +27,14 @@ dependencies {
 
     // Use JUnit Jupiter API for testing.
     testImplementation(libs.findLibraryOrThrow("junit-jupiter-api"))
-    // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly(libs.findLibraryOrThrow("junit-jupiter-engine"))
+    testRuntimeOnly(libs.findLibraryOrThrow("junit-platform-launcher"))
 }
 
 tasks {
+    test {
+        useJUnitPlatform()
+    }
+
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
             jvmTarget = "21"
