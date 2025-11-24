@@ -131,7 +131,7 @@ open class ServerTestBase {
                     ServerConfiguration(
                         serverPort,
                         htpasswdFile,
-                        corsHeaderUrl,
+                        listOf(corsHeaderUrl),
                         false,
                     ),
                 )
