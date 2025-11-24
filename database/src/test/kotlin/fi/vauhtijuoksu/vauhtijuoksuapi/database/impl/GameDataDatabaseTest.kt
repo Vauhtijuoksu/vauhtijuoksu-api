@@ -112,6 +112,23 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
     }
 
     @Test
+    fun `deserialising a game with no participants works`() = runTest {
+        val newGame = TestGameData.gameData2.copy(id = UUID.randomUUID(), participants = emptyList())
+        db.getAll().map { games ->
+            games.forEach {
+                db.delete(it.id)
+            }
+        }.coAwait()
+
+        db.add(newGame)
+            .flatMap {
+                db.getAll()
+            }.map { res ->
+                assertEquals(res, listOf(newGame))
+            }.coAwait()
+    }
+
+    @Test
     fun `player order should stay consistent when players are in multiple games`() = runTest {
         val playerDb = injector.getInstance(ParticipantDatabase::class.java)
 
