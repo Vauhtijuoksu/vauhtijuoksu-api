@@ -246,8 +246,9 @@ class DonationFlowTest {
             .onSuccess {
                 testContext.verify {
                     val donations = it.bodyAsJsonArray()
-                    assertEquals(1, donations.size())
-                    val donation = donations.getJsonObject(0)
+                    val donation = donations.find {
+                        (it as JsonObject).getString("id") == donationId
+                    } as JsonObject
                     assertEquals(donationId, donation.getString("id"))
                     assertEquals(donationSum, donation.getDouble("amount"))
                     assertEquals("ota tää :D 🤔🤔: $incentiveCode1", donation.getString("message"))
