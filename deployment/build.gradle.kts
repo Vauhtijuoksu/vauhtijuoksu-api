@@ -1,3 +1,4 @@
+import fi.vauhtijuoksu.utilities.ExecOperationsProvider
 import fi.vauhtijuoksu.utilities.bashCommand
 import java.io.FileOutputStream
 
@@ -12,10 +13,12 @@ dependencies {
     dockerImage(project(path = ":server", "dockerImageConfiguration"))
 }
 
+val execOperations = objects.newInstance(ExecOperationsProvider::class).execOperations
+
 tasks {
     val lintCharts by registering {
         fun lintDir(chartDirectory: String, output: String) {
-            val res = exec {
+            val res = execOperations.exec {
                 bashCommand("helm lint $chartDirectory")
                 standardOutput = FileOutputStream(output, true)
                 isIgnoreExitValue = true
@@ -44,22 +47,22 @@ tasks {
         description = "Create a kind cluster named vauhtijuoksu"
         group = "Application"
         doLast {
-            val res = exec {
+            val res = execOperations.exec {
                 bashCommand("kind get clusters | grep ^vauhtijuoksu$")
                 isIgnoreExitValue = true
             }
             if (res.exitValue == 0) {
                 logger.info("""Cluster named "vauhtijuoksu" already exists""")
                 // Ensure that local cluster is used for following commands, and not for example production cluster
-                exec {
+                execOperations.exec {
                     bashCommand("kind export kubeconfig --name vauhtijuoksu")
                 }
             } else {
-                exec {
+                execOperations.exec {
                     workingDir = projectDir
                     bashCommand("kind create cluster --name vauhtijuoksu --config kind-cluster/kind-cluster-config.yaml")
                 }
-                exec {
+                execOperations.exec {
                     workingDir = projectDir
                     bashCommand(
                         """
@@ -72,7 +75,7 @@ tasks {
                     )
                 }
                 // Utilize the wait time that would otherwise be spent waiting on ingress by installing postgres here
-                exec {
+                execOperations.exec {
                     bashCommand(
                         """
                         helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -84,21 +87,21 @@ tasks {
                         """,
                     )
                 }
-                exec {
+                execOperations.exec {
                     workingDir = projectDir
                     bashCommand("helm install postgres bitnami/postgresql -f kind-cluster/psql-values.yaml --version 12.1.5")
                 }
                 // Postgres secrets for vauhtijuoksu api. Created manually on production environment
-                exec {
+                execOperations.exec {
                     workingDir = projectDir
                     bashCommand("kubectl create secret generic vauhtijuoksu-api-psql --from-file kind-cluster/psql-secret.yaml")
                 }
-                exec {
+                execOperations.exec {
                     workingDir = projectDir
                     bashCommand("kubectl create secret generic vauhtijuoksu-api-htpasswd --from-file kind-cluster/htpasswd")
                 }
                 // Install valkey
-                exec {
+                execOperations.exec {
                     bashCommand(
                         """
                         kubectl create secret generic --from-literal=REDIS__PASSWORD="not used" vauhtijuoksu-api-redis
@@ -112,12 +115,12 @@ tasks {
                 val secret = File("$projectDir/kind-cluster/oauth-secret.yaml")
                 val secretTemplate = File("$projectDir/kind-cluster/oauth-secret-template.yaml")
                 val oAuthSecret = if (secret.exists()) secret else secretTemplate
-                exec {
+                execOperations.exec {
                     bashCommand("kubectl create secret generic vauhtijuoksu-api-oauth --from-file ${oAuthSecret.path}")
                 }
 
                 // Wait for ingress
-                exec {
+                execOperations.exec {
                     workingDir = projectDir
                     bashCommand("kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=90s")
                 }
@@ -130,10 +133,10 @@ tasks {
         group = "Application"
         dependsOn(dockerImage, createCluster)
         doLast {
-            exec {
+            execOperations.exec {
                 bashCommand("kind load docker-image vauhtijuoksu/vauhtijuoksu-api:${rootProject.version} --name vauhtijuoksu")
             }
-            exec {
+            execOperations.exec {
                 workingDir = projectDir
                 bashCommand(
                     """
@@ -152,7 +155,7 @@ tasks {
         group = "Application"
         dependsOn(createCluster)
         doLast {
-            exec {
+            execOperations.exec {
                 workingDir = projectDir
                 bashCommand("helm upgrade --install mockserver mockserver")
             }
@@ -165,7 +168,7 @@ tasks {
         dependsOn(runInCluster)
         doLast {
             val output = FileOutputStream("$buildDir/curl-output.txt")
-            exec {
+            execOperations.exec {
                 bashCommand("curl -vf --retry 10 --retry-all-errors localhost/gamedata")
                 standardOutput = output
                 errorOutput = output
@@ -177,7 +180,7 @@ tasks {
         description = "Tear down a kind cluster named vauhtijuoksu"
         group = "Application"
         doLast {
-            exec {
+            execOperations.exec {
                 workingDir = projectDir
                 bashCommand("kind delete cluster --name vauhtijuoksu")
             }

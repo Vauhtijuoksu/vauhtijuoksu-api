@@ -1,6 +1,8 @@
+import fi.vauhtijuoksu.utilities.ExecOperationsProvider
 import fi.vauhtijuoksu.utilities.bashCommand
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
+
 
 plugins {
     id("vauhtijuoksu-api.kotlin-conventions")
@@ -14,8 +16,9 @@ buildscript {
     }
 }
 
+val execOperations = objects.newInstance(ExecOperationsProvider::class).execOperations
 val versionOutput = ByteArrayOutputStream()
-exec {
+execOperations.exec {
     standardOutput = versionOutput
     workingDir = projectDir
     bashCommand("./scripts/version.sh")
