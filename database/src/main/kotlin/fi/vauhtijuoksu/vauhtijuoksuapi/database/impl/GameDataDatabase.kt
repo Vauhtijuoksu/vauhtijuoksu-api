@@ -25,12 +25,18 @@ internal class GameDataDatabase
 
     private val selectClause =
         """
-        SELECT gamedata.*, 
-        COALESCE(json_agg(participant_in_game ORDER BY participant_order), '[]') AS participants
-        FROM gamedata 
-        LEFT JOIN participant_in_game ON gamedata.id = participant_in_game.game_id
-        GROUP BY gamedata.id 
-        ORDER BY start_time ASC
+        SELECT
+        gamedata.*,
+        COALESCE(
+            (
+                SELECT json_agg(participant_in_game ORDER BY participant_order)
+                FROM participant_in_game
+                WHERE participant_in_game.game_id = gamedata.id
+            ),
+            '[]'
+        ) AS participants
+        FROM gamedata
+        ORDER BY gamedata.start_time ASC;
         """
     private val getAllQuery = pool.preparedQuery(selectClause)
 
