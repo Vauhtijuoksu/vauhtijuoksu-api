@@ -8,7 +8,9 @@ server:
   # Generate a htpasswd file
   # Create corresponding secret by running `kubectl create secret generic vauhtijuoksu-htpasswd --from-file <path>/htpasswd`
   htpasswdSecret: vauhtijuoksu-api-htpasswd
-  corsHeader: https://(.+[.])*vauhtijuoksu[.]fi
+  corsHeaders:
+    - https://(.+[.])*vauhtijuoksu[.]fi
+    - https://vauhtijuoksu[.]github[.]io
 
 database:
   address: postgres-postgresql.default.svc.cluster.local

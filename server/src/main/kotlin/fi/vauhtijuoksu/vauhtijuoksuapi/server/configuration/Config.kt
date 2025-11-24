@@ -36,6 +36,6 @@ data class DiscordClientConfiguration(
 data class ServerConfiguration(
     val port: Int,
     val htpasswdFileLocation: String,
-    val corsHeader: String,
+    val corsHeaders: List<String>,
     val sessionCookieSecure: Boolean = true, // Needs to be false for tests. Setting this to false in production will break login
 )

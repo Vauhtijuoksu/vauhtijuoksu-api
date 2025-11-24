@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "vauhtijuoksu-api.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       {{- include "vauhtijuoksu-api.selectorLabels" . | nindent 6 }}
@@ -24,7 +24,7 @@ spec:
               protocol: TCP
           readinessProbe:
             httpGet:
-              path: /stream-metadata
+              path: /gamedata
               port: http
           volumeMounts:
             - name: configuration

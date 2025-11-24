@@ -84,7 +84,7 @@ class ApiModule : AbstractModule() {
     @Named(AUTHENTICATED_CORS)
     fun getCorsHandlerAuth(conf: ServerConfiguration): CorsHandler =
         CorsHandler.create()
-            .addRelativeOrigin(conf.corsHeader)
+            .addOriginsWithRegex(conf.corsHeaders)
             .allowCredentials(true)
             .allowedMethod(HttpMethod.GET)
             .allowedMethod(HttpMethod.POST)

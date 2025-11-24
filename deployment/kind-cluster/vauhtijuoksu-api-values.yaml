@@ -1,7 +1,8 @@
 image:
   registry:
 server:
-  corsHeader: http(s)?://api.localhost(:\d{1,5})?$
+  corsHeaders:
+    - http(s)?://api.localhost(:\d{1,5})?$
 oAuth:
   callbackUrl: "https://api.localhost/callback"
   baseAuthorizationUrl: "https://discord.com"

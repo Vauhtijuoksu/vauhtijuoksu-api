@@ -9,7 +9,8 @@ data:
     server:
       port: 8080
       htpasswdFileLocation: /htpasswd/htpasswd
-      corsHeader: {{ .Values.server.corsHeader }}
+      corsHeaders:
+        {{- toYaml .Values.server.corsHeaders | nindent 6 }}
     database:
       database: {{ .Values.database.database }}
       address: {{ .Values.database.address }}
