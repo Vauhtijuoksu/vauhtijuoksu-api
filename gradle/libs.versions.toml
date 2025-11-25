@@ -1,5 +1,4 @@
 [versions]
-jackson = "2.18.3"
 hoplite = "2.9.0"
 vertx = "4.5.22"
 kotlin = "2.1.20"
@@ -25,10 +24,13 @@ swagger-ui = "org.webjars:swagger-ui:5.30.2"
 
 arrow-kt = "io.arrow-kt:arrow-core:2.2.0"
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.9.0" }
-jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
-jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
-jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
-jackson-module-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
+jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations" }
+jackson-bom = "com.fasterxml.jackson:jackson-bom:2.20.1"
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind" }
+# Jackson databind required by log4j2 to read yaml configuration files
+jackson-dataformat-yaml = { group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-yaml" }
+jackson-datatype-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310" }
+jackson-module-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin" }
 guice = "com.google.inject:guice:7.0.0"
 jakarta-inject = "jakarta.inject:jakarta.inject-api:2.0.1"
 hoplite-core = { group = "com.sksamuel.hoplite", name = "hoplite-core", version.ref = "hoplite" }
@@ -43,15 +45,13 @@ vertx-lang-kotlincoroutines = { group = "io.vertx", name = "vertx-lang-kotlin-co
 vertx-pg-client = { group = "io.vertx", name = "vertx-pg-client", version.ref = "vertx" }
 vertx-sql-client-templates = { group = "io.vertx", name = "vertx-sql-client-templates", version.ref = "vertx" }
 vertx-session-redis = { group = "io.vertx", name = "vertx-web-sstore-redis", version.ref = "vertx" }
-flyway-core = {group = "org.flywaydb", name="flyway-core", version.ref = "flyway"}
-flyway-postgresql = {group = "org.flywaydb", name="flyway-database-postgresql", version.ref = "flyway"}
+flyway-core = { group = "org.flywaydb", name = "flyway-core", version.ref = "flyway" }
+flyway-postgresql = { group = "org.flywaydb", name = "flyway-database-postgresql", version.ref = "flyway" }
 postgresql = "org.postgresql:postgresql:42.7.8"
 jakarta-validation-api = 'jakarta.validation:jakarta.validation-api:3.1.1'
 scram = "com.ongres.scram:client:2.1"
 
 log4j-slf4j18-impl = "org.apache.logging.log4j:log4j-slf4j18-impl:2.18.0"
-# Jackson databind required by log4j2 to read yaml configuration files
-jackson-dataformat-yaml = { group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-yaml", version.ref = "jackson" }
 
 # Test
 junit-bom = "org.junit:junit-bom:6.0.1"
