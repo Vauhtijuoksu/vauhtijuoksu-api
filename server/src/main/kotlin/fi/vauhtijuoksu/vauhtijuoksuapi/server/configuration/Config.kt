@@ -7,10 +7,11 @@ data class Config(
     val database: DatabaseConfiguration,
     val oAuth: OAuthConfiguration,
     val discordClient: DiscordClientConfiguration,
-    val redis: RedisConfiguration?,
+    val redis: RedisConfiguration,
 )
 
 data class RedisConfiguration(
+    val enabled: Boolean = true,
     val host: String,
     val password: String,
 )

@@ -135,7 +135,7 @@ open class ServerTestBase {
                         false,
                     ),
                 )
-                bind(RedisConfiguration::class.java).toProvider(Providers.of(null))
+                bind(RedisConfiguration::class.java).toProvider(Providers.of(RedisConfiguration(false, "", "")))
                 bind(OAuthConfiguration::class.java).toInstance(oAuthConfiguration(serverPort))
                 bind(DiscordClientConfiguration::class.java).toInstance(
                     DiscordClientConfiguration(

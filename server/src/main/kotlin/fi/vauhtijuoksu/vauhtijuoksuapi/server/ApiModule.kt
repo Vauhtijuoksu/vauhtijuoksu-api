@@ -32,7 +32,6 @@ import io.vertx.redis.client.RedisOptions
 import jakarta.inject.Named
 import java.time.Clock
 import java.time.ZoneId
-import javax.annotation.Nullable
 
 class ApiModule : AbstractModule() {
 
@@ -58,8 +57,8 @@ class ApiModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun getSessionStore(vertx: Vertx, @Nullable redisConf: RedisConfiguration?): SessionStore {
-        return if (redisConf != null) {
+    fun getSessionStore(vertx: Vertx, redisConf: RedisConfiguration): SessionStore {
+        return if (redisConf.enabled) {
             RedisSessionStore.create(
                 vertx,
                 Redis.createClient(
