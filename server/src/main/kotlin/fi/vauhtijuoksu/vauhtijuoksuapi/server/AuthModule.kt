@@ -23,8 +23,10 @@ import io.vertx.ext.web.handler.OAuth2AuthHandler
 class AuthModule : AbstractModule() {
     @Provides
     @Singleton
-    fun htpasswd(vertx: Vertx, conf: ServerConfiguration): HtpasswdAuth =
-        HtpasswdAuth.create(vertx, HtpasswdAuthOptions().setHtpasswdFile(conf.htpasswdFileLocation))
+    fun htpasswd(
+        vertx: Vertx,
+        conf: ServerConfiguration,
+    ): HtpasswdAuth = HtpasswdAuth.create(vertx, HtpasswdAuthOptions().setHtpasswdFile(conf.htpasswdFileLocation))
 
     @Provides
     @Singleton
@@ -32,17 +34,21 @@ class AuthModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun oAuthOptions(config: OAuthConfiguration): OAuth2Options = OAuth2Options().apply {
-        clientId = config.clientId
-        clientSecret = config.clientSecret
-        site = config.baseAuthorizationUrl
-        authorizationPath = config.authorizationPath
-        tokenPath = config.tokenPath
-    }
+    fun oAuthOptions(config: OAuthConfiguration): OAuth2Options =
+        OAuth2Options().apply {
+            clientId = config.clientId
+            clientSecret = config.clientSecret
+            site = config.baseAuthorizationUrl
+            authorizationPath = config.authorizationPath
+            tokenPath = config.tokenPath
+        }
 
     @Provides
     @Singleton
-    fun oAuth(vertx: Vertx, oAuth2Options: OAuth2Options): OAuth2Auth = OAuth2Auth.create(vertx, oAuth2Options)
+    fun oAuth(
+        vertx: Vertx,
+        oAuth2Options: OAuth2Options,
+    ): OAuth2Auth = OAuth2Auth.create(vertx, oAuth2Options)
 
     /**
      * OAuth2 handler for Discord
@@ -57,25 +63,36 @@ class AuthModule : AbstractModule() {
         oAuth2Auth: OAuth2Auth,
         vertx: Vertx,
     ): OAuth2AuthHandler =
-        OAuth2AuthHandler.create(vertx, oAuth2Auth, config.callbackUrl)
+        OAuth2AuthHandler
+            .create(vertx, oAuth2Auth, config.callbackUrl)
             .withScopes(config.scopes)
 
     @Provides
     @Singleton
-    fun anyAuth(htpasswdAuth: HtpasswdAuth, oAuth2Auth: OAuth2Auth): AuthenticationProvider =
-        ChainAuth.any().add(htpasswdAuth).add(oAuth2Auth)
+    fun anyAuth(
+        htpasswdAuth: HtpasswdAuth,
+        oAuth2Auth: OAuth2Auth,
+    ): AuthenticationProvider = ChainAuth.any().add(htpasswdAuth).add(oAuth2Auth)
 
     @Provides
     @Singleton
-    fun anyAuthHandler(basicAuth: BasicAuthHandler, oAuth: OAuth2AuthHandler): AuthenticationHandler =
-        ChainAuthHandler.any()
+    fun anyAuthHandler(
+        basicAuth: BasicAuthHandler,
+        oAuth: OAuth2AuthHandler,
+    ): AuthenticationHandler =
+        ChainAuthHandler
+            .any()
             .add(basicAuth)
             .add(oAuth)
 
     @Provides
     @Singleton
-    fun admin(discord: DiscordUserHandler, basic: BasicAuthorizationProvider): AuthorizationHandler =
-        AuthorizationHandler.create(RoleBasedAuthorization.create(Roles.ADMIN.name))
+    fun admin(
+        discord: DiscordUserHandler,
+        basic: BasicAuthorizationProvider,
+    ): AuthorizationHandler =
+        AuthorizationHandler
+            .create(RoleBasedAuthorization.create(Roles.ADMIN.name))
             .addAuthorizationProvider(discord)
             .addAuthorizationProvider(basic)
 }

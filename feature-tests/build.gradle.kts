@@ -50,13 +50,24 @@ tasks {
     /**
      * Run block when forwarded to each vauhtijuoksu-api pod created in the current build
      */
-    fun forwardToEachVauhtijuoksuPod(port: Int, block: (portForward: LocalPortForward) -> Unit) {
+    fun forwardToEachVauhtijuoksuPod(
+        port: Int,
+        block: (portForward: LocalPortForward) -> Unit,
+    ) {
         KubernetesClientBuilder().build().use { k8s ->
-            k8s.pods().inNamespace("default")
+            k8s
+                .pods()
+                .inNamespace("default")
                 .withLabel("app.kubernetes.io/name", "vauhtijuoksu-api")
                 .withLabel("build", "$buildId")
-                .list().items.forEach { pod ->
-                    k8s.pods().inNamespace("default").withName(pod.metadata.name).portForward(port)
+                .list()
+                .items
+                .forEach { pod ->
+                    k8s
+                        .pods()
+                        .inNamespace("default")
+                        .withName(pod.metadata.name)
+                        .portForward(port)
                         .use { portForward ->
                             logger.debug("Forwarding to pod ${pod.metadata.name} using local port ${portForward.localPort}")
                             block.invoke(portForward)
@@ -89,7 +100,8 @@ tasks {
      * Run a patched version of vauhtijuoksu-api that has jacoco agent running in a local cluster.
      */
     val clusterWithJacoco by registering {
-        val patch = """
+        val patch =
+            """
             spec:
               template:
                 metadata:
@@ -108,7 +120,7 @@ tasks {
                     - name: jacoco
                       configMap:
                         name: jacoco
-        """.trimIndent()
+            """.trimIndent()
         dependsOn(findJacoco, getByPath(":deployment:runInCluster"))
         doLast {
             execOperations.exec {
@@ -122,7 +134,11 @@ tasks {
             KubernetesClientBuilder().build().use { k8s ->
                 logger.debug("Patching deployment")
                 val vauhtijuoksuApiDeployment =
-                    k8s.apps().deployments().inNamespace("default").withName("vauhtijuoksu-api")
+                    k8s
+                        .apps()
+                        .deployments()
+                        .inNamespace("default")
+                        .withName("vauhtijuoksu-api")
                 vauhtijuoksuApiDeployment.patch(patch)
                 logger.debug("Deployment patched")
             }

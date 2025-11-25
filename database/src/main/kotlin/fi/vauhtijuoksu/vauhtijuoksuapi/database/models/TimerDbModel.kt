@@ -13,23 +13,21 @@ data class TimerDbModel(
     val endTime: OffsetDateTime?,
     val name: String,
 ) {
-    fun toTimer(): Timer {
-        return Timer(
+    fun toTimer(): Timer =
+        Timer(
             id,
             startTime,
             endTime,
             name,
         )
-    }
 
     companion object {
-        fun fromTimer(timer: Timer): TimerDbModel {
-            return TimerDbModel(
+        fun fromTimer(timer: Timer): TimerDbModel =
+            TimerDbModel(
                 timer.id,
                 timer.startTime,
                 timer.endTime,
                 timer.name,
             )
-        }
     }
 }

@@ -29,29 +29,31 @@ class DonationApiModelTest {
 
     @BeforeEach
     fun setup() {
-        expectedDonation = JsonObject()
-            .put("id", uuid.toString())
-            .put("timestamp", dateUtc)
-            .put("name", name)
-            .put("message", message)
-            .put("amount", 10F)
-            .put("read", true)
-            .put("external_id", "an id")
-            .put("incentives", JsonArray())
+        expectedDonation =
+            JsonObject()
+                .put("id", uuid.toString())
+                .put("timestamp", dateUtc)
+                .put("name", name)
+                .put("message", message)
+                .put("amount", 10F)
+                .put("read", true)
+                .put("external_id", "an id")
+                .put("incentives", JsonArray())
     }
 
     @Test
     fun testDonationSerialization() {
-        val donation = DonationApiModel(
-            uuid,
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(date))),
-            name,
-            message,
-            amount,
-            true,
-            "an id",
-            listOf(),
-        )
+        val donation =
+            DonationApiModel(
+                uuid,
+                Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(date))),
+                name,
+                message,
+                amount,
+                true,
+                "an id",
+                listOf(),
+            )
 
         val donationAsJson = donation.toJson()
         assertEquals(expectedDonation, donationAsJson)
@@ -60,16 +62,17 @@ class DonationApiModelTest {
     @Test
     fun testDonationWithoutMessage() {
         expectedDonation.remove("message")
-        val donation = DonationApiModel(
-            uuid,
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(date))),
-            name,
-            null,
-            amount,
-            true,
-            "an id",
-            listOf(),
-        )
+        val donation =
+            DonationApiModel(
+                uuid,
+                Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(date))),
+                name,
+                null,
+                amount,
+                true,
+                "an id",
+                listOf(),
+            )
 
         val donationAsJson = donation.toJson()
 

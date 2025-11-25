@@ -10,16 +10,17 @@ import io.vertx.ext.web.handler.CorsHandler
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
-class GameDataDeleteRouter @Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<GameData>,
-) :
-    DeleteRouter<GameData>(
-        authenticationHandler,
-        adminRequired,
-        authenticatedEndpointCorsHandler,
-        db,
-    )
+class GameDataDeleteRouter
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<GameData>,
+    ) : DeleteRouter<GameData>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+        )

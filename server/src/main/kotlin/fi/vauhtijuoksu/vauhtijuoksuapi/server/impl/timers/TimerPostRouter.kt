@@ -12,19 +12,19 @@ import jakarta.inject.Named
 import java.util.UUID
 
 class TimerPostRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Timer>,
-) :
-    PostRouter<Timer>(
-        authenticationHandler,
-        adminRequired,
-        authenticatedEndpointCorsHandler,
-        db,
-        { json -> json.mapTo(NewTimerApiModel::class.java).toTimer(UUID.randomUUID()) },
-        { timer -> TimerApiModel.from(timer).toJson() },
-        { null },
-    )
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Timer>,
+    ) : PostRouter<Timer>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            { json -> json.mapTo(NewTimerApiModel::class.java).toTimer(UUID.randomUUID()) },
+            { timer -> TimerApiModel.from(timer).toJson() },
+            { null },
+        )

@@ -17,30 +17,35 @@ import mu.KotlinLogging
 import java.util.UUID
 
 class IncentivePatchRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    private val authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Incentive>,
-    private val incentiveService: IncentiveService,
-) : PatchRouter<Incentive, ApiModel<Incentive>>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-    { null }, // Incentive is always valid
-    IncentiveApiModel::fromIncentive,
-) {
-    private val logger = KotlinLogging.logger {}
-    override fun respond(updatedId: UUID, ctx: RoutingContext): Future<Void> {
-        return incentiveService
-            .getIncentive(updatedId)
-            .map {
-                logger.info { "Patched record $it" }
-                ctx.response().setStatusCode(ApiConstants.OK)
-                    .end(IncentiveApiModel.fromIncentiveWithStatuses(it).toJson().encode())
-            }
-            .mapEmpty()
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        private val authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Incentive>,
+        private val incentiveService: IncentiveService,
+    ) : PatchRouter<Incentive, ApiModel<Incentive>>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            { null }, // Incentive is always valid
+            IncentiveApiModel::fromIncentive,
+        ) {
+        private val logger = KotlinLogging.logger {}
+
+        override fun respond(
+            updatedId: UUID,
+            ctx: RoutingContext,
+        ): Future<Void> =
+            incentiveService
+                .getIncentive(updatedId)
+                .map {
+                    logger.info { "Patched record $it" }
+                    ctx
+                        .response()
+                        .setStatusCode(ApiConstants.OK)
+                        .end(IncentiveApiModel.fromIncentiveWithStatuses(it).toJson().encode())
+                }.mapEmpty()
     }
-}

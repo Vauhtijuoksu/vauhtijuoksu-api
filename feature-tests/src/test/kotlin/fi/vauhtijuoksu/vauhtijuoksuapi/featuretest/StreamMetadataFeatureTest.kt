@@ -19,7 +19,8 @@ import kotlin.math.abs
 @FeatureTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class StreamMetadataFeatureTest {
-    private val newMetaData = """
+    private val newMetaData =
+        """
         {
           "donation_goal": 10000,
           "current_game_id": null,
@@ -41,9 +42,10 @@ class StreamMetadataFeatureTest {
               4
           ]
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    private val metadataResponse = """
+    private val metadataResponse =
+        """
         {
           "donation_goal": 10000,
           "current_game_id": null,
@@ -66,9 +68,10 @@ class StreamMetadataFeatureTest {
           ],
           "timers": []
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    private val someHeartData = """
+    private val someHeartData =
+        """
         {
           "heart_rates": [
               100,
@@ -77,27 +80,33 @@ class StreamMetadataFeatureTest {
               441
           ]
         }
-    """.trimIndent()
+        """.trimIndent()
 
-    private val aTimer = """
+    private val aTimer =
+        """
         {            
             "start_time": "2021-09-21T15:05:47Z",
             "end_time": "2021-09-21T16:05:47Z",
             "name": "timer 1"
         }
-    """.trimIndent()
+        """.trimIndent()
 
     private lateinit var client: WebClient
 
     @BeforeEach
-    fun setup(testContext: VertxTestContext, webClient: WebClient) {
+    fun setup(
+        testContext: VertxTestContext,
+        webClient: WebClient,
+    ) {
         client = webClient
-        webClient.get("/timers")
+        webClient
+            .get("/timers")
             .send()
             .flatMap { res ->
                 CompositeFuture.all(
                     res.bodyAsJsonArray().map { timer ->
-                        webClient.delete("/timers/${(timer as JsonObject).getString("id")}")
+                        webClient
+                            .delete("/timers/${(timer as JsonObject).getString("id")}")
                             .withAuthenticationAndOrigins()
                             .send()
                     },
@@ -110,7 +119,8 @@ class StreamMetadataFeatureTest {
     @Test
     @Order(1)
     fun `test changing whole stream metadata`(testContext: VertxTestContext) {
-        client.patch("/stream-metadata")
+        client
+            .patch("/stream-metadata")
             .withAuthenticationAndOrigins()
             .sendJson(JsonObject(newMetaData))
             .verifyStatusCode(200, testContext)
@@ -129,12 +139,14 @@ class StreamMetadataFeatureTest {
     @Test
     @Order(2)
     fun `test partially updating stream metadata`(testContext: VertxTestContext) {
-        client.patch("/stream-metadata")
+        client
+            .patch("/stream-metadata")
             .withAuthenticationAndOrigins()
             .sendJson(JsonObject(newMetaData))
             .verifyStatusCode(200, testContext)
             .flatMap {
-                client.patch("/stream-metadata")
+                client
+                    .patch("/stream-metadata")
                     .putHeader("Origin", "http://api.localhost")
                     .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
                     .sendJson(
@@ -142,13 +154,13 @@ class StreamMetadataFeatureTest {
                             .put("donation_goal", 3000)
                             .put("counters", JsonArray()),
                     )
-            }
-            .map { res ->
+            }.map { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
-                    val expectedData = JsonObject(metadataResponse)
-                        .put("donation_goal", 3000)
-                        .put("counters", JsonArray())
+                    val expectedData =
+                        JsonObject(metadataResponse)
+                            .put("donation_goal", 3000)
+                            .put("counters", JsonArray())
                     val now = OffsetDateTime.now().toEpochSecond()
                     val body = res.bodyAsJsonObject()
                     val responseTime = OffsetDateTime.parse(body.remove("server_time") as String).toEpochSecond()
@@ -156,27 +168,28 @@ class StreamMetadataFeatureTest {
                     assertEquals(expectedData, body)
                 }
                 testContext.completeNow()
-            }
-            .onFailure(testContext::failNow)
+            }.onFailure(testContext::failNow)
     }
 
     @Test
     @Order(3)
     fun `test heart rate update`(testContext: VertxTestContext) {
-        client.patch("/stream-metadata")
+        client
+            .patch("/stream-metadata")
             .withAuthenticationAndOrigins()
             .sendJson(JsonObject(newMetaData))
             .verifyStatusCode(200, testContext)
             .compose {
-                client.patch("/stream-metadata")
+                client
+                    .patch("/stream-metadata")
                     .withAuthenticationAndOrigins()
                     .sendJson(JsonObject(someHeartData))
-            }
-            .map { res ->
+            }.map { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
-                    val expectedData = JsonObject(metadataResponse)
-                        .put("heart_rates", listOf(100, 130, 333, 441))
+                    val expectedData =
+                        JsonObject(metadataResponse)
+                            .put("heart_rates", listOf(100, 130, 333, 441))
                     val body = res.bodyAsJsonObject()
                     body.remove("server_time")
                     assertEquals(expectedData, body)
@@ -188,31 +201,33 @@ class StreamMetadataFeatureTest {
     @Test
     @Order(4)
     fun `test timer update`(testContext: VertxTestContext) {
-        client.patch("/stream-metadata")
+        client
+            .patch("/stream-metadata")
             .withAuthenticationAndOrigins()
             .sendJson(JsonObject(newMetaData))
             .verifyStatusCode(200, testContext)
             .flatMap {
-                client.post("/timers")
+                client
+                    .post("/timers")
                     .withAuthenticationAndOrigins()
                     .sendJson(
                         JsonObject(aTimer).put("end_time", null),
                     )
-            }
-            .verifyStatusCode(201, testContext)
+            }.verifyStatusCode(201, testContext)
             .map {
                 val id = it.bodyAsJsonObject().getString("id")
                 assertEquals(JsonObject(aTimer).put("end_time", null).put("id", id), it.bodyAsJsonObject())
                 id
-            }
-            .compose { id ->
-                client.patch("/timers/$id")
+            }.compose { id ->
+                client
+                    .patch("/timers/$id")
                     .withAuthenticationAndOrigins()
                     .sendJson(JsonObject().put("end_time", JsonObject(aTimer).getString("end_time")))
                     .map(id)
-            }
-            .flatMap { id ->
-                client.get("/stream-metadata").send()
+            }.flatMap { id ->
+                client
+                    .get("/stream-metadata")
+                    .send()
                     .verifyStatusCode(200, testContext)
                     .map {
                         object {
@@ -220,12 +235,12 @@ class StreamMetadataFeatureTest {
                             val res = it
                         }
                     }
-            }
-            .map {
+            }.map {
                 testContext.verify {
                     assertEquals(200, it.res.statusCode())
-                    val expectedData = JsonObject(metadataResponse)
-                        .put("timers", JsonArray().add(JsonObject(aTimer).put("id", it.id)))
+                    val expectedData =
+                        JsonObject(metadataResponse)
+                            .put("timers", JsonArray().add(JsonObject(aTimer).put("id", it.id)))
                     val body = it.res.bodyAsJsonObject()
                     body.remove("server_time")
                     assertEquals(expectedData, body)

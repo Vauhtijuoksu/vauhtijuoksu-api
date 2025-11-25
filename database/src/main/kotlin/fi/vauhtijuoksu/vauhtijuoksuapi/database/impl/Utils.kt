@@ -11,23 +11,18 @@ import io.vertx.sqlclient.templates.SqlTemplate
 
 internal fun <I, R, DbModel> SqlTemplate<I, R>.mapWith(
     mapper: (SqlTemplate<I, R>) -> SqlTemplate<I, RowSet<DbModel>>,
-): SqlTemplate<I, RowSet<DbModel>> {
-    return mapper(this)
-}
+): SqlTemplate<I, RowSet<DbModel>> = mapper(this)
 
-internal fun <V> Future<V>.orServerError(): Future<V> {
-    return this.recover {
+internal fun <V> Future<V>.orServerError(): Future<V> =
+    this.recover {
         if (it is VauhtijuoksuException) {
             throw it
         } else {
             throw ServerError(it)
         }
     }
-}
 
-internal inline fun <reified T> mapperToType(): (Row) -> T {
-    return { it.toJson().mapTo(T::class.java) }
-}
+internal inline fun <reified T> mapperToType(): (Row) -> T = { it.toJson().mapTo(T::class.java) }
 
 internal fun <T, V : SqlResult<T>> Future<V>.expectOneChangedRow(): Future<Unit> {
     return this.map {

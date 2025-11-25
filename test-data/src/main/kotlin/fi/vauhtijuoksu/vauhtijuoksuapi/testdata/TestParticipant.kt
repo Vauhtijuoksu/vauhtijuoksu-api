@@ -7,28 +7,31 @@ import java.util.UUID
 
 class TestParticipant private constructor() {
     companion object {
-        val participant1 = Participant(
-            UUID.randomUUID(),
-            "hluposti",
-            listOf(),
-        )
+        val participant1 =
+            Participant(
+                UUID.randomUUID(),
+                "hluposti",
+                listOf(),
+            )
 
-        val participant2 = Participant(
-            UUID.randomUUID(),
-            "jiisloth",
-            listOf(
-                SocialMedia(Platform.TWITCH, "slotti"),
-                SocialMedia(Platform.DISCORD, "slottivaan"),
-            ),
-        )
+        val participant2 =
+            Participant(
+                UUID.randomUUID(),
+                "jiisloth",
+                listOf(
+                    SocialMedia(Platform.TWITCH, "slotti"),
+                    SocialMedia(Platform.DISCORD, "slottivaan"),
+                ),
+            )
 
-        val participant3 = Participant(
-            UUID.randomUUID(),
-            "runtu",
-            listOf(
-                SocialMedia(Platform.TWITCH, "runtelii"),
-                SocialMedia(Platform.DISCORD, "märkylii"),
-            ),
-        )
+        val participant3 =
+            Participant(
+                UUID.randomUUID(),
+                "runtu",
+                listOf(
+                    SocialMedia(Platform.TWITCH, "runtelii"),
+                    SocialMedia(Platform.DISCORD, "märkylii"),
+                ),
+            )
     }
 }

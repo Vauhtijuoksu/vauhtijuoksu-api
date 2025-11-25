@@ -34,7 +34,6 @@ import java.time.Clock
 import java.time.ZoneId
 
 class ApiModule : AbstractModule() {
-
     override fun configure() {
         bind(object : TypeLiteral<PostInputValidator<GameData>>() {}).to(GameDataPostInputValidator::class.java)
         bind(object : TypeLiteral<PatchInputValidator<GameData>>() {}).to(GameDataPatchInputValidator::class.java)
@@ -52,13 +51,18 @@ class ApiModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun getHttpServer(vertx: Vertx, conf: ServerConfiguration): HttpServer =
-        vertx.createHttpServer(HttpServerOptions().setPort(conf.port))
+    fun getHttpServer(
+        vertx: Vertx,
+        conf: ServerConfiguration,
+    ): HttpServer = vertx.createHttpServer(HttpServerOptions().setPort(conf.port))
 
     @Provides
     @Singleton
-    fun getSessionStore(vertx: Vertx, redisConf: RedisConfiguration): SessionStore {
-        return if (redisConf.enabled) {
+    fun getSessionStore(
+        vertx: Vertx,
+        redisConf: RedisConfiguration,
+    ): SessionStore =
+        if (redisConf.enabled) {
             RedisSessionStore.create(
                 vertx,
                 Redis.createClient(
@@ -69,12 +73,15 @@ class ApiModule : AbstractModule() {
         } else {
             LocalSessionStore.create(vertx)
         }
-    }
 
     @Provides
     @Singleton
-    fun getSessionHandler(conf: ServerConfiguration, sessionStore: SessionStore): SessionHandler =
-        SessionHandler.create(sessionStore)
+    fun getSessionHandler(
+        conf: ServerConfiguration,
+        sessionStore: SessionStore,
+    ): SessionHandler =
+        SessionHandler
+            .create(sessionStore)
             .setCookieSameSite(CookieSameSite.NONE)
             .setCookieSecureFlag(conf.sessionCookieSecure)
 
@@ -82,7 +89,8 @@ class ApiModule : AbstractModule() {
     @Singleton
     @Named(AUTHENTICATED_CORS)
     fun getCorsHandlerAuth(conf: ServerConfiguration): CorsHandler =
-        CorsHandler.create()
+        CorsHandler
+            .create()
             .addOriginsWithRegex(conf.corsHeaders)
             .allowCredentials(true)
             .allowedMethod(HttpMethod.GET)
@@ -95,7 +103,8 @@ class ApiModule : AbstractModule() {
     @Singleton
     @Named(PUBLIC_CORS)
     fun getCorsHandlerPublic(): CorsHandler =
-        CorsHandler.create()
+        CorsHandler
+            .create()
             .allowedMethod(HttpMethod.GET)
             .allowedMethod(HttpMethod.POST)
             .allowedMethod(HttpMethod.OPTIONS)

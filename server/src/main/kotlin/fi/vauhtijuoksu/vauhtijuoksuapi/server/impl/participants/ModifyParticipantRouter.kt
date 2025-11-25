@@ -12,17 +12,18 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class ModifyParticipantRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    private val authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Participant>,
-) : PatchRouter<Participant, ApiModel<Participant>>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-    { null },
-    ParticipantResponse::fromParticipant,
-)
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        private val authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Participant>,
+    ) : PatchRouter<Participant, ApiModel<Participant>>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            { null },
+            ParticipantResponse::fromParticipant,
+        )

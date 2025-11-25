@@ -20,8 +20,8 @@ internal data class StreamMetadataDbModel(
     @JsonProperty("heart_rates")
     val heartRates: List<Int>,
 ) {
-    fun toStreamMetadata(): StreamMetadata {
-        return StreamMetadata(
+    fun toStreamMetadata(): StreamMetadata =
+        StreamMetadata(
             donationGoal,
             currentGameId,
             donatebarInfo,
@@ -29,5 +29,4 @@ internal data class StreamMetadataDbModel(
             heartRates,
             nowPlaying,
         )
-    }
 }

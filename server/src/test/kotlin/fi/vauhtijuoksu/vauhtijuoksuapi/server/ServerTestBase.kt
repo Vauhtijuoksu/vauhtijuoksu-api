@@ -109,43 +109,46 @@ open class ServerTestBase {
             scopes = listOf("openid"), // The mock OAuth server requires this scope
         )
 
-    open fun modules(serverPort: Int): List<Module> = listOf(
-        Modules.override(ApiModule()).with(object : AbstractModule() {
-            override fun configure() {
-                bind(Clock::class.java).toInstance(clock)
-            }
-        }),
-        AuthModule(),
-        object : AbstractModule() {
-            override fun configure() {
-                bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
-                bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
-                bind(object : TypeLiteral<VauhtijuoksuDatabase<Timer>>() {}).toInstance(timerDb)
-                bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).toInstance(streamMetadataDb)
-                bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).toInstance(playerInfoDb)
-                bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
-                bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
-                bind(object : TypeLiteral<StreamMetadataDatabase>() {}).toInstance(streamMetadataDatabase)
-                bind(object : TypeLiteral<VauhtijuoksuDatabase<Participant>>() {}).toInstance(participantDatabase)
-                bind(ServerConfiguration::class.java).toInstance(
-                    ServerConfiguration(
-                        serverPort,
-                        htpasswdFile,
-                        listOf(corsHeaderUrl),
-                        false,
-                    ),
-                )
-                bind(RedisConfiguration::class.java).toProvider(Providers.of(RedisConfiguration(false, "", "")))
-                bind(OAuthConfiguration::class.java).toInstance(oAuthConfiguration(serverPort))
-                bind(DiscordClientConfiguration::class.java).toInstance(
-                    DiscordClientConfiguration(
-                        vauhtijuoksuServerId = "serverId",
-                        adminRoleId = "adminRoleId",
-                    ),
-                )
-            }
-        },
-    )
+    open fun modules(serverPort: Int): List<Module> =
+        listOf(
+            Modules.override(ApiModule()).with(
+                object : AbstractModule() {
+                    override fun configure() {
+                        bind(Clock::class.java).toInstance(clock)
+                    }
+                },
+            ),
+            AuthModule(),
+            object : AbstractModule() {
+                override fun configure() {
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).toInstance(gameDataDb)
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).toInstance(donationDb)
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Timer>>() {}).toInstance(timerDb)
+                    bind(object : TypeLiteral<SingletonDatabase<StreamMetadata>>() {}).toInstance(streamMetadataDb)
+                    bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).toInstance(playerInfoDb)
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).toInstance(incentiveDatabase)
+                    bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
+                    bind(object : TypeLiteral<StreamMetadataDatabase>() {}).toInstance(streamMetadataDatabase)
+                    bind(object : TypeLiteral<VauhtijuoksuDatabase<Participant>>() {}).toInstance(participantDatabase)
+                    bind(ServerConfiguration::class.java).toInstance(
+                        ServerConfiguration(
+                            serverPort,
+                            htpasswdFile,
+                            listOf(corsHeaderUrl),
+                            false,
+                        ),
+                    )
+                    bind(RedisConfiguration::class.java).toProvider(Providers.of(RedisConfiguration(false, "", "")))
+                    bind(OAuthConfiguration::class.java).toInstance(oAuthConfiguration(serverPort))
+                    bind(DiscordClientConfiguration::class.java).toInstance(
+                        DiscordClientConfiguration(
+                            vauhtijuoksuServerId = "serverId",
+                            adminRoleId = "adminRoleId",
+                        ),
+                    )
+                }
+            },
+        )
 
     open fun injector(modules: List<Module>): Injector = Guice.createInjector(modules)
 
@@ -166,13 +169,13 @@ open class ServerTestBase {
         client = WebClient.create(vertx, WebClientOptions().setDefaultPort(serverPort))
         var runs = 0
         vertx.setPeriodic(0, 5) { timerId ->
-            client.request(HttpMethod.OPTIONS, "/")
+            client
+                .request(HttpMethod.OPTIONS, "/")
                 .send()
                 .onSuccess {
                     vertx.cancelTimer(timerId)
                     testContext.completeNow()
-                }
-                .onFailure {
+                }.onFailure {
                     runs += 1
                     if (runs > 10) {
                         testContext.failNow("Server not responding after 10 tries")

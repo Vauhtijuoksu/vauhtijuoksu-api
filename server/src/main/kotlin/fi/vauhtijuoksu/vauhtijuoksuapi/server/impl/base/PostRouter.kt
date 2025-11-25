@@ -25,8 +25,12 @@ open class PostRouter<M : Model>(
 ) : PartialRouter {
     private val logger = KotlinLogging.logger {}
 
-    override fun configure(router: Router, basepath: String) {
-        router.post(basepath)
+    override fun configure(
+        router: Router,
+        basepath: String,
+    ) {
+        router
+            .post(basepath)
             .handler(authenticatedEndpointCorsHandler)
             .handler(BodyHandler.create())
             .handler(authenticationHandler)
@@ -46,11 +50,14 @@ open class PostRouter<M : Model>(
                     throw UserError(validationMessage)
                 }
 
-                db.add(record)
+                db
+                    .add(record)
                     .onFailure(ctx::fail)
                     .onSuccess {
                         logger.info { "Inserted record $record" }
-                        ctx.response().setStatusCode(ApiConstants.CREATED)
+                        ctx
+                            .response()
+                            .setStatusCode(ApiConstants.CREATED)
                             .end(toJson(record).encode())
                     }
             }

@@ -51,100 +51,109 @@ class IncentiveServiceTest {
     private lateinit var donationDb: VauhtijuoksuDatabase<Donation>
 
     private val ts = "2021-09-21T16:05:47-00:00"
-    private val milestoneIncentive = Incentive(
-        UUID.randomUUID(),
-        null,
-        "Slotti syö nuubels",
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(ts)), ZoneId.of("Z")),
-        IncentiveType.MILESTONE,
-        "Noobelit on tulisia",
-        listOf(100, 200),
-        null,
-        null,
-    )
+    private val milestoneIncentive =
+        Incentive(
+            UUID.randomUUID(),
+            null,
+            "Slotti syö nuubels",
+            OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(ts)), ZoneId.of("Z")),
+            IncentiveType.MILESTONE,
+            "Noobelit on tulisia",
+            listOf(100, 200),
+            null,
+            null,
+        )
 
     private val incentiveCode = IncentiveCode.random()
-    private val milestoneGeneratedIncentive = GeneratedIncentive(
-        incentiveCode,
-        listOf(
-            ChosenIncentive(
-                milestoneIncentive.id,
-                null,
+    private val milestoneGeneratedIncentive =
+        GeneratedIncentive(
+            incentiveCode,
+            listOf(
+                ChosenIncentive(
+                    milestoneIncentive.id,
+                    null,
+                ),
             ),
-        ),
-    )
+        )
 
-    private val donationWithIncentiveCode = Donation(
-        UUID.randomUUID(),
-        Date.from(Instant.now()),
-        "Hluposti",
-        "Ota tää: $incentiveCode",
-        60.0F,
-        true,
-        null,
-    )
+    private val donationWithIncentiveCode =
+        Donation(
+            UUID.randomUUID(),
+            Date.from(Instant.now()),
+            "Hluposti",
+            "Ota tää: $incentiveCode",
+            60.0F,
+            true,
+            null,
+        )
 
-    private val optionIncentive = Incentive(
-        UUID.randomUUID(),
-        null,
-        "Slotti syö nuubels",
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(ts)), ZoneId.of("Z")),
-        IncentiveType.OPTION,
-        "Noobelit on tulisia",
-        null,
-        listOf("kissa", "koira"),
-        null,
-    )
+    private val optionIncentive =
+        Incentive(
+            UUID.randomUUID(),
+            null,
+            "Slotti syö nuubels",
+            OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(ts)), ZoneId.of("Z")),
+            IncentiveType.OPTION,
+            "Noobelit on tulisia",
+            null,
+            listOf("kissa", "koira"),
+            null,
+        )
 
-    private val optionGeneratedIncentive = GeneratedIncentive(
-        incentiveCode,
-        listOf(
-            ChosenIncentive(
-                optionIncentive.id,
-                "kissa",
+    private val optionGeneratedIncentive =
+        GeneratedIncentive(
+            incentiveCode,
+            listOf(
+                ChosenIncentive(
+                    optionIncentive.id,
+                    "kissa",
+                ),
             ),
-        ),
-    )
+        )
 
-    private val openIncentive = Incentive(
-        UUID.randomUUID(),
-        null,
-        "Slotti syö nuubels",
-        OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(ts)), ZoneId.of("Z")),
-        IncentiveType.OPEN,
-        "Noobelit on tulisia",
-        null,
-        null,
-        10,
-    )
+    private val openIncentive =
+        Incentive(
+            UUID.randomUUID(),
+            null,
+            "Slotti syö nuubels",
+            OffsetDateTime.ofInstant(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(ts)), ZoneId.of("Z")),
+            IncentiveType.OPEN,
+            "Noobelit on tulisia",
+            null,
+            null,
+            10,
+        )
 
-    private val openGeneratedIncentive1 = GeneratedIncentive(
-        incentiveCode,
-        listOf(
-            ChosenIncentive(
-                openIncentive.id,
-                "kissa",
+    private val openGeneratedIncentive1 =
+        GeneratedIncentive(
+            incentiveCode,
+            listOf(
+                ChosenIncentive(
+                    openIncentive.id,
+                    "kissa",
+                ),
             ),
-        ),
-    )
+        )
 
-    private val openGeneratedIncentive2 = GeneratedIncentive(
-        IncentiveCode.random(),
-        listOf(
-            ChosenIncentive(
-                openIncentive.id,
-                "koira",
+    private val openGeneratedIncentive2 =
+        GeneratedIncentive(
+            IncentiveCode.random(),
+            listOf(
+                ChosenIncentive(
+                    openIncentive.id,
+                    "koira",
+                ),
             ),
-        ),
-    )
+        )
 
     @BeforeEach
     fun setup() {
-        incentiveService = IncentiveService(
-            incentiveDb,
-            incentiveCodeDb,
-            donationDb,
-        )
+        incentiveService =
+            IncentiveService(
+                incentiveDb,
+                incentiveCodeDb,
+                donationDb,
+            )
     }
 
     @Test
@@ -152,11 +161,11 @@ class IncentiveServiceTest {
         testContext: VertxTestContext,
     ) {
         `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(null))
-        incentiveService.getIncentive(UUID.randomUUID())
+        incentiveService
+            .getIncentive(UUID.randomUUID())
             .onSuccess {
                 testContext.completeNow()
-            }
-            .onFailure {
+            }.onFailure {
                 testContext.verify {
                     assertTrue(it is VauhtijuoksuException)
                 }
@@ -169,7 +178,8 @@ class IncentiveServiceTest {
         `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(milestoneIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
-        incentiveService.getIncentive(UUID.randomUUID())
+        incentiveService
+            .getIncentive(UUID.randomUUID())
             .verifyAndCompleteTest(testContext) {
                 assertEquals(milestoneIncentive, it.incentive)
                 assertEquals(0.0, it.total)
@@ -196,7 +206,8 @@ class IncentiveServiceTest {
         `when`(donationDb.getAll()).thenReturn(
             Future.succeededFuture(listOf(donationWithIncentiveCode.copy(message = "No code"))),
         )
-        incentiveService.getIncentive(UUID.randomUUID())
+        incentiveService
+            .getIncentive(UUID.randomUUID())
             .verifyAndCompleteTest(testContext) {
                 assertEquals(milestoneIncentive, it.incentive)
                 assertEquals(0.0, it.total)
@@ -221,7 +232,8 @@ class IncentiveServiceTest {
         `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(optionIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        incentiveService.getIncentive(UUID.randomUUID())
+        incentiveService
+            .getIncentive(UUID.randomUUID())
             .verifyAndCompleteTest(testContext) {
                 assertEquals(optionIncentive, it.incentive)
                 assertEquals(0.0, it.total)
@@ -246,7 +258,8 @@ class IncentiveServiceTest {
         `when`(incentiveDb.getById(any())).thenReturn(Future.succeededFuture(openIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        incentiveService.getIncentive(UUID.randomUUID())
+        incentiveService
+            .getIncentive(UUID.randomUUID())
             .verifyAndCompleteTest(testContext) {
                 assertEquals(openIncentive, it.incentive)
                 assertEquals(0.0, it.total)
@@ -258,9 +271,7 @@ class IncentiveServiceTest {
     }
 
     @Test
-    fun `a milestone incentive status changes to complete when there are enough donations`(
-        testContext: VertxTestContext,
-    ) {
+    fun `a milestone incentive status changes to complete when there are enough donations`(testContext: VertxTestContext) {
         `when`(incentiveDb.getById(milestoneIncentive.id)).thenReturn(Future.succeededFuture(milestoneIncentive))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf(milestoneGeneratedIncentive)))
         `when`(donationDb.getAll()).thenReturn(
@@ -272,7 +283,8 @@ class IncentiveServiceTest {
             ),
         )
 
-        incentiveService.getIncentive(milestoneIncentive.id)
+        incentiveService
+            .getIncentive(milestoneIncentive.id)
             .verifyAndCompleteTest(testContext) {
                 assertEquals(milestoneIncentive, it.incentive)
                 assertEquals(100.0, it.total)
@@ -305,7 +317,8 @@ class IncentiveServiceTest {
             ),
         )
 
-        incentiveService.getIncentive(optionIncentive.id)
+        incentiveService
+            .getIncentive(optionIncentive.id)
             .verifyAndCompleteTest(testContext) {
                 assertEquals(optionIncentive, it.incentive)
                 assertEquals(120.0, it.total)
@@ -345,7 +358,8 @@ class IncentiveServiceTest {
             ),
         )
 
-        incentiveService.getIncentive(openIncentive.id)
+        incentiveService
+            .getIncentive(openIncentive.id)
             .verifyAndCompleteTest(testContext) {
                 assertEquals(openIncentive, it.incentive)
                 assertEquals(120.0, it.total)
@@ -382,7 +396,8 @@ class IncentiveServiceTest {
             ),
         )
 
-        incentiveService.getIncentive(openIncentive.id)
+        incentiveService
+            .getIncentive(openIncentive.id)
             .verifyAndCompleteTest(testContext) {
                 assertEquals(openIncentive, it.incentive)
                 assertEquals(120.0, it.total)
@@ -410,7 +425,8 @@ class IncentiveServiceTest {
             ),
         )
 
-        incentiveService.getIncentive(milestoneIncentive.id)
+        incentiveService
+            .getIncentive(milestoneIncentive.id)
             .verifyAndCompleteTest(testContext) {
                 assertEquals(30.0, it.total)
             }
@@ -423,23 +439,25 @@ class IncentiveServiceTest {
             Future.succeededFuture(
                 listOf(
                     milestoneGeneratedIncentive.copy(
-                        chosenIncentives = listOf(
-                            ChosenIncentive(
-                                UUID.randomUUID(),
-                                null,
+                        chosenIncentives =
+                            listOf(
+                                ChosenIncentive(
+                                    UUID.randomUUID(),
+                                    null,
+                                ),
+                                ChosenIncentive(
+                                    milestoneIncentive.id,
+                                    null,
+                                ),
                             ),
-                            ChosenIncentive(
-                                milestoneIncentive.id,
-                                null,
-                            ),
-                        ),
                     ),
                 ),
             ),
         )
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
 
-        incentiveService.getIncentive(milestoneIncentive.id)
+        incentiveService
+            .getIncentive(milestoneIncentive.id)
             .verifyAndCompleteTest(testContext) {
                 assertEquals(30.0, it.total)
             }
@@ -452,16 +470,18 @@ class IncentiveServiceTest {
             Future.succeededFuture(
                 listOf(
                     optionGeneratedIncentive.copy(
-                        chosenIncentives = listOf(
-                            ChosenIncentive(optionIncentive.id, "kissa"),
-                            ChosenIncentive(optionIncentive.id, "koira"),
-                        ),
+                        chosenIncentives =
+                            listOf(
+                                ChosenIncentive(optionIncentive.id, "kissa"),
+                                ChosenIncentive(optionIncentive.id, "koira"),
+                            ),
                     ),
                 ),
             ),
         )
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
-        incentiveService.getIncentive(optionIncentive.id)
+        incentiveService
+            .getIncentive(optionIncentive.id)
             .verifyAndCompleteTest(testContext) {
                 assertEquals(60.0, it.total)
                 assertEquals(
@@ -487,16 +507,18 @@ class IncentiveServiceTest {
             Future.succeededFuture(
                 listOf(
                     openGeneratedIncentive1.copy(
-                        chosenIncentives = listOf(
-                            ChosenIncentive(openIncentive.id, "kissa"),
-                            ChosenIncentive(openIncentive.id, "koira"),
-                        ),
+                        chosenIncentives =
+                            listOf(
+                                ChosenIncentive(openIncentive.id, "kissa"),
+                                ChosenIncentive(openIncentive.id, "koira"),
+                            ),
                     ),
                 ),
             ),
         )
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
-        incentiveService.getIncentive(openIncentive.id)
+        incentiveService
+            .getIncentive(openIncentive.id)
             .verifyAndCompleteTest(testContext) {
                 assertEquals(60.0, it.total)
                 assertEquals(
@@ -523,17 +545,19 @@ class IncentiveServiceTest {
             Future.succeededFuture(
                 listOf(
                     openGeneratedIncentive1.copy(
-                        chosenIncentives = listOf(
-                            ChosenIncentive(openIncentive.id, "kissa"),
-                            ChosenIncentive(optionIncentive.id, "koira"),
-                        ),
+                        chosenIncentives =
+                            listOf(
+                                ChosenIncentive(openIncentive.id, "kissa"),
+                                ChosenIncentive(optionIncentive.id, "koira"),
+                            ),
                     ),
                 ),
             ),
         )
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf(donationWithIncentiveCode)))
         val cp = testContext.checkpoint(2)
-        incentiveService.getIncentive(openIncentive.id)
+        incentiveService
+            .getIncentive(openIncentive.id)
             .verify(testContext) {
                 assertEquals(30.0, it.total)
                 assertEquals(
@@ -547,7 +571,8 @@ class IncentiveServiceTest {
                 )
                 cp.flag()
             }
-        incentiveService.getIncentive(optionIncentive.id)
+        incentiveService
+            .getIncentive(optionIncentive.id)
             .verify(testContext) {
                 assertEquals(30.0, it.total)
                 assertEquals(
@@ -572,7 +597,8 @@ class IncentiveServiceTest {
         `when`(incentiveDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        incentiveService.getIncentives()
+        incentiveService
+            .getIncentives()
             .onFailure(testContext::failNow)
             .onSuccess {
                 testContext.verify {
@@ -594,7 +620,8 @@ class IncentiveServiceTest {
         )
         `when`(incentiveCodeDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        incentiveService.getIncentives()
+        incentiveService
+            .getIncentives()
             .onFailure(testContext::failNow)
             .onSuccess {
                 testContext.verify {

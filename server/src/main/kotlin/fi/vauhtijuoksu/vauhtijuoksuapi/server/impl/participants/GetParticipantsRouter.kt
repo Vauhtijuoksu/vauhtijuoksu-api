@@ -9,12 +9,13 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class GetParticipantsRouter
-@Inject constructor(
-    @Named(DependencyInjectionConstants.PUBLIC_CORS)
-    publicEndpointCorsHandler: CorsHandler,
-    participantDatabase: VauhtijuoksuDatabase<Participant>,
-) : GetRouter<Participant>(
-    publicEndpointCorsHandler,
-    participantDatabase,
-    { participant: Participant -> ParticipantResponse.fromParticipant(participant).toJson() },
-)
+    @Inject
+    constructor(
+        @Named(DependencyInjectionConstants.PUBLIC_CORS)
+        publicEndpointCorsHandler: CorsHandler,
+        participantDatabase: VauhtijuoksuDatabase<Participant>,
+    ) : GetRouter<Participant>(
+            publicEndpointCorsHandler,
+            participantDatabase,
+            { participant: Participant -> ParticipantResponse.fromParticipant(participant).toJson() },
+        )

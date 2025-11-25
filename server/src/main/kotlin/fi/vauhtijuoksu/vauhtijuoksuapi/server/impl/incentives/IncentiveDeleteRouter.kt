@@ -11,14 +11,15 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class IncentiveDeleteRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS) private val authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Incentive>,
-) : DeleteRouter<Incentive>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-)
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS) private val authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Incentive>,
+    ) : DeleteRouter<Incentive>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+        )

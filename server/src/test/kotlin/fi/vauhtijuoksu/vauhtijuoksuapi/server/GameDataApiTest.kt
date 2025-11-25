@@ -24,15 +24,23 @@ import org.mockito.Mockito.`when`
 import java.util.UUID
 
 class GameDataApiTest : ServerTestBase() {
-
     @Test
     fun testGamedataOptions(testContext: VertxTestContext) {
-        client.request(HttpMethod.OPTIONS, "/gamedata").send()
+        client
+            .request(HttpMethod.OPTIONS, "/gamedata")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
-                    assertEquals(allowedMethods, res.headers().get("Allow").split(", ").toSet())
+                    assertEquals(
+                        allowedMethods,
+                        res
+                            .headers()
+                            .get("Allow")
+                            .split(", ")
+                            .toSet(),
+                    )
                 }
                 testContext.completeNow()
             }
@@ -40,12 +48,21 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testSingleGameDataOptions(testContext: VertxTestContext) {
-        client.request(HttpMethod.OPTIONS, "/gamedata/${UUID.randomUUID()}").send()
+        client
+            .request(HttpMethod.OPTIONS, "/gamedata/${UUID.randomUUID()}")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
-                    assertEquals(allowedMethods, res.headers().get("Allow").split(", ").toSet())
+                    assertEquals(
+                        allowedMethods,
+                        res
+                            .headers()
+                            .get("Allow")
+                            .split(", ")
+                            .toSet(),
+                    )
                 }
                 testContext.completeNow()
             }
@@ -54,7 +71,9 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testGetGameDataNoData(testContext: VertxTestContext) {
         `when`(gameDataDb.getAll()).thenReturn(Future.succeededFuture(ArrayList()))
-        client.get("/gamedata").send()
+        client
+            .get("/gamedata")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -70,18 +89,21 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testGetGameData(testContext: VertxTestContext) {
         `when`(gameDataDb.getAll()).thenReturn(Future.succeededFuture(arrayListOf(gameData1, gameData2)))
-        client.get("/gamedata").send()
+        client
+            .get("/gamedata")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    val expectedJson = jacksonObjectMapper().writeValueAsString(
-                        arrayListOf(
-                            GameDataApiModel.fromGameData(gameData1),
-                            GameDataApiModel.fromGameData(gameData2),
-                        ),
-                    )
+                    val expectedJson =
+                        jacksonObjectMapper().writeValueAsString(
+                            arrayListOf(
+                                GameDataApiModel.fromGameData(gameData1),
+                                GameDataApiModel.fromGameData(gameData2),
+                            ),
+                        )
                     assertEquals(expectedJson, res.bodyAsString())
                     verifyNoMoreInteractions(gameDataDb)
                 }
@@ -92,7 +114,10 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testGetGameDataWithOriginHeader(testContext: VertxTestContext) {
         `when`(gameDataDb.getAll()).thenReturn(Future.succeededFuture(arrayListOf(gameData1, gameData2)))
-        client.get("/gamedata").putHeader("Origin", "http://localhost").send()
+        client
+            .get("/gamedata")
+            .putHeader("Origin", "http://localhost")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -106,7 +131,9 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testGameDataDbError(testContext: VertxTestContext) {
         `when`(gameDataDb.getAll()).thenReturn(Future.failedFuture(RuntimeException("DB error")))
-        client.get("/gamedata").send()
+        client
+            .get("/gamedata")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -123,7 +150,8 @@ class GameDataApiTest : ServerTestBase() {
         `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture())
         val body = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         body.remove("id")
-        client.post("/gamedata")
+        client
+            .post("/gamedata")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
             .onFailure(testContext::failNow)
@@ -147,7 +175,9 @@ class GameDataApiTest : ServerTestBase() {
         `when`(gameDataDb.add(any())).thenReturn(Future.succeededFuture())
         val body = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         body.remove("id")
-        client.post("/gamedata").putHeader("Origin", allowedOrigin)
+        client
+            .post("/gamedata")
+            .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
             .onFailure(testContext::failNow)
@@ -162,7 +192,8 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testAddingGameDataWithIdFails(testContext: VertxTestContext) {
-        client.post("/gamedata")
+        client
+            .post("/gamedata")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject.mapFrom(gameData1))
             .onFailure(testContext::failNow)
@@ -177,11 +208,15 @@ class GameDataApiTest : ServerTestBase() {
 
     @ParameterizedTest
     @ValueSource(strings = ["game", "start_time", "end_time", "category", "device", "published"])
-    fun testMandatoryFieldsAreRequiredWhenAddingGameData(missingField: String, testContext: VertxTestContext) {
+    fun testMandatoryFieldsAreRequiredWhenAddingGameData(
+        missingField: String,
+        testContext: VertxTestContext,
+    ) {
         val json = JsonObject.mapFrom(GameDataApiModel.fromGameData(gameData1))
         json.remove("id")
         assertNotNull(json.remove(missingField))
-        client.post("/gamedata")
+        client
+            .post("/gamedata")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(json)
             .onFailure(testContext::failNow)
@@ -197,7 +232,8 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testAddingGameDataWithoutBodyFails(testContext: VertxTestContext) {
-        client.post("/gamedata")
+        client
+            .post("/gamedata")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
             .onFailure(testContext::failNow)
@@ -212,7 +248,8 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testAddingGameDataWithoutAuthenticationFails(testContext: VertxTestContext) {
-        client.post("/gamedata")
+        client
+            .post("/gamedata")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -227,7 +264,9 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testGetSingleGameDataNotFound(testContext: VertxTestContext) {
         `when`(gameDataDb.getById(any())).thenReturn(Future.succeededFuture())
-        client.get("/gamedata/${UUID.randomUUID()}").send()
+        client
+            .get("/gamedata/${UUID.randomUUID()}")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -242,7 +281,9 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testGetSingleGameData(testContext: VertxTestContext) {
         `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1))
-        client.get("/gamedata/${gameData1.id}").send()
+        client
+            .get("/gamedata/${gameData1.id}")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -268,7 +309,8 @@ class GameDataApiTest : ServerTestBase() {
             Future.succeededFuture(newGame),
         )
         `when`(gameDataDb.update(any())).thenReturn(Future.succeededFuture())
-        client.patch("/gamedata/${gameData1.id}")
+        client
+            .patch("/gamedata/${gameData1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(
                 JsonObject()
@@ -287,8 +329,7 @@ class GameDataApiTest : ServerTestBase() {
                             JsonObject().put("participant_id", it.participantId).put("role", it.role.name)
                         },
                     ),
-            )
-            .onFailure(testContext::failNow)
+            ).onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     println(res.bodyAsString())
@@ -304,7 +345,8 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testPatchGameDataWithIllegalInput(testContext: VertxTestContext) {
         `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1.copy()))
-        client.patch("/gamedata/${gameData1.id}")
+        client
+            .patch("/gamedata/${gameData1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("game", null))
             .onFailure(testContext::failNow)
@@ -321,7 +363,8 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testPatchGameDataWithUnknownFields(testContext: VertxTestContext) {
         `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1))
-        client.patch("/gamedata/${gameData1.id}")
+        client
+            .patch("/gamedata/${gameData1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("wololoo", "ssh"))
             .onFailure(testContext::failNow)
@@ -336,7 +379,8 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testPatchWithoutAuthenticationFails(testContext: VertxTestContext) {
-        client.patch("/gamedata/${UUID.randomUUID()}")
+        client
+            .patch("/gamedata/${UUID.randomUUID()}")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -351,7 +395,8 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testPatchWithNoneUrlVodFails(testContext: VertxTestContext) {
         `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1))
-        client.patch("/gamedata/${gameData1.id}")
+        client
+            .patch("/gamedata/${gameData1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("vod_link", "What is love"))
             .onFailure(testContext::failNow)
@@ -367,7 +412,9 @@ class GameDataApiTest : ServerTestBase() {
     @Test
     fun testSingleGameDataDbError(testContext: VertxTestContext) {
         `when`(gameDataDb.getById(any())).thenReturn(Future.failedFuture(RuntimeException("DB error")))
-        client.get("/gamedata/${UUID.randomUUID()}").send()
+        client
+            .get("/gamedata/${UUID.randomUUID()}")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -383,7 +430,8 @@ class GameDataApiTest : ServerTestBase() {
     fun testDeleteGameData(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
         `when`(gameDataDb.delete(uuid)).thenReturn(Future.succeededFuture())
-        client.delete("/gamedata/$uuid")
+        client
+            .delete("/gamedata/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
             .onFailure(testContext::failNow)
@@ -401,7 +449,8 @@ class GameDataApiTest : ServerTestBase() {
     fun testDeleteNonExistingGameData(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
         `when`(gameDataDb.delete(uuid)).thenReturn(Future.failedFuture(MissingEntityException("No such row")))
-        client.delete("/gamedata/$uuid")
+        client
+            .delete("/gamedata/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
             .onFailure(testContext::failNow)
@@ -417,7 +466,8 @@ class GameDataApiTest : ServerTestBase() {
 
     @Test
     fun testDeleteWithoutAuthenticationFails(testContext: VertxTestContext) {
-        client.delete("/gamedata/${UUID.randomUUID()}")
+        client
+            .delete("/gamedata/${UUID.randomUUID()}")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->

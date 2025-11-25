@@ -20,7 +20,8 @@ class IncentiveCodesTest : ServerTestBase() {
         `when`(incentiveDatabase.getById(milestoneIncentive.id))
             .thenReturn(Future.succeededFuture(milestoneIncentive))
         `when`(generatedIncentiveCodeDatabase.add(any())).thenReturn(Future.succeededFuture())
-        client.post("/generate-incentive-code")
+        client
+            .post("/generate-incentive-code")
             .putHeader("Origin", "https://example.com")
             .sendJson(JsonArray().add(JsonObject().put("id", milestoneIncentive.id)))
             .onFailure(testContext::failNow)

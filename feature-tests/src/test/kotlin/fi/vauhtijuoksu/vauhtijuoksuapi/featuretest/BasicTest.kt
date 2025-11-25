@@ -8,8 +8,12 @@ import org.junit.jupiter.api.Test
 @FeatureTest
 class BasicTest {
     @Test
-    fun testServerResponds(webClient: WebClient, testContext: VertxTestContext) {
-        webClient.get("/gamedata")
+    fun testServerResponds(
+        webClient: WebClient,
+        testContext: VertxTestContext,
+    ) {
+        webClient
+            .get("/gamedata")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->

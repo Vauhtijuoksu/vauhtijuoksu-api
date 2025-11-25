@@ -13,6 +13,7 @@ data class SocialMedia(
 ) {
     companion object {
         fun twitch(username: String) = SocialMedia(Platform.TWITCH, username)
+
         fun discord(username: String) = SocialMedia(Platform.DISCORD, username)
     }
 }

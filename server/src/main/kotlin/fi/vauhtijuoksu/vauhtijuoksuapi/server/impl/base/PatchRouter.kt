@@ -27,8 +27,12 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
 ) : PartialRouter {
     private val logger = KotlinLogging.logger {}
 
-    override fun configure(router: Router, basepath: String) {
-        router.patch("$basepath/:id")
+    override fun configure(
+        router: Router,
+        basepath: String,
+    ) {
+        router
+            .patch("$basepath/:id")
             .handler(authenticatedEndpointCorsHandler)
             .handler(BodyHandler.create())
             .handler(authenticationHandler)
@@ -44,7 +48,8 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
                 val jsonBody = ctx.body().asJsonObject() ?: throw UserError("Body is required on PATCH")
                 logger.debug { "Patching a record with object $jsonBody" }
 
-                db.getById(id)
+                db
+                    .getById(id)
                     .map { merge(ctx, it) }
                     .compose(db::update)
                     .compose { respond(id, ctx) }
@@ -52,13 +57,19 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
             }
     }
 
-    private fun merge(ctx: RoutingContext, existingData: M): M {
+    private fun merge(
+        ctx: RoutingContext,
+        existingData: M,
+    ): M {
         val oldData = mapper().readerForUpdating(toApiRepresentation(existingData))
-        val mergedData: M = try {
-            oldData.readValue<ApiRepresentation>(ctx.body().asString()).toModel()
-        } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
-            throw UserError("Error patching object: ${e.message}", e)
-        }
+        val mergedData: M =
+            try {
+                oldData.readValue<ApiRepresentation>(ctx.body().asString()).toModel()
+            } catch (
+                @Suppress("TooGenericExceptionCaught") e: Throwable,
+            ) {
+                throw UserError("Error patching object: ${e.message}", e)
+            }
 
         val validationMessage = patchValidator(mergedData)
         if (validationMessage != null) {
@@ -67,13 +78,17 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
         return mergedData
     }
 
-    protected open fun respond(updatedId: UUID, ctx: RoutingContext): Future<Void> {
-        return db.getById(updatedId)
+    protected open fun respond(
+        updatedId: UUID,
+        ctx: RoutingContext,
+    ): Future<Void> =
+        db
+            .getById(updatedId)
             .map { updatedRecord ->
                 logger.info { "Patched record $updatedRecord" }
-                ctx.response().setStatusCode(ApiConstants.OK)
+                ctx
+                    .response()
+                    .setStatusCode(ApiConstants.OK)
                     .end(toApiRepresentation(updatedRecord).toJson().encode())
-            }
-            .mapEmpty()
-    }
+            }.mapEmpty()
 }
