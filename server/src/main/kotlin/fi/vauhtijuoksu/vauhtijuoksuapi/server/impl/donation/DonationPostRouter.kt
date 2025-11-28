@@ -12,19 +12,20 @@ import jakarta.inject.Named
 import java.util.UUID
 
 class DonationPostRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(AUTHENTICATED_CORS)
-    authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Donation>,
-    postInputValidator: DonationPostInputValidator,
-) : PostRouter<Donation>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-    { json -> json.mapTo(NewDonationApiModel::class.java).toDonation(UUID.randomUUID()) },
-    { donation -> DonationApiModel.fromDonation(donation).toJson() },
-    postInputValidator,
-)
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(AUTHENTICATED_CORS)
+        authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Donation>,
+        postInputValidator: DonationPostInputValidator,
+    ) : PostRouter<Donation>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            { json -> json.mapTo(NewDonationApiModel::class.java).toDonation(UUID.randomUUID()) },
+            { donation -> DonationApiModel.fromDonation(donation).toJson() },
+            postInputValidator,
+        )

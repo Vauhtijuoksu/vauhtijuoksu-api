@@ -11,18 +11,19 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class GameDataPatchRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<GameData>,
-    gamedataPatchInputValidator: GameDataPatchInputValidator,
-) : PatchRouter<GameData, GameDataApiModel>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-    gamedataPatchInputValidator::validate,
-    { gameData: GameData -> GameDataApiModel.fromGameData(gameData) },
-)
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<GameData>,
+        gamedataPatchInputValidator: GameDataPatchInputValidator,
+    ) : PatchRouter<GameData, GameDataApiModel>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            gamedataPatchInputValidator::validate,
+            { gameData: GameData -> GameDataApiModel.fromGameData(gameData) },
+        )

@@ -44,8 +44,8 @@ data class IncentiveApiModel(
     val status: List<StatusModel>,
 ) : ApiModel<Incentive> {
     companion object {
-        fun fromIncentive(incentive: Incentive): IncentiveApiModel {
-            return IncentiveApiModel(
+        fun fromIncentive(incentive: Incentive): IncentiveApiModel =
+            IncentiveApiModel(
                 incentive.id,
                 incentive.gameId,
                 incentive.title,
@@ -58,7 +58,6 @@ data class IncentiveApiModel(
                 0.0,
                 listOf(),
             )
-        }
 
         fun fromIncentiveWithStatuses(incentiveWithStatuses: IncentiveWithStatuses): IncentiveApiModel {
             val incentive = incentiveWithStatuses.incentive
@@ -92,8 +91,8 @@ data class IncentiveApiModel(
         }
     }
 
-    override fun toModel(): Incentive {
-        return Incentive(
+    override fun toModel(): Incentive =
+        Incentive(
             id,
             gameId,
             title,
@@ -104,9 +103,6 @@ data class IncentiveApiModel(
             optionParameters,
             openCharLimit,
         )
-    }
 
-    override fun toJson(): JsonObject {
-        return JsonObject.mapFrom(this)
-    }
+    override fun toJson(): JsonObject = JsonObject.mapFrom(this)
 }

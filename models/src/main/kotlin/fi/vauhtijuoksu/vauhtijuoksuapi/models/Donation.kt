@@ -16,6 +16,9 @@ data class Donation(
         if (message == null) {
             return@lazy setOf()
         }
-        return@lazy IncentiveCode.codeFormat.findAll(message).map { IncentiveCode(it.value) }.toSet()
+        return@lazy IncentiveCode.codeFormat
+            .findAll(message)
+            .map { IncentiveCode(it.value) }
+            .toSet()
     }
 }

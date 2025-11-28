@@ -18,51 +18,56 @@ import org.junit.jupiter.api.extension.ParameterResolver
 import java.lang.annotation.Inherited
 
 class FeatureTestUtils : ParameterResolver {
-    override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
-        return parameterContext.parameter.type.equals(WebClient::class.java)
-    }
+    override fun supportsParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext,
+    ): Boolean = parameterContext.parameter.type.equals(WebClient::class.java)
 
-    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
+    override fun resolveParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext,
+    ): Any {
         val vertx = Vertx.vertx()
-        val webClient = WebClient.create(
-            vertx,
-            WebClientOptions()
-                .setDefaultHost("api.localhost"),
-        )
-        extensionContext.getStore(
-            ExtensionContext.Namespace.create(
-                extensionContext.requiredTestClass,
-                extensionContext.requiredTestMethod,
-            ),
-        ).put(
-            "data",
-            object : CloseableResource {
-                override fun close() {
-                    webClient.close()
-                    vertx.close()
-                }
-            },
-        )
+        val webClient =
+            WebClient.create(
+                vertx,
+                WebClientOptions()
+                    .setDefaultHost("api.localhost"),
+            )
+        extensionContext
+            .getStore(
+                ExtensionContext.Namespace.create(
+                    extensionContext.requiredTestClass,
+                    extensionContext.requiredTestMethod,
+                ),
+            ).put(
+                "data",
+                object : CloseableResource {
+                    override fun close() {
+                        webClient.close()
+                        vertx.close()
+                    }
+                },
+            )
         return webClient
     }
 }
 
-fun <T> HttpRequest<T>.withAuthenticationAndOrigins(): HttpRequest<T> {
-    return this.authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+fun <T> HttpRequest<T>.withAuthenticationAndOrigins(): HttpRequest<T> =
+    this
+        .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
         .putHeader("Origin", "http://api.localhost")
-}
 
 fun <T> Future<HttpResponse<T>>.verifyStatusCode(
     expectedCode: Int,
     testContext: VertxTestContext,
-): Future<HttpResponse<T>> {
-    return this.map {
+): Future<HttpResponse<T>> =
+    this.map {
         testContext.verify {
             assertEquals(expectedCode, it.statusCode())
         }
         it
     }
-}
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)

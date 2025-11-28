@@ -29,12 +29,21 @@ import java.util.UUID
 class DonationApiTest : ServerTestBase() {
     @Test
     fun testDonationsOptions(testContext: VertxTestContext) {
-        client.request(HttpMethod.OPTIONS, "/donations").send()
+        client
+            .request(HttpMethod.OPTIONS, "/donations")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
-                    assertEquals(allowedMethods, res.headers().get("Allow").split(", ").toSet())
+                    assertEquals(
+                        allowedMethods,
+                        res
+                            .headers()
+                            .get("Allow")
+                            .split(", ")
+                            .toSet(),
+                    )
                 }
                 testContext.completeNow()
             }
@@ -42,12 +51,21 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testSingleDonationOptions(testContext: VertxTestContext) {
-        client.request(HttpMethod.OPTIONS, "/donations/${UUID.randomUUID()}").send()
+        client
+            .request(HttpMethod.OPTIONS, "/donations/${UUID.randomUUID()}")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
-                    assertEquals(allowedMethods, res.headers().get("Allow").split(", ").toSet())
+                    assertEquals(
+                        allowedMethods,
+                        res
+                            .headers()
+                            .get("Allow")
+                            .split(", ")
+                            .toSet(),
+                    )
                 }
                 testContext.completeNow()
             }
@@ -57,7 +75,9 @@ class DonationApiTest : ServerTestBase() {
     fun testGetDonationNoData(testContext: VertxTestContext) {
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(ArrayList()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        client.get("/donations").send()
+        client
+            .get("/donations")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -74,18 +94,21 @@ class DonationApiTest : ServerTestBase() {
     fun testGetDonation(testContext: VertxTestContext) {
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(arrayListOf(donation1, donation2)))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        client.get("/donations").send()
+        client
+            .get("/donations")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    val expectedJson = jacksonObjectMapper().writeValueAsString(
-                        arrayListOf(
-                            DonationApiModel.fromDonation(donation1),
-                            DonationApiModel.fromDonation(donation2),
-                        ),
-                    )
+                    val expectedJson =
+                        jacksonObjectMapper().writeValueAsString(
+                            arrayListOf(
+                                DonationApiModel.fromDonation(donation1),
+                                DonationApiModel.fromDonation(donation2),
+                            ),
+                        )
                     assertEquals(expectedJson, res.bodyAsString())
                     verifyNoMoreInteractions(donationDb)
                 }
@@ -96,7 +119,9 @@ class DonationApiTest : ServerTestBase() {
     @Test
     fun testDonationDbError(testContext: VertxTestContext) {
         `when`(donationDb.getAll()).thenReturn(Future.failedFuture(RuntimeException("DB error")))
-        client.get("/donations").send()
+        client
+            .get("/donations")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -114,7 +139,8 @@ class DonationApiTest : ServerTestBase() {
         val body = JsonObject.mapFrom(DonationApiModel.fromDonation(donation1))
         body.remove("id")
         body.remove("incentives")
-        client.post("/donations")
+        client
+            .post("/donations")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
             .onFailure(testContext::failNow)
@@ -135,7 +161,8 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testAddingDonationWithIdFails(testContext: VertxTestContext) {
-        client.post("/donations")
+        client
+            .post("/donations")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject.mapFrom(donation1))
             .onFailure(testContext::failNow)
@@ -150,11 +177,15 @@ class DonationApiTest : ServerTestBase() {
 
     @ParameterizedTest
     @ValueSource(strings = ["name", "amount", "timestamp"])
-    fun testMandatoryFieldsAreRequiredWhenAddingDonation(missingField: String, testContext: VertxTestContext) {
+    fun testMandatoryFieldsAreRequiredWhenAddingDonation(
+        missingField: String,
+        testContext: VertxTestContext,
+    ) {
         val json = JsonObject.mapFrom(DonationApiModel.fromDonation(donation1))
         json.remove("id")
         assertNotNull(json.remove(missingField))
-        client.post("/donations")
+        client
+            .post("/donations")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(json)
             .onFailure(testContext::failNow)
@@ -169,7 +200,8 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testAddingDonationWithoutBodyFails(testContext: VertxTestContext) {
-        client.post("/donations")
+        client
+            .post("/donations")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
             .onFailure(testContext::failNow)
@@ -184,7 +216,8 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testAddingDonationWithoutAuthenticationFails(testContext: VertxTestContext) {
-        client.post("/donations")
+        client
+            .post("/donations")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -199,7 +232,9 @@ class DonationApiTest : ServerTestBase() {
     @Test
     fun testGetSingleDonationNotFound(testContext: VertxTestContext) {
         `when`(donationDb.getById(any())).thenReturn(Future.succeededFuture())
-        client.get("/donations/${UUID.randomUUID()}").send()
+        client
+            .get("/donations/${UUID.randomUUID()}")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -231,7 +266,9 @@ class DonationApiTest : ServerTestBase() {
                 ),
             ),
         )
-        client.get("/donations/${donation1.id}").send()
+        client
+            .get("/donations/${donation1.id}")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -239,9 +276,10 @@ class DonationApiTest : ServerTestBase() {
                     assertEquals("application/json", res.getHeader("content-type"))
                     val donationIncentive =
                         JsonObject().put("incentive_id", incentiveId.toString()).put("parameter", "kissa")
-                    val incentive = JsonObject()
-                        .put("code", code.code)
-                        .put("chosen_incentives", JsonArray().add(donationIncentive))
+                    val incentive =
+                        JsonObject()
+                            .put("code", code.code)
+                            .put("chosen_incentives", JsonArray().add(donationIncentive))
                     val incentives = JsonArray().add(incentive)
                     val expectedDonation =
                         JsonObject(jacksonObjectMapper().writeValueAsString(DonationApiModel.fromDonation(donation1)))
@@ -259,17 +297,19 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testPatchDonation(testContext: VertxTestContext) {
-        val newDonation = donation1.copy(
-            read = true,
-            message = null,
-        )
+        val newDonation =
+            donation1.copy(
+                read = true,
+                message = null,
+            )
 
         `when`(donationDb.getById(donation1.id)).thenReturn(
             Future.succeededFuture(donation1),
             Future.succeededFuture(newDonation),
         )
         `when`(donationDb.update(any())).thenReturn(Future.succeededFuture())
-        client.patch("/donations/${donation1.id}")
+        client
+            .patch("/donations/${donation1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("read", true).put("message", null))
             .onFailure(testContext::failNow)
@@ -293,7 +333,8 @@ class DonationApiTest : ServerTestBase() {
         // Jackson updating modifies the underlying object, even though it's supposed to be immutable
         // Copy the object here, since otherwise the modified state leaks to other tests
         `when`(donationDb.getById(donation1.id)).thenReturn(Future.succeededFuture(donation1.copy()))
-        client.patch("/donations/${donation1.id}")
+        client
+            .patch("/donations/${donation1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("name", null))
             .onFailure(testContext::failNow)
@@ -309,7 +350,8 @@ class DonationApiTest : ServerTestBase() {
     @Test
     fun testPatchDonationWithUnknownFields(testContext: VertxTestContext) {
         `when`(donationDb.getById(donation1.id)).thenReturn(Future.succeededFuture(donation1))
-        client.patch("/donations/${donation1.id}")
+        client
+            .patch("/donations/${donation1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("new_field", "value"))
             .onFailure(testContext::failNow)
@@ -324,7 +366,8 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testPatchWithoutAuthenticationFails(testContext: VertxTestContext) {
-        client.patch("/donations/${UUID.randomUUID()}")
+        client
+            .patch("/donations/${UUID.randomUUID()}")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -339,7 +382,9 @@ class DonationApiTest : ServerTestBase() {
     @Test
     fun testSingleDonationDbError(testContext: VertxTestContext) {
         `when`(donationDb.getById(any())).thenReturn(Future.failedFuture(RuntimeException("DB error")))
-        client.get("/donations/${UUID.randomUUID()}").send()
+        client
+            .get("/donations/${UUID.randomUUID()}")
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -355,7 +400,8 @@ class DonationApiTest : ServerTestBase() {
     fun testDeleteDonation(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
         `when`(donationDb.delete(any())).thenReturn(Future.succeededFuture())
-        client.delete("/donations/$uuid")
+        client
+            .delete("/donations/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
             .onFailure(testContext::failNow)
@@ -373,7 +419,8 @@ class DonationApiTest : ServerTestBase() {
     fun testDeleteNonExistingDonation(testContext: VertxTestContext) {
         val uuid = UUID.randomUUID()
         `when`(donationDb.delete(any())).thenReturn(Future.failedFuture(MissingEntityException("No such donation")))
-        client.delete("/donations/$uuid")
+        client
+            .delete("/donations/$uuid")
             .authentication(UsernamePasswordCredentials(username, password))
             .send()
             .onFailure(testContext::failNow)
@@ -389,7 +436,8 @@ class DonationApiTest : ServerTestBase() {
 
     @Test
     fun testDeleteWithoutAuthenticationFails(testContext: VertxTestContext) {
-        client.delete("/donations/${UUID.randomUUID()}")
+        client
+            .delete("/donations/${UUID.randomUUID()}")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->

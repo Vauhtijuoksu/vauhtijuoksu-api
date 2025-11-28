@@ -64,38 +64,35 @@ class DonationFlowTest {
         client = webClient
     }
 
-    private fun <T> authenticatedRequest(request: HttpRequest<T>): HttpRequest<T> {
-        return request
+    private fun <T> authenticatedRequest(request: HttpRequest<T>): HttpRequest<T> =
+        request
             .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-    }
 
-    private fun authenticatedPost(url: String): HttpRequest<Buffer> {
-        return authenticatedRequest(client.post(url))
-    }
+    private fun authenticatedPost(url: String): HttpRequest<Buffer> = authenticatedRequest(client.post(url))
 
-    private fun authenticatedPatch(url: String): HttpRequest<Buffer> {
-        return authenticatedRequest(client.patch(url))
-    }
+    private fun authenticatedPatch(url: String): HttpRequest<Buffer> = authenticatedRequest(client.patch(url))
 
     @Test
     @Order(1)
     fun `an admin can create incentives`(testContext: VertxTestContext) {
-        Future.all(
-            authenticatedPost("/incentives/")
-                .sendJson(JsonObject(newIncentive1)),
-            authenticatedPost("/incentives/")
-                .sendJson(JsonObject(newIncentive2)),
-        )
-            .onFailure(testContext::failNow)
+        Future
+            .all(
+                authenticatedPost("/incentives/")
+                    .sendJson(JsonObject(newIncentive1)),
+                authenticatedPost("/incentives/")
+                    .sendJson(JsonObject(newIncentive2)),
+            ).onFailure(testContext::failNow)
             .onSuccess {
-                val (first, second) = it.list<HttpResponse<Buffer>>()
-                    .map { res ->
-                        testContext.verify {
-                            assertEquals(201, res.statusCode())
+                val (first, second) =
+                    it
+                        .list<HttpResponse<Buffer>>()
+                        .map { res ->
+                            testContext.verify {
+                                assertEquals(201, res.statusCode())
+                            }
+                            res.bodyAsJsonObject().getString("id")
                         }
-                        res.bodyAsJsonObject().getString("id")
-                    }
                 incentiveId1 = first
                 incentiveId2 = second
                 testContext.completeNow()
@@ -105,23 +102,26 @@ class DonationFlowTest {
     @Test
     @Order(2)
     fun `users can generate incentive codes for incentives`(testContext: VertxTestContext) {
-        Future.all(
-            client.post("/generate-incentive-code")
-                .putHeader("Origin", "http://api.localhost")
-                .sendJson(JsonArray().add(JsonObject().put("id", incentiveId1).put("parameter", "neliö"))),
-            client.post("/generate-incentive-code")
-                .putHeader("Origin", "http://api.localhost")
-                .sendJson(JsonArray().add(JsonObject().put("id", incentiveId2).put("parameter", "kirkas"))),
-        )
-            .onFailure(testContext::failNow)
+        Future
+            .all(
+                client
+                    .post("/generate-incentive-code")
+                    .putHeader("Origin", "http://api.localhost")
+                    .sendJson(JsonArray().add(JsonObject().put("id", incentiveId1).put("parameter", "neliö"))),
+                client
+                    .post("/generate-incentive-code")
+                    .putHeader("Origin", "http://api.localhost")
+                    .sendJson(JsonArray().add(JsonObject().put("id", incentiveId2).put("parameter", "kirkas"))),
+            ).onFailure(testContext::failNow)
             .onSuccess {
                 testContext.verify {
-                    val (first, second) = it.list<HttpResponse<Buffer>>().map {
-                        assertEquals(201, it.statusCode())
-                        val body = it.bodyAsJsonObject()
-                        assertEquals(1, body.size())
-                        body.getString("code")
-                    }
+                    val (first, second) =
+                        it.list<HttpResponse<Buffer>>().map {
+                            assertEquals(201, it.statusCode())
+                            val body = it.bodyAsJsonObject()
+                            assertEquals(1, body.size())
+                            body.getString("code")
+                        }
                     incentiveCode1 = first
                     incentiveCode2 = second
                 }
@@ -143,11 +143,10 @@ class DonationFlowTest {
 
     @Test
     @Order(4)
-    fun `the user checks incentives, but doesn't see their money because it's on the wrong incentive`(
-        testContext: VertxTestContext,
-    ) {
+    fun `the user checks incentives, but doesn't see their money because it's on the wrong incentive`(testContext: VertxTestContext) {
         val cp = testContext.checkpoint(2)
-        client.get("/incentives/$incentiveId1")
+        client
+            .get("/incentives/$incentiveId1")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess {
@@ -161,7 +160,8 @@ class DonationFlowTest {
                 cp.flag()
             }
 
-        client.get("/incentives/$incentiveId2")
+        client
+            .get("/incentives/$incentiveId2")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess {
@@ -202,7 +202,8 @@ class DonationFlowTest {
         testContext: VertxTestContext,
     ) {
         val cp = testContext.checkpoint(2)
-        client.get("/incentives/$incentiveId1")
+        client
+            .get("/incentives/$incentiveId1")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess {
@@ -222,7 +223,8 @@ class DonationFlowTest {
                 cp.flag()
             }
 
-        client.get("/incentives/$incentiveId2")
+        client
+            .get("/incentives/$incentiveId2")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess {
@@ -240,15 +242,17 @@ class DonationFlowTest {
     @Test
     @Order(7)
     fun `the donation shows up in donations list`(testContext: VertxTestContext) {
-        client.get("/donations")
+        client
+            .get("/donations")
             .send()
             .onFailure(testContext::failNow)
             .onSuccess {
                 testContext.verify {
                     val donations = it.bodyAsJsonArray()
-                    val donation = donations.find {
-                        (it as JsonObject).getString("id") == donationId
-                    } as JsonObject
+                    val donation =
+                        donations.find {
+                            (it as JsonObject).getString("id") == donationId
+                        } as JsonObject
                     assertEquals(donationId, donation.getString("id"))
                     assertEquals(donationSum, donation.getDouble("amount"))
                     assertEquals("ota tää :D 🤔🤔: $incentiveCode1", donation.getString("message"))

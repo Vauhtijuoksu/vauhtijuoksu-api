@@ -19,24 +19,20 @@ data class ParticipantResponse(
     val social_medias: List<SocialMediaResponse>,
 ) : ApiModel<Participant> {
     companion object {
-        fun fromParticipant(participant: Participant): ParticipantResponse {
-            return ParticipantResponse(
+        fun fromParticipant(participant: Participant): ParticipantResponse =
+            ParticipantResponse(
                 participant.id,
                 participant.displayName,
                 participant.socialMedias.map { SocialMediaResponse(it.platform.name, it.username) },
             )
-        }
     }
 
-    override fun toModel(): Participant {
-        return Participant(
+    override fun toModel(): Participant =
+        Participant(
             id,
             display_name,
             social_medias.map { SocialMedia(Platform.valueOf(it.platform), it.username) },
         )
-    }
 
-    override fun toJson(): JsonObject {
-        return JsonObject.mapFrom(this)
-    }
+    override fun toJson(): JsonObject = JsonObject.mapFrom(this)
 }

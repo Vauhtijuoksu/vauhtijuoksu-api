@@ -41,8 +41,8 @@ class DatabaseModule : AbstractModule() {
 
     @Provides
     @Singleton
-    fun getSqlClient(config: DatabaseConfiguration): PgPool {
-        return PgPool.pool(
+    fun getSqlClient(config: DatabaseConfiguration): PgPool =
+        PgPool.pool(
             PgConnectOptions()
                 .setHost(config.address)
                 .setPort(config.port)
@@ -52,5 +52,4 @@ class DatabaseModule : AbstractModule() {
                 .setPassword(config.password),
             PoolOptions().setMaxSize(config.poolSize),
         )
-    }
 }

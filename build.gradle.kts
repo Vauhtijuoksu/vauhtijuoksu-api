@@ -44,13 +44,14 @@ tasks {
 
         subprojects.forEach { subproject ->
             plugins.withType<JacocoPlugin>().configureEach {
-                subproject.tasks.matching {
-                    it.extensions.findByType<JacocoTaskExtension>() != null
-                }.configureEach {
-                    subproject.the<SourceSetContainer>().findByName("main")?.let {
-                        sourceSets(it)
+                subproject.tasks
+                    .matching {
+                        it.extensions.findByType<JacocoTaskExtension>() != null
+                    }.configureEach {
+                        subproject.the<SourceSetContainer>().findByName("main")?.let {
+                            sourceSets(it)
+                        }
                     }
-                }
             }
         }
         reports {

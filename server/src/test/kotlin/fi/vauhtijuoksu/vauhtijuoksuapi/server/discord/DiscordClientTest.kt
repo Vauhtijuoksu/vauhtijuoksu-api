@@ -38,11 +38,12 @@ class DiscordClientTest {
     private val vauhtijuoksuServerId = "123"
     private val adminRoleId = "456"
     private val bearer = "that_means_more_bear"
-    private val config = DiscordClientConfiguration(
-        host = "localhost",
-        vauhtijuoksuServerId = vauhtijuoksuServerId,
-        adminRoleId = adminRoleId,
-    )
+    private val config =
+        DiscordClientConfiguration(
+            host = "localhost",
+            vauhtijuoksuServerId = vauhtijuoksuServerId,
+            adminRoleId = adminRoleId,
+        )
     private lateinit var client: DiscordClient
 
     @BeforeAll
@@ -51,131 +52,141 @@ class DiscordClientTest {
     }
 
     @Test
-    fun `Normal user with no nicknames, but with ignored fields`() = runTest {
-        val username = "user"
-        stubFor(
-            get("/api/users/@me/guilds/$vauhtijuoksuServerId/member").withHeader(
-                "Authorization",
-                matching("Bearer $bearer"),
-            ).willReturn(
-                aResponse().withBody(
-                    """
-                        {
-                          "user": {
-                            "username": "$username",
-                            "ignoredProperty": "ignoredValue"
-                          },
-                          "roles": ["789"]
-                        }
-                    """.trimIndent(),
-                ),
-            ),
-        )
+    fun `Normal user with no nicknames, but with ignored fields`() =
+        runTest {
+            val username = "user"
+            stubFor(
+                get("/api/users/@me/guilds/$vauhtijuoksuServerId/member")
+                    .withHeader(
+                        "Authorization",
+                        matching("Bearer $bearer"),
+                    ).willReturn(
+                        aResponse().withBody(
+                            """
+                            {
+                              "user": {
+                                "username": "$username",
+                                "ignoredProperty": "ignoredValue"
+                              },
+                              "roles": ["789"]
+                            }
+                            """.trimIndent(),
+                        ),
+                    ),
+            )
 
-        client.getUser(bearer).verifyRight {
-            it.displayName shouldBe username
-            it.isAdmin shouldBe false
+            client.getUser(bearer).verifyRight {
+                it.displayName shouldBe username
+                it.isAdmin shouldBe false
+            }
         }
-    }
 
     @Test
-    fun `Admin users are recognized by the role`() = runTest {
-        val username = "user"
-        stubFor(
-            get("/api/users/@me/guilds/$vauhtijuoksuServerId/member").withHeader(
-                "Authorization",
-                matching("Bearer $bearer"),
-            ).willReturn(
-                aResponse().withBody(
-                    """
-                        {
-                          "user": {
-                            "username": "$username"
-                          },
-                          "roles": ["789", "$adminRoleId"]
-                        }
-                    """.trimIndent(),
-                ),
-            ),
-        )
+    fun `Admin users are recognized by the role`() =
+        runTest {
+            val username = "user"
+            stubFor(
+                get("/api/users/@me/guilds/$vauhtijuoksuServerId/member")
+                    .withHeader(
+                        "Authorization",
+                        matching("Bearer $bearer"),
+                    ).willReturn(
+                        aResponse().withBody(
+                            """
+                            {
+                              "user": {
+                                "username": "$username"
+                              },
+                              "roles": ["789", "$adminRoleId"]
+                            }
+                            """.trimIndent(),
+                        ),
+                    ),
+            )
 
-        client.getUser(bearer).verifyRight {
-            it.displayName shouldBe "user"
-            it.isAdmin shouldBe true
+            client.getUser(bearer).verifyRight {
+                it.displayName shouldBe "user"
+                it.isAdmin shouldBe true
+            }
         }
-    }
 
     @Test
-    fun `Guild nickname is used if set`() = runTest {
-        val guildNick = "guild user"
-        stubFor(
-            get("/api/users/@me/guilds/$vauhtijuoksuServerId/member").withHeader(
-                "Authorization",
-                matching("Bearer $bearer"),
-            ).willReturn(
-                aResponse().withBody(
-                    """
-                        {
-                          "user": {
-                            "username": "user",
-                            "global_name": "global name"
-                          },
-                          "nick": "$guildNick",
-                          "roles": []
-                        }
-                    """.trimIndent(),
-                ),
-            ),
-        )
+    fun `Guild nickname is used if set`() =
+        runTest {
+            val guildNick = "guild user"
+            stubFor(
+                get("/api/users/@me/guilds/$vauhtijuoksuServerId/member")
+                    .withHeader(
+                        "Authorization",
+                        matching("Bearer $bearer"),
+                    ).willReturn(
+                        aResponse().withBody(
+                            """
+                            {
+                              "user": {
+                                "username": "user",
+                                "global_name": "global name"
+                              },
+                              "nick": "$guildNick",
+                              "roles": []
+                            }
+                            """.trimIndent(),
+                        ),
+                    ),
+            )
 
-        client.getUser(bearer).verifyRight {
-            it.displayName shouldBe guildNick
-            it.isAdmin shouldBe false
+            client.getUser(bearer).verifyRight {
+                it.displayName shouldBe guildNick
+                it.isAdmin shouldBe false
+            }
         }
-    }
 
     @Test
-    fun `Global name is used if set and guild nickname is not`() = runTest {
-        val globalNickname = "Global nick"
-        stubFor(
-            get("/api/users/@me/guilds/$vauhtijuoksuServerId/member").withHeader(
-                "Authorization",
-                matching("Bearer $bearer"),
-            ).willReturn(
-                aResponse().withBody(
-                    """
-                        {
-                          "user": {
-                            "username": "user",
-                            "global_name": "$globalNickname"
-                          },
-                          "nick": null,
-                          "roles": ["789"]
-                        }
-                    """.trimIndent(),
-                ),
-            ),
-        )
+    fun `Global name is used if set and guild nickname is not`() =
+        runTest {
+            val globalNickname = "Global nick"
+            stubFor(
+                get("/api/users/@me/guilds/$vauhtijuoksuServerId/member")
+                    .withHeader(
+                        "Authorization",
+                        matching("Bearer $bearer"),
+                    ).willReturn(
+                        aResponse().withBody(
+                            """
+                            {
+                              "user": {
+                                "username": "user",
+                                "global_name": "$globalNickname"
+                              },
+                              "nick": null,
+                              "roles": ["789"]
+                            }
+                            """.trimIndent(),
+                        ),
+                    ),
+            )
 
-        client.getUser(bearer).verifyRight {
-            it.displayName shouldBe globalNickname
-            it.isAdmin shouldBe false
+            client.getUser(bearer).verifyRight {
+                it.displayName shouldBe globalNickname
+                it.isAdmin shouldBe false
+            }
         }
-    }
 
     @Test
-    fun `When user is not a member, error is returned`() = runTest {
-        stubFor(
-            get("/api/users/@me/guilds/$vauhtijuoksuServerId/member").withHeader(
-                "Authorization",
-                matching("Bearer $bearer"),
-            ).willReturn(
-                aResponse().withStatus(404).withBody("""{"message": "Unknown Server", "code": 10004}"""),
-            ),
-        )
+    fun `When user is not a member, error is returned`() =
+        runTest {
+            stubFor(
+                get("/api/users/@me/guilds/$vauhtijuoksuServerId/member")
+                    .withHeader(
+                        "Authorization",
+                        matching("Bearer $bearer"),
+                    ).willReturn(
+                        aResponse().withStatus(404).withBody("""{"message": "Unknown Server", "code": 10004}"""),
+                    ),
+            )
 
-        client.getUser(bearer).verifyLeft {
-            it shouldBe DiscordError.NOT_A_MEMBER
+            client.getUser(bearer).verifyLeft {
+                it shouldBe DiscordError.NOT_A_MEMBER
+            }
         }
-    }
 }

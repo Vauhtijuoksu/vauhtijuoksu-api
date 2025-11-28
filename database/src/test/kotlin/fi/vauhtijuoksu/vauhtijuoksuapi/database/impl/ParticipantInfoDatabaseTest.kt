@@ -20,13 +20,15 @@ import org.testcontainers.junit.jupiter.Testcontainers
 class ParticipantInfoDatabaseTest {
     private lateinit var db: PlayerInfoDatabase
 
-    private val emptyData = PlayerInfo(
-        null,
-    )
+    private val emptyData =
+        PlayerInfo(
+            null,
+        )
 
-    private val someData = PlayerInfo(
-        "We gots some moneey",
-    )
+    private val someData =
+        PlayerInfo(
+            "We gots some moneey",
+        )
 
     @Container
     var pg: PostgreSQLContainer<Nothing> =
@@ -34,29 +36,31 @@ class ParticipantInfoDatabaseTest {
 
     @BeforeEach
     fun setup() {
-        val injector = Guice.createInjector(
-            DatabaseModule(),
-            object : AbstractModule() {
-                override fun configure() {
-                    bind(DatabaseConfiguration::class.java).toInstance(
-                        DatabaseConfiguration(
-                            pg.host,
-                            pg.firstMappedPort,
-                            "vauhtijuoksu-api",
-                            pg.username,
-                            pg.password,
-                            6,
-                        ),
-                    )
-                }
-            },
-        )
+        val injector =
+            Guice.createInjector(
+                DatabaseModule(),
+                object : AbstractModule() {
+                    override fun configure() {
+                        bind(DatabaseConfiguration::class.java).toInstance(
+                            DatabaseConfiguration(
+                                pg.host,
+                                pg.firstMappedPort,
+                                "vauhtijuoksu-api",
+                                pg.username,
+                                pg.password,
+                                6,
+                            ),
+                        )
+                    }
+                },
+            )
         db = injector.getInstance(PlayerInfoDatabase::class.java)
     }
 
     @Test
     fun `database returns empty data initially`(testContext: VertxTestContext) {
-        db.get()
+        db
+            .get()
             .onFailure(testContext::failNow)
             .onSuccess {
                 testContext.verify {
@@ -68,7 +72,8 @@ class ParticipantInfoDatabaseTest {
 
     @Test
     fun `database saves given data`(testContext: VertxTestContext) {
-        db.save(someData)
+        db
+            .save(someData)
             .compose { db.get() }
             .onFailure(testContext::failNow)
             .onSuccess {

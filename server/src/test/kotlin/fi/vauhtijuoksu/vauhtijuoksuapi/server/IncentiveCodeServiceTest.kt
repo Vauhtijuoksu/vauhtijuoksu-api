@@ -56,7 +56,8 @@ class IncentiveCodeServiceTest {
     @Test
     fun `the service generates a new code and saves it to db`(testContext: VertxTestContext) {
         `when`(incentiveCodeDatabase.add(any())).thenReturn(Future.succeededFuture())
-        incentiveCodeService.generateCode(listOf(ChosenIncentive(milestoneIncentive.id, null)))
+        incentiveCodeService
+            .generateCode(listOf(ChosenIncentive(milestoneIncentive.id, null)))
             .onFailure(testContext::failNow)
             .onSuccess {
                 testContext.verify {
@@ -79,38 +80,44 @@ class IncentiveCodeServiceTest {
     @Test
     fun `code generation fails when unknown incentive is chosen`(testContext: VertxTestContext) {
         `when`(incentiveDatabase.getById(any())).thenReturn(Future.succeededFuture())
-        incentiveCodeService.generateCode(listOf(ChosenIncentive(UUID.randomUUID(), null)))
+        incentiveCodeService
+            .generateCode(listOf(ChosenIncentive(UUID.randomUUID(), null)))
             .expectToFailWithVauhtijuoksuException(testContext)
     }
 
     @Test
     fun `the service fails if option is given for a milestone incentive`(testContext: VertxTestContext) {
-        incentiveCodeService.generateCode(listOf(ChosenIncentive(milestoneIncentive.id, "kissa")))
+        incentiveCodeService
+            .generateCode(listOf(ChosenIncentive(milestoneIncentive.id, "kissa")))
             .expectToFailWithVauhtijuoksuException(testContext)
     }
 
     @Test
     fun `the service fails if unknown option is chosen for option incentive`(testContext: VertxTestContext) {
-        incentiveCodeService.generateCode(listOf(ChosenIncentive(optionIncentive.id, "Unknown option")))
+        incentiveCodeService
+            .generateCode(listOf(ChosenIncentive(optionIncentive.id, "Unknown option")))
             .expectToFailWithVauhtijuoksuException(testContext)
     }
 
     @Test
     fun `the service fails if no option is chosen for option incentive`(testContext: VertxTestContext) {
-        incentiveCodeService.generateCode(listOf(ChosenIncentive(optionIncentive.id, null)))
+        incentiveCodeService
+            .generateCode(listOf(ChosenIncentive(optionIncentive.id, null)))
             .expectToFailWithVauhtijuoksuException(testContext)
     }
 
     @Test
     fun `the service fails if too long option is chosen for open incentive`(testContext: VertxTestContext) {
-        incentiveCodeService.generateCode(
-            listOf(ChosenIncentive(openIncentive.id, "A".repeat(openIncentive.openCharLimit!! + 1))),
-        ).expectToFailWithVauhtijuoksuException(testContext)
+        incentiveCodeService
+            .generateCode(
+                listOf(ChosenIncentive(openIncentive.id, "A".repeat(openIncentive.openCharLimit!! + 1))),
+            ).expectToFailWithVauhtijuoksuException(testContext)
     }
 
     @Test
     fun `the service fails if too no option is chosen for open incentive`(testContext: VertxTestContext) {
-        incentiveCodeService.generateCode(listOf(ChosenIncentive(openIncentive.id, null)))
+        incentiveCodeService
+            .generateCode(listOf(ChosenIncentive(openIncentive.id, null)))
             .expectToFailWithVauhtijuoksuException(testContext)
     }
 

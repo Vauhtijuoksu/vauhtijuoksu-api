@@ -11,16 +11,16 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class TimerDeleteRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Timer>,
-) :
-    DeleteRouter<Timer>(
-        authenticationHandler,
-        adminRequired,
-        authenticatedEndpointCorsHandler,
-        db,
-    )
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Timer>,
+    ) : DeleteRouter<Timer>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+        )

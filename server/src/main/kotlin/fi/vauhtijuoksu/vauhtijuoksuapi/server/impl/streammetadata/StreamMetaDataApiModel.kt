@@ -27,8 +27,12 @@ internal data class StreamMetaDataApiModel(
     val serverTime: OffsetDateTime,
 ) {
     companion object {
-        fun from(data: StreamMetadata, timers: List<Timer>, now: OffsetDateTime): StreamMetaDataApiModel {
-            return StreamMetaDataApiModel(
+        fun from(
+            data: StreamMetadata,
+            timers: List<Timer>,
+            now: OffsetDateTime,
+        ): StreamMetaDataApiModel =
+            StreamMetaDataApiModel(
                 data.donationGoal,
                 data.currentGameId,
                 data.donateBarInfo,
@@ -40,10 +44,7 @@ internal data class StreamMetaDataApiModel(
                 data.nowPlaying,
                 now,
             )
-        }
     }
 
-    fun toJson(): JsonObject {
-        return JsonObject.mapFrom(this)
-    }
+    fun toJson(): JsonObject = JsonObject.mapFrom(this)
 }

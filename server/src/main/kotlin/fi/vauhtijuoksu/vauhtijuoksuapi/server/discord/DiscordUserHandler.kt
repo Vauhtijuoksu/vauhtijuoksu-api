@@ -15,36 +15,41 @@ import kotlinx.coroutines.async
 import mu.KotlinLogging
 
 class DiscordUserHandler
-@Inject constructor(
-    private val vertx: Vertx,
-    private val discordClient: DiscordClient,
-) : AuthorizationProvider {
-    private val logger = KotlinLogging.logger {}
+    @Inject
+    constructor(
+        private val vertx: Vertx,
+        private val discordClient: DiscordClient,
+    ) : AuthorizationProvider {
+        private val logger = KotlinLogging.logger {}
 
-    override fun getId() = "Discord user role based authorization"
+        override fun getId() = "Discord user role based authorization"
 
-    override fun getAuthorizations(user: User, handler: Handler<AsyncResult<Void>>) {
-        getAuthorizations(user).onComplete(handler)
-    }
+        override fun getAuthorizations(
+            user: User,
+            handler: Handler<AsyncResult<Void>>,
+        ) {
+            getAuthorizations(user).onComplete(handler)
+        }
 
-    override fun getAuthorizations(user: User): Future<Void> {
-        val accessToken = user.principal().getString("access_token")
-        return if (accessToken == null) {
-            Future.succeededFuture()
-        } else {
-            Future.future {
-                CoroutineScope(vertx.dispatcher()).async {
-                    discordClient.getUser(accessToken).fold({
-                        logger.info { "User not a member of Vauhtijuoksu server" }
-                    }, {
-                        if (it.isAdmin) {
-                            user.authorizations().add(id, RoleBasedAuthorization.create(Roles.ADMIN.name))
+        override fun getAuthorizations(user: User): Future<Void> {
+            val accessToken = user.principal().getString("access_token")
+            return if (accessToken == null) {
+                Future.succeededFuture()
+            } else {
+                Future.future {
+                    CoroutineScope(vertx.dispatcher())
+                        .async {
+                            discordClient.getUser(accessToken).fold({
+                                logger.info { "User not a member of Vauhtijuoksu server" }
+                            }, {
+                                if (it.isAdmin) {
+                                    user.authorizations().add(id, RoleBasedAuthorization.create(Roles.ADMIN.name))
+                                }
+                            })
+                        }.invokeOnCompletion { t ->
+                            t?.run { it.fail(t) } ?: it.complete()
                         }
-                    })
-                }.invokeOnCompletion { t ->
-                    t?.run { it.fail(t) } ?: it.complete()
                 }
             }
         }
     }
-}

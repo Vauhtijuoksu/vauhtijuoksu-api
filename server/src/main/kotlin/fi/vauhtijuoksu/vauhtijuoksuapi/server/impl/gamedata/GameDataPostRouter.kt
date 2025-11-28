@@ -12,19 +12,20 @@ import jakarta.inject.Named
 import java.util.UUID
 
 class GameDataPostRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(AUTHENTICATED_CORS)
-    authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<GameData>,
-    postInputValidator: GameDataPostInputValidator,
-) : PostRouter<GameData>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-    { json -> json.mapTo(NewGameDataApiModel::class.java).toGameData(UUID.randomUUID()) },
-    { gameData -> GameDataApiModel.fromGameData(gameData).toJson() },
-    postInputValidator,
-)
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(AUTHENTICATED_CORS)
+        authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<GameData>,
+        postInputValidator: GameDataPostInputValidator,
+    ) : PostRouter<GameData>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            { json -> json.mapTo(NewGameDataApiModel::class.java).toGameData(UUID.randomUUID()) },
+            { gameData -> GameDataApiModel.fromGameData(gameData).toJson() },
+            postInputValidator,
+        )

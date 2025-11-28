@@ -4,18 +4,18 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.base.BaseRouter
 import jakarta.inject.Inject
 
 class TimerRouter
-@Inject
-constructor(
-    getRouter: TimerGetRouter,
-    postRouter: TimerPostRouter,
-    patchRouter: TimerPatchRouter,
-    deleteRouter: TimerDeleteRouter,
-) : BaseRouter(
-    "/timers",
-    listOf(
-        getRouter,
-        postRouter,
-        patchRouter,
-        deleteRouter,
-    ),
-)
+    @Inject
+    constructor(
+        getRouter: TimerGetRouter,
+        postRouter: TimerPostRouter,
+        patchRouter: TimerPatchRouter,
+        deleteRouter: TimerDeleteRouter,
+    ) : BaseRouter(
+            "/timers",
+            listOf(
+                getRouter,
+                postRouter,
+                patchRouter,
+                deleteRouter,
+            ),
+        )

@@ -16,30 +16,24 @@ data class TimerApiModel(
     val name: String,
 ) : ApiModel<Timer> {
     companion object {
-        fun from(data: Timer): TimerApiModel {
-            return TimerApiModel(
+        fun from(data: Timer): TimerApiModel =
+            TimerApiModel(
                 data.id,
                 data.startTime,
                 data.endTime,
                 data.name,
             )
-        }
     }
 
-    fun to(data: TimerApiModel): Timer {
-        return Timer(
+    fun to(data: TimerApiModel): Timer =
+        Timer(
             data.id,
             data.startTime,
             data.endTime,
             data.name,
         )
-    }
 
-    override fun toModel(): Timer {
-        return to(this)
-    }
+    override fun toModel(): Timer = to(this)
 
-    override fun toJson(): JsonObject {
-        return JsonObject.mapFrom(this)
-    }
+    override fun toJson(): JsonObject = JsonObject.mapFrom(this)
 }

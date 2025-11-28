@@ -57,18 +57,24 @@ val dockerBuild by tasks.registering {
     val imageName = "vauhtijuoksu/vauhtijuoksu-api"
     val imageTag = rootProject.version
     dependsOn(tasks.distTar)
-    inputs.files(tasks.distTar.get().outputs.files)
+    inputs.files(
+        tasks.distTar
+            .get()
+            .outputs.files,
+    )
     inputs.file("Dockerfile")
     val imageHashFile = "$buildDir/image-hash"
     outputs.file(imageHashFile)
     outputs.upToDateWhen {
-        val findHash = ProcessBuilder().command(
-            "bash",
-            "-euo",
-            "pipefail",
-            "-c",
-            "docker image inspect $imageName:$imageTag | jq '.[0].Id'",
-        ).start()
+        val findHash =
+            ProcessBuilder()
+                .command(
+                    "bash",
+                    "-euo",
+                    "pipefail",
+                    "-c",
+                    "docker image inspect $imageName:$imageTag | jq '.[0].Id'",
+                ).start()
         val foundImageHash = String(findHash.inputStream.readAllBytes()).trim()
         var previousHash: String? = null
         try {

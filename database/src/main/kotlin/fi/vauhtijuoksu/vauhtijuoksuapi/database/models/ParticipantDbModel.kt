@@ -10,21 +10,19 @@ data class ParticipantDbModel(
     val display_name: String,
     val social_medias: Array<SocialMedia>,
 ) {
-    fun toParticipant(): Participant {
-        return Participant(
+    fun toParticipant(): Participant =
+        Participant(
             id,
             display_name,
             social_medias.toList(),
         )
-    }
 
     companion object {
-        fun fromParticipant(participant: Participant): ParticipantDbModel {
-            return ParticipantDbModel(
+        fun fromParticipant(participant: Participant): ParticipantDbModel =
+            ParticipantDbModel(
                 participant.id,
                 participant.displayName,
                 participant.socialMedias.toTypedArray(),
             )
-        }
     }
 }

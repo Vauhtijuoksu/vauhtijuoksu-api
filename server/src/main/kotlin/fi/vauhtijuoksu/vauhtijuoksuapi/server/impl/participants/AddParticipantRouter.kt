@@ -12,18 +12,19 @@ import jakarta.inject.Named
 import java.util.UUID
 
 class AddParticipantRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    private val authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Participant>,
-) : PostRouter<Participant>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-    { json -> json.mapTo(NewParticipantRequest::class.java).toParticipant(UUID.randomUUID()) },
-    { player -> ParticipantResponse.fromParticipant(player).toJson() },
-    { null },
-)
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        private val authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Participant>,
+    ) : PostRouter<Participant>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            { json -> json.mapTo(NewParticipantRequest::class.java).toParticipant(UUID.randomUUID()) },
+            { player -> ParticipantResponse.fromParticipant(player).toJson() },
+            { null },
+        )

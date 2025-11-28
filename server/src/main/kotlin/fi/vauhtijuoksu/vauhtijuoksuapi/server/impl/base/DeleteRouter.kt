@@ -17,8 +17,12 @@ open class DeleteRouter<M : Model>(
     private val authenticatedEndpointCorsHandler: CorsHandler,
     private val db: VauhtijuoksuDatabase<M>,
 ) : PartialRouter {
-    override fun configure(router: Router, basepath: String) {
-        router.delete("$basepath/:id")
+    override fun configure(
+        router: Router,
+        basepath: String,
+    ) {
+        router
+            .delete("$basepath/:id")
             .handler(authenticatedEndpointCorsHandler)
             .handler(authenticationHandler)
             .handler(adminRequired)
@@ -29,7 +33,8 @@ open class DeleteRouter<M : Model>(
                 } catch (_: IllegalArgumentException) {
                     throw UserError("Not UUID: ${ctx.pathParam("id")}")
                 }
-                db.delete(id)
+                db
+                    .delete(id)
                     .onFailure(ctx::fail)
                     .onSuccess { ctx.response().setStatusCode(ApiConstants.NO_CONTENT).end() }
             }

@@ -17,12 +17,16 @@ val execOperations = objects.newInstance(ExecOperationsProvider::class).execOper
 
 tasks {
     val lintCharts by registering {
-        fun lintDir(chartDirectory: String, output: String) {
-            val res = execOperations.exec {
-                bashCommand("helm lint $chartDirectory")
-                standardOutput = FileOutputStream(output, true)
-                isIgnoreExitValue = true
-            }
+        fun lintDir(
+            chartDirectory: String,
+            output: String,
+        ) {
+            val res =
+                execOperations.exec {
+                    bashCommand("helm lint $chartDirectory")
+                    standardOutput = FileOutputStream(output, true)
+                    isIgnoreExitValue = true
+                }
             if (res.exitValue != 0) {
                 throw GradleException("Helm lint failed. Check $output for details")
             }
@@ -47,10 +51,11 @@ tasks {
         description = "Create a kind cluster named vauhtijuoksu"
         group = "Application"
         doLast {
-            val res = execOperations.exec {
-                bashCommand("kind get clusters | grep ^vauhtijuoksu$")
-                isIgnoreExitValue = true
-            }
+            val res =
+                execOperations.exec {
+                    bashCommand("kind get clusters | grep ^vauhtijuoksu$")
+                    isIgnoreExitValue = true
+                }
             if (res.exitValue == 0) {
                 logger.info("""Cluster named "vauhtijuoksu" already exists""")
                 // Ensure that local cluster is used for following commands, and not for example production cluster

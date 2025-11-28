@@ -30,7 +30,8 @@ class IncentivesTest : ServerTestBase() {
         `when`(incentiveDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        client.get(incentivesEndpoint)
+        client
+            .get(incentivesEndpoint)
             .send()
             .onSuccess {
                 testContext.verify {
@@ -50,7 +51,8 @@ class IncentivesTest : ServerTestBase() {
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
 
-        client.get(incentivesEndpoint)
+        client
+            .get(incentivesEndpoint)
             .send()
             .onSuccess {
                 testContext.verify {
@@ -72,8 +74,7 @@ class IncentivesTest : ServerTestBase() {
                                             ),
                                         ),
                                     )
-                                }
-                                .map { it.toJson() },
+                                }.map { it.toJson() },
                         ),
                         it.bodyAsJsonArray(),
                     )
@@ -84,7 +85,8 @@ class IncentivesTest : ServerTestBase() {
 
     @Test
     fun `get accepts all origins`(testContext: VertxTestContext) {
-        client.get(incentivesEndpoint)
+        client
+            .get(incentivesEndpoint)
             .putHeader("Origin", "https://example.com")
             .send()
             .onSuccess { res ->
@@ -101,25 +103,27 @@ class IncentivesTest : ServerTestBase() {
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
 
-        client.get("$incentivesEndpoint/${someIncentive.id}")
+        client
+            .get("$incentivesEndpoint/${someIncentive.id}")
             .send()
             .onSuccess {
                 testContext.verify {
                     assertEquals(200, it.statusCode())
                     assertEquals("application/json", it.headers().get("Content-Type"))
                     assertEquals(
-                        IncentiveApiModel.fromIncentiveWithStatuses(
-                            IncentiveWithStatuses(
-                                someIncentive,
-                                0.0,
-                                listOf(
-                                    MilestoneIncentiveStatus(
-                                        MilestoneStatus.INCOMPLETE,
-                                        100,
+                        IncentiveApiModel
+                            .fromIncentiveWithStatuses(
+                                IncentiveWithStatuses(
+                                    someIncentive,
+                                    0.0,
+                                    listOf(
+                                        MilestoneIncentiveStatus(
+                                            MilestoneStatus.INCOMPLETE,
+                                            100,
+                                        ),
                                     ),
                                 ),
-                            ),
-                        ).toJson(),
+                            ).toJson(),
                         it.bodyAsJsonObject(),
                     )
                 }
@@ -129,7 +133,8 @@ class IncentivesTest : ServerTestBase() {
 
     @Test
     fun `post requires credentials`(testContext: VertxTestContext) {
-        client.post(incentivesEndpoint)
+        client
+            .post(incentivesEndpoint)
             .send()
             .onSuccess {
                 testContext.verify {
@@ -142,19 +147,21 @@ class IncentivesTest : ServerTestBase() {
     @Test
     fun `post adds a new incentive`(testContext: VertxTestContext) {
         `when`(incentiveDatabase.add(any())).thenReturn(Future.succeededFuture())
-        val body = JsonObject.mapFrom(
-            NewIncentiveApiModel(
-                someIncentive.gameId,
-                someIncentive.title,
-                someIncentive.endTime,
-                someIncentive.type.name,
-                someIncentive.info,
-                someIncentive.milestones,
-                someIncentive.optionParameters,
-                someIncentive.openCharLimit,
-            ),
-        )
-        client.post(incentivesEndpoint)
+        val body =
+            JsonObject.mapFrom(
+                NewIncentiveApiModel(
+                    someIncentive.gameId,
+                    someIncentive.title,
+                    someIncentive.endTime,
+                    someIncentive.type.name,
+                    someIncentive.info,
+                    someIncentive.milestones,
+                    someIncentive.optionParameters,
+                    someIncentive.openCharLimit,
+                ),
+            )
+        client
+            .post(incentivesEndpoint)
             .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
@@ -173,20 +180,22 @@ class IncentivesTest : ServerTestBase() {
 
     @Test
     fun `post validates input`(testContext: VertxTestContext) {
-        val body = JsonObject.mapFrom(
-            NewIncentiveApiModel(
-                someIncentive.gameId,
-                someIncentive.title,
-                someIncentive.endTime,
-                someIncentive.type.name,
-                someIncentive.info,
-                someIncentive.milestones,
-                someIncentive.optionParameters,
-                someIncentive.openCharLimit,
-            ),
-        )
+        val body =
+            JsonObject.mapFrom(
+                NewIncentiveApiModel(
+                    someIncentive.gameId,
+                    someIncentive.title,
+                    someIncentive.endTime,
+                    someIncentive.type.name,
+                    someIncentive.info,
+                    someIncentive.milestones,
+                    someIncentive.optionParameters,
+                    someIncentive.openCharLimit,
+                ),
+            )
         body.remove("title")
-        client.post(incentivesEndpoint)
+        client
+            .post(incentivesEndpoint)
             .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
@@ -201,7 +210,8 @@ class IncentivesTest : ServerTestBase() {
 
     @Test
     fun `patch requires credentials`(testContext: VertxTestContext) {
-        client.patch("$incentivesEndpoint/${UUID.randomUUID()}")
+        client
+            .patch("$incentivesEndpoint/${UUID.randomUUID()}")
             .send()
             .onSuccess {
                 testContext.verify {
@@ -222,7 +232,8 @@ class IncentivesTest : ServerTestBase() {
         `when`(incentiveDatabase.update(expectedIncentive)).thenReturn(Future.succeededFuture())
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        client.patch("$incentivesEndpoint/$id")
+        client
+            .patch("$incentivesEndpoint/$id")
             .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("end_time", null))
@@ -231,18 +242,19 @@ class IncentivesTest : ServerTestBase() {
                     assertEquals(200, res.statusCode())
                     assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
                     assertEquals(
-                        IncentiveApiModel.fromIncentiveWithStatuses(
-                            IncentiveWithStatuses(
-                                expectedIncentive,
-                                0.0,
-                                listOf(
-                                    MilestoneIncentiveStatus(
-                                        MilestoneStatus.INCOMPLETE,
-                                        100,
+                        IncentiveApiModel
+                            .fromIncentiveWithStatuses(
+                                IncentiveWithStatuses(
+                                    expectedIncentive,
+                                    0.0,
+                                    listOf(
+                                        MilestoneIncentiveStatus(
+                                            MilestoneStatus.INCOMPLETE,
+                                            100,
+                                        ),
                                     ),
                                 ),
-                            ),
-                        ).toJson(),
+                            ).toJson(),
                         res.bodyAsJsonObject(),
                     )
                     verify(incentiveDatabase).update(expectedIncentive)
@@ -263,7 +275,8 @@ class IncentivesTest : ServerTestBase() {
         `when`(incentiveDatabase.update(expectedIncentive)).thenReturn(Future.succeededFuture())
         `when`(donationDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         `when`(generatedIncentiveCodeDatabase.getAll()).thenReturn(Future.succeededFuture(listOf()))
-        client.patch("$incentivesEndpoint/$id")
+        client
+            .patch("$incentivesEndpoint/$id")
             .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("end_time", newTime.toString()))
@@ -271,18 +284,19 @@ class IncentivesTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals(
-                        IncentiveApiModel.fromIncentiveWithStatuses(
-                            IncentiveWithStatuses(
-                                expectedIncentive,
-                                0.0,
-                                listOf(
-                                    MilestoneIncentiveStatus(
-                                        MilestoneStatus.INCOMPLETE,
-                                        100,
+                        IncentiveApiModel
+                            .fromIncentiveWithStatuses(
+                                IncentiveWithStatuses(
+                                    expectedIncentive,
+                                    0.0,
+                                    listOf(
+                                        MilestoneIncentiveStatus(
+                                            MilestoneStatus.INCOMPLETE,
+                                            100,
+                                        ),
                                     ),
                                 ),
-                            ),
-                        ).toJson(),
+                            ).toJson(),
                         res.bodyAsJsonObject(),
                     )
                     verify(incentiveDatabase).update(expectedIncentive)
@@ -294,7 +308,8 @@ class IncentivesTest : ServerTestBase() {
     @Test
     fun `patch returns 404 when the incentive does not exists`(testContext: VertxTestContext) {
         `when`(incentiveDatabase.getById(any())).thenReturn(Future.failedFuture(MissingEntityException("No such row")))
-        client.patch("$incentivesEndpoint/${UUID.randomUUID()}")
+        client
+            .patch("$incentivesEndpoint/${UUID.randomUUID()}")
             .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("end_time", null))
@@ -310,7 +325,8 @@ class IncentivesTest : ServerTestBase() {
     fun `patch validates input`(testContext: VertxTestContext) {
         val id = someIncentive.id
         `when`(incentiveDatabase.getById(id)).thenReturn(Future.succeededFuture(someIncentive))
-        client.patch("$incentivesEndpoint/$id")
+        client
+            .patch("$incentivesEndpoint/$id")
             .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject().put("title", null))

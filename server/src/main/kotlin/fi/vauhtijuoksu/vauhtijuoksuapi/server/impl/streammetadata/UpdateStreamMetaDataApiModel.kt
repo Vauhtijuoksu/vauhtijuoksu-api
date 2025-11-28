@@ -20,8 +20,8 @@ internal data class UpdateStreamMetaDataApiModel(
     val nowPlaying: String?,
 ) {
     companion object {
-        fun from(data: StreamMetadata): UpdateStreamMetaDataApiModel {
-            return UpdateStreamMetaDataApiModel(
+        fun from(data: StreamMetadata): UpdateStreamMetaDataApiModel =
+            UpdateStreamMetaDataApiModel(
                 data.donationGoal,
                 data.currentGameId,
                 data.donateBarInfo,
@@ -29,10 +29,7 @@ internal data class UpdateStreamMetaDataApiModel(
                 data.heartRates,
                 data.nowPlaying,
             )
-        }
     }
 
-    fun toJson(): JsonObject {
-        return JsonObject.mapFrom(this)
-    }
+    fun toJson(): JsonObject = JsonObject.mapFrom(this)
 }

@@ -11,17 +11,18 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class TimerPatchRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Timer>,
-) : PatchRouter<Timer, TimerApiModel>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-    { null },
-    { timer -> TimerApiModel.from(timer) },
-)
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Timer>,
+    ) : PatchRouter<Timer, TimerApiModel>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            { null },
+            { timer -> TimerApiModel.from(timer) },
+        )

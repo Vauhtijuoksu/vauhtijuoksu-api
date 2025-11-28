@@ -17,8 +17,8 @@ data class NewParticipantRequest(
     val display_name: String,
     val social_medias: List<NewSocialMediaRequest>,
 ) {
-    fun toParticipant(id: UUID): Participant {
-        return Participant(
+    fun toParticipant(id: UUID): Participant =
+        Participant(
             id,
             display_name,
             social_medias.map {
@@ -28,5 +28,4 @@ data class NewParticipantRequest(
                 )
             },
         )
-    }
 }

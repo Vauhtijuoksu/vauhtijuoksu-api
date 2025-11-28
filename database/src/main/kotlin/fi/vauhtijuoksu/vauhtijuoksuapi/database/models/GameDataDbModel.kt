@@ -39,8 +39,8 @@ data class GameDataDbModel(
     val participants: List<GameParticipantDbModel>,
 ) {
     companion object {
-        fun fromGameData(gameData: GameData): GameDataDbModel {
-            return GameDataDbModel(
+        fun fromGameData(gameData: GameData): GameDataDbModel =
+            GameDataDbModel(
                 gameData.id,
                 gameData.game,
                 gameData.startTime,
@@ -53,11 +53,10 @@ data class GameDataDbModel(
                 gameData.meta,
                 listOf(),
             )
-        }
     }
 
-    fun toGameData(): GameData {
-        return GameData(
+    fun toGameData(): GameData =
+        GameData(
             id,
             game,
             startTime,
@@ -70,5 +69,4 @@ data class GameDataDbModel(
             meta,
             participants.map { GameParticipant(it.participant_id, it.role_in_game) },
         )
-    }
 }

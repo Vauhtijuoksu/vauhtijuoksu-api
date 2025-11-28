@@ -30,18 +30,20 @@ abstract class AbstractModelDatabase<T : Model, DbModel : Any>(
     defaultOrderBy: String?,
     private val toModel: ((DbModel) -> T),
     private val dbModelClass: KClass<DbModel>,
-) : BaseDatabase(configuration), VauhtijuoksuDatabase<T> {
+) : BaseDatabase(configuration),
+    VauhtijuoksuDatabase<T> {
     private val logger = KotlinLogging.logger {}
     private val getAllQuery: String
     private val getByIdQuery: String
     private val deleteQuery: PreparedQuery<RowSet<Row>>
 
     init {
-        getAllQuery = if (defaultOrderBy == null) {
-            "SELECT * FROM $tableName"
-        } else {
-            "SELECT * FROM $tableName ORDER BY $defaultOrderBy ASC"
-        }
+        getAllQuery =
+            if (defaultOrderBy == null) {
+                "SELECT * FROM $tableName"
+            } else {
+                "SELECT * FROM $tableName ORDER BY $defaultOrderBy ASC"
+            }
         getByIdQuery = "SELECT * FROM $tableName WHERE id = #{id}"
 
         deleteQuery = client.preparedQuery("DELETE FROM $tableName WHERE id = $1")
@@ -51,15 +53,15 @@ abstract class AbstractModelDatabase<T : Model, DbModel : Any>(
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    private fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<DbModel>> {
-        return template.mapTo { row ->
+    private fun <I, R> mapToFunction(template: SqlTemplate<I, R>): SqlTemplate<I, RowSet<DbModel>> =
+        template.mapTo { row ->
             row.toJson().mapTo(dbModelClass.java)
         }
-    }
 
     override fun getAll(): Future<List<T>> {
         logger.debug { "Get all objects" }
-        return SqlTemplate.forQuery(client, getAllQuery)
+        return SqlTemplate
+            .forQuery(client, getAllQuery)
             .mapWith(this::mapToFunction)
             .execute(Collections.emptyMap())
             .recover {
@@ -72,13 +74,13 @@ abstract class AbstractModelDatabase<T : Model, DbModel : Any>(
 
     override fun getById(id: UUID): Future<T> {
         logger.debug { "Get record by id $id" }
-        return SqlTemplate.forQuery(client, getByIdQuery)
+        return SqlTemplate
+            .forQuery(client, getByIdQuery)
             .mapWith(this::mapToFunction)
             .execute(Collections.singletonMap("id", id) as Map<String, Any>?)
             .recover {
                 throw ServerError("Failed to retrieve records because ${it.message}")
-            }
-            .map {
+            }.map {
                 if (it.iterator().hasNext()) {
                     logger.debug { "Found record with id $id" }
                     return@map toModel(it.iterator().next())
@@ -89,12 +91,10 @@ abstract class AbstractModelDatabase<T : Model, DbModel : Any>(
             }
     }
 
-    override fun delete(id: UUID): Future<Unit> {
-        return deleteQuery
+    override fun delete(id: UUID): Future<Unit> =
+        deleteQuery
             .execute(Tuple.of(id))
             .recover {
                 throw ServerError("Failed to delete a record with id $id because ${it.message}")
-            }
-            .expectOneChangedRow()
-    }
+            }.expectOneChangedRow()
 }

@@ -14,7 +14,10 @@ import io.vertx.ext.auth.authorization.RoleBasedAuthorization
 class BasicAuthorizationProvider : AuthorizationProvider {
     override fun getId(): String = "Basic authorization provider"
 
-    override fun getAuthorizations(user: User, handler: Handler<AsyncResult<Void>>) {
+    override fun getAuthorizations(
+        user: User,
+        handler: Handler<AsyncResult<Void>>,
+    ) {
         if (user.hasAmr("pwd")) {
             user.authorizations().add(id, RoleBasedAuthorization.create(Roles.ADMIN.name))
         }

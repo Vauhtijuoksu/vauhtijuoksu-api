@@ -9,14 +9,23 @@ import org.junit.jupiter.api.Test
 
 class ServerTest : ServerTestBase() {
     @Test
-    fun testServerRespondsWithOptions() = runTest {
-        client.request(HttpMethod.OPTIONS, "/")
-            .putHeader(HttpHeaders.ORIGIN.toString(), allowedOrigin)
-            .send()
-            .map { res ->
-                val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
-                assertEquals(allowedMethods, res.headers().get("Allow").split(", ").toSet())
-                assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
-            }.coAwait()
-    }
+    fun testServerRespondsWithOptions() =
+        runTest {
+            client
+                .request(HttpMethod.OPTIONS, "/")
+                .putHeader(HttpHeaders.ORIGIN.toString(), allowedOrigin)
+                .send()
+                .map { res ->
+                    val allowedMethods = setOf("GET", "POST", "PATCH", "OPTIONS", "DELETE")
+                    assertEquals(
+                        allowedMethods,
+                        res
+                            .headers()
+                            .get("Allow")
+                            .split(", ")
+                            .toSet(),
+                    )
+                    assertEquals(allowedOrigin, res.getHeader("Access-Control-Allow-Origin"))
+                }.coAwait()
+        }
 }

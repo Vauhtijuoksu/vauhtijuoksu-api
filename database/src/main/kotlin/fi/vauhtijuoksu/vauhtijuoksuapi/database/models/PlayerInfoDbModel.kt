@@ -9,9 +9,8 @@ internal data class PlayerInfoDbModel(
     @JsonProperty("message")
     val message: String?,
 ) {
-    fun toPlayerInfo(): PlayerInfo {
-        return PlayerInfo(
+    fun toPlayerInfo(): PlayerInfo =
+        PlayerInfo(
             message,
         )
-    }
 }

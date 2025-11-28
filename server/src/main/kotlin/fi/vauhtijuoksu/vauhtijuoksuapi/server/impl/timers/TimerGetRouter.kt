@@ -9,12 +9,13 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class TimerGetRouter
-@Inject constructor(
-    @Named(DependencyInjectionConstants.PUBLIC_CORS)
-    publicEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Timer>,
-) : GetRouter<Timer>(
-    publicEndpointCorsHandler,
-    db,
-    { timer -> TimerApiModel.from(timer).toJson() },
-)
+    @Inject
+    constructor(
+        @Named(DependencyInjectionConstants.PUBLIC_CORS)
+        publicEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Timer>,
+    ) : GetRouter<Timer>(
+            publicEndpointCorsHandler,
+            db,
+            { timer -> TimerApiModel.from(timer).toJson() },
+        )

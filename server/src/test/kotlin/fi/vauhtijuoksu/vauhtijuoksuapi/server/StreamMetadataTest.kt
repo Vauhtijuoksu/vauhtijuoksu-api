@@ -30,53 +30,58 @@ class StreamMetadataTest : ServerTestBase() {
     private val now = OffsetDateTime.now(clock)
     private val streamMetadataEndpoint = "/stream-metadata"
     private val someUuid = UUID.randomUUID()
-    private val someTimer = Timer(
-        UUID.randomUUID(),
-        OffsetDateTime.ofInstant(
-            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")),
-            ZoneId.of("Z"),
-        ),
-        OffsetDateTime.ofInstant(
-            Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")),
-            ZoneId.of("Z"),
-        ),
-        "timer 1",
-    )
-    private val someApiTimer = TimerApiModel(
-        someTimer.id,
-        someTimer.startTime,
-        someTimer.endTime,
-        someTimer.name,
-    )
+    private val someTimer =
+        Timer(
+            UUID.randomUUID(),
+            OffsetDateTime.ofInstant(
+                Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-05T16:00:00Z")),
+                ZoneId.of("Z"),
+            ),
+            OffsetDateTime.ofInstant(
+                Instant.from(DateTimeFormatter.ISO_INSTANT.parse("2022-05-06T16:00:00Z")),
+                ZoneId.of("Z"),
+            ),
+            "timer 1",
+        )
+    private val someApiTimer =
+        TimerApiModel(
+            someTimer.id,
+            someTimer.startTime,
+            someTimer.endTime,
+            someTimer.name,
+        )
 
-    private val someMetadata = StreamMetadata(
-        100,
-        someUuid,
-        listOf("save", "norppas"),
-        listOf(1, 0),
-        listOf(100, 120),
-        "Deerboy - Biisi",
-    )
+    private val someMetadata =
+        StreamMetadata(
+            100,
+            someUuid,
+            listOf("save", "norppas"),
+            listOf(1, 0),
+            listOf(100, 120),
+            "Deerboy - Biisi",
+        )
 
-    private val someMetadataNoTimer = StreamMetadata(
-        100,
-        someUuid,
-        listOf("save", "norppas"),
-        listOf(1, 0),
-        listOf(100, 120),
-        "Deerboy - Biisi",
-    )
+    private val someMetadataNoTimer =
+        StreamMetadata(
+            100,
+            someUuid,
+            listOf("save", "norppas"),
+            listOf(1, 0),
+            listOf(100, 120),
+            "Deerboy - Biisi",
+        )
 
-    private val someMetadataApi = StreamMetaDataApiModel(
-        100,
-        someUuid,
-        listOf("save", "norppas"),
-        listOf(1, 0),
-        listOf(100, 120),
-        listOf(someApiTimer),
-        "Deerboy - Biisi",
-        OffsetDateTime.now(clock),
-    )
+    private val someMetadataApi =
+        StreamMetaDataApiModel(
+            100,
+            someUuid,
+            listOf("save", "norppas"),
+            listOf(1, 0),
+            listOf(100, 120),
+            listOf(someApiTimer),
+            "Deerboy - Biisi",
+            OffsetDateTime.now(clock),
+        )
 
     @BeforeEach
     fun before() {
@@ -93,15 +98,16 @@ class StreamMetadataTest : ServerTestBase() {
         verifyNoMoreInteractions(streamMetadataDatabase)
     }
 
-    private fun patchStreamMetadata(body: JsonObject): Future<io.vertx.ext.web.client.HttpResponse<Buffer>> {
-        return client.patch(streamMetadataEndpoint)
+    private fun patchStreamMetadata(body: JsonObject): Future<io.vertx.ext.web.client.HttpResponse<Buffer>> =
+        client
+            .patch(streamMetadataEndpoint)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(body)
-    }
 
     @Test
     fun `get returns current stream metadata`(testContext: VertxTestContext) {
-        client.get(streamMetadataEndpoint)
+        client
+            .get(streamMetadataEndpoint)
             .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -119,7 +125,8 @@ class StreamMetadataTest : ServerTestBase() {
 
     @Test
     fun `get accepts all origins`(testContext: VertxTestContext) {
-        client.get(streamMetadataEndpoint)
+        client
+            .get(streamMetadataEndpoint)
             .putHeader("Origin", "https://example.com")
             .send()
             .onFailure(testContext::failNow)
@@ -133,7 +140,8 @@ class StreamMetadataTest : ServerTestBase() {
 
     @Test
     fun `patch requires credentials`(testContext: VertxTestContext) {
-        client.patch(streamMetadataEndpoint)
+        client
+            .patch(streamMetadataEndpoint)
             .sendJson("{}")
             .onFailure(testContext::failNow)
             .onSuccess { res ->
@@ -146,7 +154,8 @@ class StreamMetadataTest : ServerTestBase() {
 
     @Test
     fun `patch accepts vauhtijuoksu origins`(testContext: VertxTestContext) {
-        client.patch(streamMetadataEndpoint)
+        client
+            .patch(streamMetadataEndpoint)
             .putHeader("Origin", allowedOrigin)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendJson(JsonObject())
@@ -163,7 +172,8 @@ class StreamMetadataTest : ServerTestBase() {
 
     @Test
     fun `patch saves updated data and responds with new stream metadata`(testContext: VertxTestContext) {
-        lenient().`when`(streamMetadataDatabase.get())
+        lenient()
+            .`when`(streamMetadataDatabase.get())
             .thenReturn(Future.succeededFuture(someMetadataNoTimer.copy(donationGoal = 1000)))
         `when`(timerDb.getAll()).thenReturn(Future.succeededFuture(listOf()))
         patchStreamMetadata(JsonObject().put("donation_goal", 1000))
@@ -184,7 +194,8 @@ class StreamMetadataTest : ServerTestBase() {
 
     @Test
     fun `patch responds bad request on invalid json`(testContext: VertxTestContext) {
-        client.patch(streamMetadataEndpoint)
+        client
+            .patch(streamMetadataEndpoint)
             .authentication(UsernamePasswordCredentials(username, password))
             .sendBuffer(Buffer.buffer().appendString("hello server"))
             .onFailure(testContext::failNow)

@@ -13,61 +13,64 @@ import io.vertx.sqlclient.Tuple
 import jakarta.inject.Inject
 
 internal class GeneratedIncentiveCodeDatabaseImpl
-@Inject constructor(
-    configuration: DatabaseConfiguration,
-    private val client: PgPool,
-) : GeneratedIncentiveCodeDatabase, BaseDatabase(configuration) {
-
-    override fun getAll(): Future<List<GeneratedIncentive>> {
-        data class CodeWithChosenIncentive(
-            val code: IncentiveCode,
-            val chosenIncentive: ChosenIncentive,
-        )
-        return client.preparedQuery(
-            "SELECT * FROM incentive_codes " +
-                "INNER JOIN chosen_incentives ON incentive_codes.id = chosen_incentives.incentive_code",
-        )
-            .mapping {
-                CodeWithChosenIncentive(
-                    IncentiveCode(it.getString("id")),
-                    ChosenIncentive(
-                        it.getUUID("incentive_id"),
-                        it.getString("parameter"),
-                    ),
-                )
-            }
-            .execute()
-            .onFailure { cause -> throw ServerError(cause) }
-            .map { rows ->
-                rows.toList()
-                    .groupBy { it.code }
-                    .map { entry ->
-                        GeneratedIncentive(
-                            entry.key,
-                            entry.value.map { it.chosenIncentive },
-                        )
-                    }
-            }
-    }
-
-    override fun add(record: GeneratedIncentive): Future<Void> {
-        return client.withTransaction {
-            CompositeFuture.all(
-                it.preparedQuery("INSERT INTO incentive_codes values ($1)")
-                    .execute(Tuple.of(record.generatedCode.code)),
-                it.preparedQuery("INSERT INTO chosen_incentives values ($1, $2, $3)")
-                    .executeBatch(
-                        record.chosenIncentives.map { chosenIncentive ->
-                            Tuple.of(
-                                chosenIncentive.incentiveId,
-                                record.generatedCode.code,
-                                chosenIncentive.parameter,
-                            )
-                        },
-                    ),
+    @Inject
+    constructor(
+        configuration: DatabaseConfiguration,
+        private val client: PgPool,
+    ) : BaseDatabase(configuration),
+        GeneratedIncentiveCodeDatabase {
+        override fun getAll(): Future<List<GeneratedIncentive>> {
+            data class CodeWithChosenIncentive(
+                val code: IncentiveCode,
+                val chosenIncentive: ChosenIncentive,
             )
-        }.recover {
-            throw ServerError(it)
-        }.mapEmpty()
+            return client
+                .preparedQuery(
+                    "SELECT * FROM incentive_codes " +
+                        "INNER JOIN chosen_incentives ON incentive_codes.id = chosen_incentives.incentive_code",
+                ).mapping {
+                    CodeWithChosenIncentive(
+                        IncentiveCode(it.getString("id")),
+                        ChosenIncentive(
+                            it.getUUID("incentive_id"),
+                            it.getString("parameter"),
+                        ),
+                    )
+                }.execute()
+                .onFailure { cause -> throw ServerError(cause) }
+                .map { rows ->
+                    rows
+                        .toList()
+                        .groupBy { it.code }
+                        .map { entry ->
+                            GeneratedIncentive(
+                                entry.key,
+                                entry.value.map { it.chosenIncentive },
+                            )
+                        }
+                }
+        }
+
+        override fun add(record: GeneratedIncentive): Future<Void> =
+            client
+                .withTransaction {
+                    CompositeFuture.all(
+                        it
+                            .preparedQuery("INSERT INTO incentive_codes values ($1)")
+                            .execute(Tuple.of(record.generatedCode.code)),
+                        it
+                            .preparedQuery("INSERT INTO chosen_incentives values ($1, $2, $3)")
+                            .executeBatch(
+                                record.chosenIncentives.map { chosenIncentive ->
+                                    Tuple.of(
+                                        chosenIncentive.incentiveId,
+                                        record.generatedCode.code,
+                                        chosenIncentive.parameter,
+                                    )
+                                },
+                            ),
+                    )
+                }.recover {
+                    throw ServerError(it)
+                }.mapEmpty()
     }
-}

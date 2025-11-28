@@ -13,36 +13,35 @@ import jakarta.inject.Inject
 import java.util.Collections
 
 internal class PlayerInfoDatabase
-@Inject constructor(
-    configuration: DatabaseConfiguration,
-    private val client: SqlClient,
-) :
-    BaseDatabase(configuration),
-    SingletonDatabase<PlayerInfo> {
+    @Inject
+    constructor(
+        configuration: DatabaseConfiguration,
+        private val client: SqlClient,
+    ) : BaseDatabase(configuration),
+        SingletonDatabase<PlayerInfo> {
+        override fun get(): Future<PlayerInfo> {
+            return SqlTemplate
+                .forQuery(client, "SELECT * FROM player_info LIMIT 1")
+                .mapTo(PlayerInfoDbModel::class.java)
+                .execute(Collections.emptyMap())
+                .recover {
+                    throw ServerError("Failed to get player info: ${it.message}")
+                }.map {
+                    return@map it.first().toPlayerInfo()
+                }
+        }
 
-    override fun get(): Future<PlayerInfo> {
-        return SqlTemplate.forQuery(client, "SELECT * FROM player_info LIMIT 1")
-            .mapTo(PlayerInfoDbModel::class.java)
-            .execute(Collections.emptyMap())
-            .recover {
-                throw ServerError("Failed to get player info: ${it.message}")
-            }
-            .map {
-                return@map it.first().toPlayerInfo()
-            }
-    }
-
-    override fun save(record: PlayerInfo): Future<Void> {
-        return client.preparedQuery(
-            """UPDATE player_info SET 
+        override fun save(record: PlayerInfo): Future<Void> =
+            client
+                .preparedQuery(
+                    """UPDATE player_info SET 
                         message = $1
                         """,
-        ).execute(
-            Tuple.of(
-                record.message,
-            ),
-        ).recover {
-            throw ServerError(it)
-        }.mapEmpty()
+                ).execute(
+                    Tuple.of(
+                        record.message,
+                    ),
+                ).recover {
+                    throw ServerError(it)
+                }.mapEmpty()
     }
-}

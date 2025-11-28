@@ -16,7 +16,7 @@ repositories {
  * ktlint configuration for formatting kotlin files, including build scripts
  */
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
-    val ktLintVersion = "0.48.2"
+    val ktLintVersion = "1.8.0"
     kotlin {
         ktlint(ktLintVersion)
     }

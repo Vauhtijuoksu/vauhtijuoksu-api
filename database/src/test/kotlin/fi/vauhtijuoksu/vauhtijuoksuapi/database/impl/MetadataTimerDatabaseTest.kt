@@ -24,23 +24,25 @@ class MetadataTimerDatabaseTest {
     private lateinit var gameDataDb: GameDataDatabase
     private lateinit var participantDatabase: ParticipantDatabase
 
-    private val emptyData = StreamMetadata(
-        null,
-        null,
-        listOf(),
-        listOf(),
-        listOf(),
-        null,
-    )
+    private val emptyData =
+        StreamMetadata(
+            null,
+            null,
+            listOf(),
+            listOf(),
+            listOf(),
+            null,
+        )
 
-    private val someData = StreamMetadata(
-        1000,
-        TestGameData.gameData1.id,
-        listOf("gotta go fast", "pls give money to norppas"),
-        listOf(10, 100, 3),
-        listOf(99, 100, 189, 69, 0),
-        "Deerboy - Boiiii",
-    )
+    private val someData =
+        StreamMetadata(
+            1000,
+            TestGameData.gameData1.id,
+            listOf("gotta go fast", "pls give money to norppas"),
+            listOf(10, 100, 3),
+            listOf(99, 100, 189, 69, 0),
+            "Deerboy - Boiiii",
+        )
 
     @Container
     var pg: PostgreSQLContainer<Nothing> =
@@ -48,84 +50,87 @@ class MetadataTimerDatabaseTest {
 
     @BeforeEach
     fun setup() {
-        val injector = Guice.createInjector(
-            DatabaseModule(),
-            object : AbstractModule() {
-                override fun configure() {
-                    bind(DatabaseConfiguration::class.java).toInstance(
-                        DatabaseConfiguration(
-                            pg.host,
-                            pg.firstMappedPort,
-                            "vauhtijuoksu-api",
-                            pg.username,
-                            pg.password,
-                            6,
-                        ),
-                    )
-                }
-            },
-        )
+        val injector =
+            Guice.createInjector(
+                DatabaseModule(),
+                object : AbstractModule() {
+                    override fun configure() {
+                        bind(DatabaseConfiguration::class.java).toInstance(
+                            DatabaseConfiguration(
+                                pg.host,
+                                pg.firstMappedPort,
+                                "vauhtijuoksu-api",
+                                pg.username,
+                                pg.password,
+                                6,
+                            ),
+                        )
+                    }
+                },
+            )
         db = injector.getInstance(StreamMetadataDatabase::class.java)
         gameDataDb = injector.getInstance(GameDataDatabase::class.java)
         participantDatabase = injector.getInstance(ParticipantDatabase::class.java)
     }
 
     @Test
-    fun `database returns empty data initially`() = runTest {
-        db.get()
-            .coAwait()
-            .let {
-                assertEquals(emptyData, it)
-            }
-    }
+    fun `database returns empty data initially`() =
+        runTest {
+            db
+                .get()
+                .coAwait()
+                .let {
+                    assertEquals(emptyData, it)
+                }
+        }
 
     @Test
-    fun `database saves given data`() = runTest {
-        val gameData = TestGameData.gameData1
-        assertEquals(1, gameData.participants.size)
-        assertEquals(GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER), gameData.participants.first())
-        participantDatabase.add(TestParticipant.participant1)
-            .compose {
-                gameDataDb.add(gameData)
-            }
-            .compose {
-                db.save(
-                    someData.copy(
-                        currentGameId = gameData.id,
-                        counters = listOf(1, 3, 100),
-                    ),
-                )
-            }
-            .compose { db.get() }
-            .coAwait()
-            .let {
-                assertEquals(
-                    someData.copy(
-                        currentGameId = gameData.id,
-                        counters = listOf(1, 3, 100),
-                    ),
-                    it,
-                )
-            }
-    }
+    fun `database saves given data`() =
+        runTest {
+            val gameData = TestGameData.gameData1
+            assertEquals(1, gameData.participants.size)
+            assertEquals(GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER), gameData.participants.first())
+            participantDatabase
+                .add(TestParticipant.participant1)
+                .compose {
+                    gameDataDb.add(gameData)
+                }.compose {
+                    db.save(
+                        someData.copy(
+                            currentGameId = gameData.id,
+                            counters = listOf(1, 3, 100),
+                        ),
+                    )
+                }.compose { db.get() }
+                .coAwait()
+                .let {
+                    assertEquals(
+                        someData.copy(
+                            currentGameId = gameData.id,
+                            counters = listOf(1, 3, 100),
+                        ),
+                        it,
+                    )
+                }
+        }
 
     @Test
-    fun `current game is set to null when the game is deleted`() = runTest {
-        val gameData = TestGameData.gameData1
-        assertEquals(1, gameData.participants.size)
-        assertEquals(GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER), gameData.participants.first())
-        participantDatabase.add(TestParticipant.participant1)
-            .compose {
-                gameDataDb.add(TestGameData.gameData1)
-            }
-            .compose {
-                db.save(someData.copy(currentGameId = gameData.id))
-            }
-            .compose { gameDataDb.delete(gameData.id) }
-            .compose { db.get() }
-            .coAwait()
-            .let {
-                assertEquals(someData.copy(currentGameId = null), it)
-            }
-    }
+    fun `current game is set to null when the game is deleted`() =
+        runTest {
+            val gameData = TestGameData.gameData1
+            assertEquals(1, gameData.participants.size)
+            assertEquals(GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER), gameData.participants.first())
+            participantDatabase
+                .add(TestParticipant.participant1)
+                .compose {
+                    gameDataDb.add(TestGameData.gameData1)
+                }.compose {
+                    db.save(someData.copy(currentGameId = gameData.id))
+                }.compose { gameDataDb.delete(gameData.id) }
+                .compose { db.get() }
+                .coAwait()
+                .let {
+                    assertEquals(someData.copy(currentGameId = null), it)
+                }
+        }
 }

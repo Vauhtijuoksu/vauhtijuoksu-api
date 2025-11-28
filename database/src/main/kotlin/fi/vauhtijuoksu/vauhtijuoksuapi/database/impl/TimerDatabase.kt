@@ -13,71 +13,66 @@ import jakarta.inject.Inject
 import mu.KotlinLogging
 
 class TimerDatabase
-@Inject constructor(
-    private val client: SqlClient,
-    configuration: DatabaseConfiguration,
-) : AbstractModelDatabase<Timer, TimerDbModel>(
-    client,
-    configuration,
-    "timers",
-    null,
-    TimerDbModel::toTimer,
-    TimerDbModel::class,
-),
-    VauhtijuoksuDatabase<Timer> {
-    private val logger = KotlinLogging.logger {}
-
-    override fun add(record: Timer): Future<Unit> {
-        return SqlTemplate.forUpdate(
+    @Inject
+    constructor(
+        private val client: SqlClient,
+        configuration: DatabaseConfiguration,
+    ) : AbstractModelDatabase<Timer, TimerDbModel>(
             client,
-            "INSERT INTO timers VALUES (#{id}, #{start_time}, #{end_time}, #{name}) ",
-        )
-            .mapFrom(
-                TupleMapper.mapper { timer: TimerDbModel ->
-                    mapOf<String, Any?>(
-                        "id" to timer.id,
-                        "start_time" to timer.startTime,
-                        "end_time" to timer.endTime,
-                        "name" to timer.name,
-                    )
-                },
-            )
-            .execute(TimerDbModel.fromTimer(record))
-            .recover {
-                throw ServerError("Failed to insert $record because of ${it.message}")
-            }
-            .map {
-                logger.debug { "Inserted timer $record" }
-            }
-    }
+            configuration,
+            "timers",
+            null,
+            TimerDbModel::toTimer,
+            TimerDbModel::class,
+        ),
+        VauhtijuoksuDatabase<Timer> {
+        private val logger = KotlinLogging.logger {}
 
-    override fun update(record: Timer): Future<Unit> {
-        return SqlTemplate.forUpdate(
-            client,
-            """UPDATE timers SET 
+        override fun add(record: Timer): Future<Unit> =
+            SqlTemplate
+                .forUpdate(
+                    client,
+                    "INSERT INTO timers VALUES (#{id}, #{start_time}, #{end_time}, #{name}) ",
+                ).mapFrom(
+                    TupleMapper.mapper { timer: TimerDbModel ->
+                        mapOf<String, Any?>(
+                            "id" to timer.id,
+                            "start_time" to timer.startTime,
+                            "end_time" to timer.endTime,
+                            "name" to timer.name,
+                        )
+                    },
+                ).execute(TimerDbModel.fromTimer(record))
+                .recover {
+                    throw ServerError("Failed to insert $record because of ${it.message}")
+                }.map {
+                    logger.debug { "Inserted timer $record" }
+                }
+
+        override fun update(record: Timer): Future<Unit> =
+            SqlTemplate
+                .forUpdate(
+                    client,
+                    """UPDATE timers SET 
                 |id = #{id}, 
                 |start_time = #{start_time},
                 |end_time = #{end_time},
                 |name = #{name} WHERE id = #{id}
-            """.trimMargin(),
-        )
-            .mapFrom(
-                TupleMapper.mapper { timer: TimerDbModel ->
-                    mapOf<String, Any?>(
-                        "id" to timer.id,
-                        "start_time" to timer.startTime,
-                        "end_time" to timer.endTime,
-                        "name" to timer.name,
-                    )
-                },
-            )
-            .execute(TimerDbModel.fromTimer(record))
-            .recover {
-                throw ServerError("Failed to update $record because of ${it.message}")
-            }
-            .expectOneChangedRow()
-            .map {
-                logger.debug { "Updated Timer into $it" }
-            }
+                    """.trimMargin(),
+                ).mapFrom(
+                    TupleMapper.mapper { timer: TimerDbModel ->
+                        mapOf<String, Any?>(
+                            "id" to timer.id,
+                            "start_time" to timer.startTime,
+                            "end_time" to timer.endTime,
+                            "name" to timer.name,
+                        )
+                    },
+                ).execute(TimerDbModel.fromTimer(record))
+                .recover {
+                    throw ServerError("Failed to update $record because of ${it.message}")
+                }.expectOneChangedRow()
+                .map {
+                    logger.debug { "Updated Timer into $it" }
+                }
     }
-}

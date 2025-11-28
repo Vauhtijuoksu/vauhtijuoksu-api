@@ -11,18 +11,19 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class DonationPatchRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Donation>,
-    donationPatchInputValidator: DonationPatchInputValidator,
-) : PatchRouter<Donation, DonationApiModel>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-    donationPatchInputValidator::validate,
-    { donation: Donation -> DonationApiModel.fromDonation(donation) },
-)
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Donation>,
+        donationPatchInputValidator: DonationPatchInputValidator,
+    ) : PatchRouter<Donation, DonationApiModel>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            donationPatchInputValidator::validate,
+            { donation: Donation -> DonationApiModel.fromDonation(donation) },
+        )

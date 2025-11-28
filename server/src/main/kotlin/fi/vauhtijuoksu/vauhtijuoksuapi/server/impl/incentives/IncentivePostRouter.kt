@@ -12,18 +12,19 @@ import jakarta.inject.Named
 import java.util.UUID
 
 class IncentivePostRouter
-@Inject constructor(
-    authenticationHandler: AuthenticationHandler,
-    adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
-    private val authenticatedEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<Incentive>,
-) : PostRouter<Incentive>(
-    authenticationHandler,
-    adminRequired,
-    authenticatedEndpointCorsHandler,
-    db,
-    { json -> json.mapTo(NewIncentiveApiModel::class.java).toIncentive(UUID.randomUUID()) },
-    { incentive -> IncentiveApiModel.fromIncentive(incentive).toJson() },
-    { null }, // Incentive is always valid
-)
+    @Inject
+    constructor(
+        authenticationHandler: AuthenticationHandler,
+        adminRequired: AuthorizationHandler,
+        @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+        private val authenticatedEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<Incentive>,
+    ) : PostRouter<Incentive>(
+            authenticationHandler,
+            adminRequired,
+            authenticatedEndpointCorsHandler,
+            db,
+            { json -> json.mapTo(NewIncentiveApiModel::class.java).toIncentive(UUID.randomUUID()) },
+            { incentive -> IncentiveApiModel.fromIncentive(incentive).toJson() },
+            { null }, // Incentive is always valid
+        )
