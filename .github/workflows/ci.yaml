@@ -54,19 +54,19 @@ jobs:
           min-coverage-changed-files: 80
       - name: Save test results
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test results
           path: "**/build/reports/tests/test/"
       - name: Save coverage reports
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: coverage
           path: "build/reports/jacoco"
       - name: Save swagger ui
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: swagger ui
           path: api-doc/build/swagger-ui
@@ -74,7 +74,7 @@ jobs:
         run: |
           docker image save vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} -o vauhtijuoksu-api.tar
       - name: Save Docker image
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: vauhtijuosu-api.tar
           path: vauhtijuoksu-api.tar
@@ -108,7 +108,7 @@ jobs:
           mkdir ~/.kube
           echo "${{ vars.KUBECONFIG }}" > ~/.kube/config
           kubectl get all
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: vauhtijuosu-api.tar
           path: .
