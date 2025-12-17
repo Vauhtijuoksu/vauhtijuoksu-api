@@ -21,8 +21,8 @@ data class NewDonationApiModel(
     @JsonProperty("external_id")
     val externalId: String?,
 ) {
-    fun toDonation(id: UUID): Donation {
-        return Donation(
+    fun toDonation(id: UUID): Donation =
+        Donation(
             id,
             timestamp,
             name,
@@ -31,5 +31,4 @@ data class NewDonationApiModel(
             read,
             externalId,
         )
-    }
 }

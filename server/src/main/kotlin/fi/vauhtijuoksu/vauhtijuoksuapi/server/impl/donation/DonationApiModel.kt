@@ -34,10 +34,9 @@ data class DonationApiModel(
     @JsonProperty("external_id")
     val externalId: String?,
     val incentives: List<IncentiveInDonationApi>,
-) :
-    ApiModel<Donation> {
-    override fun toModel(): Donation {
-        return Donation(
+) : ApiModel<Donation> {
+    override fun toModel(): Donation =
+        Donation(
             id,
             timestamp,
             name,
@@ -46,15 +45,12 @@ data class DonationApiModel(
             read,
             externalId,
         )
-    }
 
-    override fun toJson(): JsonObject {
-        return JsonObject(jacksonObjectMapper().writeValueAsString(this))
-    }
+    override fun toJson(): JsonObject = JsonObject(jacksonObjectMapper().writeValueAsString(this))
 
     companion object {
-        fun fromDonation(donation: Donation): DonationApiModel {
-            return DonationApiModel(
+        fun fromDonation(donation: Donation): DonationApiModel =
+            DonationApiModel(
                 donation.id,
                 donation.timestamp,
                 donation.name,
@@ -64,7 +60,6 @@ data class DonationApiModel(
                 donation.externalId,
                 listOf(),
             )
-        }
 
         fun fromDonationWithCodes(donationWithCodes: DonationWithCodes): DonationApiModel {
             val donation = donationWithCodes.donation

@@ -21,18 +21,21 @@ import java.util.UUID
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @FeatureTest
 class IncentiveTest {
-    private val newIncentive = """{
-      "game_id": null,
-      "title": "Tetrispakikan nimi",
-      "end_time": "2021-09-21T19:08:47.000+00:00",
-      "type": "open",
-      "open_char_limit": 10,
-      "info": "Nimeä tetrispalikka poggers"    
-    }
-    """.trimIndent()
+    private val newIncentive =
+        """
+        {
+          "game_id": null,
+          "title": "Tetrispakikan nimi",
+          "end_time": "2021-09-21T19:08:47.000+00:00",
+          "type": "open",
+          "open_char_limit": 10,
+          "info": "Nimeä tetrispalikka poggers"    
+        }
+        """.trimIndent()
 
     private lateinit var client: WebClient
     private val incentives = "/incentives/"
+
     companion object {
         private lateinit var addedId: UUID
     }
@@ -42,21 +45,24 @@ class IncentiveTest {
         client = webClient
     }
 
-    private fun authenticatedRequest(method: HttpMethod, url: String): HttpRequest<Buffer> {
-        return client.request(method, url)
+    private fun authenticatedRequest(
+        method: HttpMethod,
+        url: String,
+    ): HttpRequest<Buffer> =
+        client
+            .request(method, url)
             .putHeader("Origin", "http://api.localhost")
             .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-    }
 
-    private fun getAll(): HttpRequest<Buffer> {
-        return client.get("$incentives/")
+    private fun getAll(): HttpRequest<Buffer> =
+        client
+            .get("$incentives/")
             .putHeader("Origin", "http://api.localhost")
-    }
 
-    private fun get(id: UUID): HttpRequest<Buffer> {
-        return client.get("$incentives/$id")
+    private fun get(id: UUID): HttpRequest<Buffer> =
+        client
+            .get("$incentives/$id")
             .putHeader("Origin", "http://api.localhost")
-    }
 
     @Test
     @Order(1)
@@ -86,7 +92,8 @@ class IncentiveTest {
     @Test
     @Order(2)
     fun `test getting all incentives`(testContext: VertxTestContext) {
-        getAll().send()
+        getAll()
+            .send()
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {
@@ -101,7 +108,8 @@ class IncentiveTest {
     @Test
     @Order(2)
     fun `test single incentive`(testContext: VertxTestContext) {
-        get(addedId).send()
+        get(addedId)
+            .send()
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
@@ -130,11 +138,12 @@ class IncentiveTest {
             .onSuccess { res ->
                 testContext.verify {
                     assertEquals(200, res.statusCode())
-                    val expected = JsonObject(newIncentive)
-                        .put("id", addedId.toString())
-                        .put("title", "new title")
-                        .put("total_amount", 0.0)
-                        .put("status", JsonArray())
+                    val expected =
+                        JsonObject(newIncentive)
+                            .put("id", addedId.toString())
+                            .put("title", "new title")
+                            .put("total_amount", 0.0)
+                            .put("status", JsonArray())
 
                     val body = res.bodyAsJsonObject()
 

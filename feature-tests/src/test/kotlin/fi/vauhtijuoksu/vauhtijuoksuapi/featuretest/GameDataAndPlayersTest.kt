@@ -98,194 +98,206 @@ class GameDataAndPlayersTest {
 
     @Test
     @Order(1)
-    fun `add a couple of players`() = runTest {
-        Future.all(
-            client.post("/participants")
-                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-                .sendJson(JsonObject(playerData1))
-                .map {
-                    val resJson = it.bodyAsJsonObject()
-                    assertEquals(201, it.statusCode())
-                    val sentData = JsonObject(playerData1)
-                    sentData.put("id", resJson.getString("id"))
-                    assertEquals(sentData, resJson)
-                    player1Id = UUID.fromString(resJson.getString("id"))
-                },
-            client.post("/participants")
-                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-                .sendJson(JsonObject(playerData2))
-                .map {
-                    assertEquals(201, it.statusCode())
-                    player2Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
-                },
-            client.post("/participants")
-                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-                .sendJson(JsonObject(participantData1))
-                .map {
-                    assertEquals(201, it.statusCode())
-                    participant1Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
-                },
-
-        ).coAwait()
-    }
+    fun `add a couple of players`() =
+        runTest {
+            Future
+                .all(
+                    client
+                        .post("/participants")
+                        .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                        .sendJson(JsonObject(playerData1))
+                        .map {
+                            val resJson = it.bodyAsJsonObject()
+                            assertEquals(201, it.statusCode())
+                            val sentData = JsonObject(playerData1)
+                            sentData.put("id", resJson.getString("id"))
+                            assertEquals(sentData, resJson)
+                            player1Id = UUID.fromString(resJson.getString("id"))
+                        },
+                    client
+                        .post("/participants")
+                        .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                        .sendJson(JsonObject(playerData2))
+                        .map {
+                            assertEquals(201, it.statusCode())
+                            player2Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
+                        },
+                    client
+                        .post("/participants")
+                        .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                        .sendJson(JsonObject(participantData1))
+                        .map {
+                            assertEquals(201, it.statusCode())
+                            participant1Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
+                        },
+                ).coAwait()
+        }
 
     @Test
     @Order(2)
-    fun `create new games`() = runTest {
-        Future.all(
-            client.post("/gamedata")
-                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-                .sendJson(
-                    JsonObject(gameData1)
-                        .put(
-                            "participants",
-                            listOf(
-                                JsonObject().put("participant_id", player1Id).put("role", "PLAYER"),
-                                JsonObject().put("participant_id", player2Id).put("role", "PLAYER"),
-                                JsonObject().put("participant_id", participant1Id).put("role", "COUCH"),
+    fun `create new games`() =
+        runTest {
+            Future
+                .all(
+                    client
+                        .post("/gamedata")
+                        .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                        .sendJson(
+                            JsonObject(gameData1)
+                                .put(
+                                    "participants",
+                                    listOf(
+                                        JsonObject().put("participant_id", player1Id).put("role", "PLAYER"),
+                                        JsonObject().put("participant_id", player2Id).put("role", "PLAYER"),
+                                        JsonObject().put("participant_id", participant1Id).put("role", "COUCH"),
+                                    ),
+                                ),
+                        ).map { res ->
+                            val resJson = res.bodyAsJsonObject()
+                            assertEquals(201, res.statusCode())
+                            val original =
+                                JsonObject(gameData1)
+                                    .put("id", resJson.getString("id"))
+                                    .put(
+                                        "participants",
+                                        listOf(
+                                            JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER"),
+                                            JsonObject().put("participant_id", player2Id.toString()).put("role", "PLAYER"),
+                                            JsonObject().put("participant_id", participant1Id.toString()).put("role", "COUCH"),
+                                        ),
+                                    )
+                            assertEquals(original, resJson)
+                            game1Id = UUID.fromString(res.bodyAsJsonObject().getString("id"))
+                        },
+                    client
+                        .post("/gamedata")
+                        .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                        .sendJson(
+                            JsonObject(gameData2).put(
+                                "participants",
+                                listOf(JsonObject().put("participant_id", player2Id).put("role", "PLAYER")),
                             ),
-                        ),
-                )
-                .map { res ->
-                    val resJson = res.bodyAsJsonObject()
-                    assertEquals(201, res.statusCode())
-                    val original = JsonObject(gameData1)
-                        .put("id", resJson.getString("id"))
-                        .put(
-                            "participants",
-                            listOf(
-                                JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER"),
-                                JsonObject().put("participant_id", player2Id.toString()).put("role", "PLAYER"),
-                                JsonObject().put("participant_id", participant1Id.toString()).put("role", "COUCH"),
-                            ),
-                        )
-                    assertEquals(original, resJson)
-                    game1Id = UUID.fromString(res.bodyAsJsonObject().getString("id"))
-                },
-            client.post("/gamedata")
-                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-                .sendJson(
-                    JsonObject(gameData2).put(
-                        "participants",
-                        listOf(JsonObject().put("participant_id", player2Id).put("role", "PLAYER")),
-                    ),
-                )
-                .map {
-                    game2Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
-                },
-        ).coAwait()
-    }
+                        ).map {
+                            game2Id = UUID.fromString(it.bodyAsJsonObject().getString("id"))
+                        },
+                ).coAwait()
+        }
 
     @Test
     @Order(3)
-    fun `change a game`() = runTest {
-        client.patch("/gamedata/$game1Id")
-            .putHeader("Origin", "http://api.localhost")
-            .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-            .sendJson(
-                JsonObject(gameData1)
-                    .put("game", "Pacman")
-                    .put(
-                        "participants",
-                        listOf(JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER")),
-                    ),
-            )
-            .map {
-                assertEquals(200, it.statusCode())
-                val expectedData = JsonObject(gameData1)
-                    .put("id", game1Id.toString())
-                    .put("game", "Pacman")
-                    .put(
-                        "participants",
-                        listOf(JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER")),
-                    )
-                assertEquals(expectedData, it.bodyAsJsonObject())
-            }
-            .coAwait()
-    }
+    fun `change a game`() =
+        runTest {
+            client
+                .patch("/gamedata/$game1Id")
+                .putHeader("Origin", "http://api.localhost")
+                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                .sendJson(
+                    JsonObject(gameData1)
+                        .put("game", "Pacman")
+                        .put(
+                            "participants",
+                            listOf(JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER")),
+                        ),
+                ).map {
+                    assertEquals(200, it.statusCode())
+                    val expectedData =
+                        JsonObject(gameData1)
+                            .put("id", game1Id.toString())
+                            .put("game", "Pacman")
+                            .put(
+                                "participants",
+                                listOf(JsonObject().put("participant_id", player1Id.toString()).put("role", "PLAYER")),
+                            )
+                    assertEquals(expectedData, it.bodyAsJsonObject())
+                }.coAwait()
+        }
 
     @Test
     @Order(4)
-    fun `remove a game`() = runTest {
-        client.delete("/gamedata/$game1Id")
-            .putHeader("Origin", "http://api.localhost")
-            .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-            .send()
-            .map {
-                assertEquals(204, it.statusCode())
-            }
-            .compose {
-                client.get("/gamedata/$game1Id")
-                    .send()
-            }
-            .map {
-                assertEquals(404, it.statusCode())
-            }
-            .compose {
-                client.get("/participants/$player1Id")
-                    .send()
-            }
-            .map {
-                assertEquals(200, it.statusCode())
-            }.coAwait()
-    }
+    fun `remove a game`() =
+        runTest {
+            client
+                .delete("/gamedata/$game1Id")
+                .putHeader("Origin", "http://api.localhost")
+                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                .send()
+                .map {
+                    assertEquals(204, it.statusCode())
+                }.compose {
+                    client
+                        .get("/gamedata/$game1Id")
+                        .send()
+                }.map {
+                    assertEquals(404, it.statusCode())
+                }.compose {
+                    client
+                        .get("/participants/$player1Id")
+                        .send()
+                }.map {
+                    assertEquals(200, it.statusCode())
+                }.coAwait()
+        }
 
     @Test
     @Order(5)
-    fun `remove a player`() = runTest {
-        client.delete("/participants/$player2Id")
-            .putHeader("Origin", "http://api.localhost")
-            .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-            .send()
-            .map {
-                assertEquals(204, it.statusCode())
-            }
-            .compose {
-                client.get("/participants/$player2Id")
-                    .send()
-            }
-            .map {
-                assertEquals(404, it.statusCode())
-            }
-            .compose {
-                client.get("/gamedata/$game2Id")
-                    .send()
-            }
-            .map {
-                assertEquals(200, it.statusCode())
-                val expectedResponse = JsonObject(gameData2)
-                    .put("id", game2Id.toString())
-                    .put("participants", listOf<String>())
-                assertEquals(expectedResponse, it.bodyAsJsonObject())
-            }.coAwait()
-    }
+    fun `remove a player`() =
+        runTest {
+            client
+                .delete("/participants/$player2Id")
+                .putHeader("Origin", "http://api.localhost")
+                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                .send()
+                .map {
+                    assertEquals(204, it.statusCode())
+                }.compose {
+                    client
+                        .get("/participants/$player2Id")
+                        .send()
+                }.map {
+                    assertEquals(404, it.statusCode())
+                }.compose {
+                    client
+                        .get("/gamedata/$game2Id")
+                        .send()
+                }.map {
+                    assertEquals(200, it.statusCode())
+                    val expectedResponse =
+                        JsonObject(gameData2)
+                            .put("id", game2Id.toString())
+                            .put("participants", listOf<String>())
+                    assertEquals(expectedResponse, it.bodyAsJsonObject())
+                }.coAwait()
+        }
 
     @Test
     @Order(6)
-    fun `modify player info`() = runTest {
-        client.patch("/participants/$player1Id")
-            .putHeader("Origin", "http://api.localhost")
-            .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
-            .sendJson(
-                JsonObject(playerData1)
-                    .put("display_name", "Pekka"),
-            )
-            .map {
-                assertEquals(200, it.statusCode())
-                val expectedResponse = JsonObject(playerData1)
-                    .put("id", player1Id.toString())
-                    .put("display_name", "Pekka")
-                assertEquals(expectedResponse, it.bodyAsJsonObject())
-            }
-            .compose {
-                client.get("/participants/$player1Id")
-                    .send()
-            }.map {
-                assertEquals(200, it.statusCode())
-                val expectedResponse = JsonObject(playerData1)
-                    .put("id", player1Id.toString())
-                    .put("display_name", "Pekka")
-                assertEquals(expectedResponse, it.bodyAsJsonObject())
-            }.coAwait()
-    }
+    fun `modify player info`() =
+        runTest {
+            client
+                .patch("/participants/$player1Id")
+                .putHeader("Origin", "http://api.localhost")
+                .authentication(UsernamePasswordCredentials("vauhtijuoksu", "vauhtijuoksu"))
+                .sendJson(
+                    JsonObject(playerData1)
+                        .put("display_name", "Pekka"),
+                ).map {
+                    assertEquals(200, it.statusCode())
+                    val expectedResponse =
+                        JsonObject(playerData1)
+                            .put("id", player1Id.toString())
+                            .put("display_name", "Pekka")
+                    assertEquals(expectedResponse, it.bodyAsJsonObject())
+                }.compose {
+                    client
+                        .get("/participants/$player1Id")
+                        .send()
+                }.map {
+                    assertEquals(200, it.statusCode())
+                    val expectedResponse =
+                        JsonObject(playerData1)
+                            .put("id", player1Id.toString())
+                            .put("display_name", "Pekka")
+                    assertEquals(expectedResponse, it.bodyAsJsonObject())
+                }.coAwait()
+        }
 }

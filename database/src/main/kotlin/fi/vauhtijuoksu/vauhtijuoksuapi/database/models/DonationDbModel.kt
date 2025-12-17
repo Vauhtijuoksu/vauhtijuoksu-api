@@ -19,8 +19,8 @@ data class DonationDbModel(
     @JsonProperty("external_id")
     val externalId: String?,
 ) {
-    fun toDonation(): Donation {
-        return Donation(
+    fun toDonation(): Donation =
+        Donation(
             id,
             timestamp,
             name,
@@ -29,11 +29,10 @@ data class DonationDbModel(
             read,
             externalId,
         )
-    }
 
     companion object {
-        fun fromDonation(donation: Donation): DonationDbModel {
-            return DonationDbModel(
+        fun fromDonation(donation: Donation): DonationDbModel =
+            DonationDbModel(
                 donation.id,
                 donation.timestamp,
                 donation.name,
@@ -42,6 +41,5 @@ data class DonationDbModel(
                 donation.read,
                 donation.externalId,
             )
-        }
     }
 }

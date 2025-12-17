@@ -5,11 +5,10 @@ import io.vertx.core.Future
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.fail
 
-internal fun <V> Future<V>.failOnSuccess(): Future<V> {
-    return this.onSuccess {
+internal fun <V> Future<V>.failOnSuccess(): Future<V> =
+    this.onSuccess {
         fail("Expected to fail")
     }
-}
 
 internal fun <V> Future<V>.recoverIfMissingEntity(): Future<V> {
     return this.recover {

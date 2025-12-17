@@ -40,8 +40,8 @@ data class GameDataApiModel(
     val participants: List<GameParticipantApiModel>,
 ) : ApiModel<GameData> {
     companion object {
-        fun fromGameData(gameData: GameData): GameDataApiModel {
-            return GameDataApiModel(
+        fun fromGameData(gameData: GameData): GameDataApiModel =
+            GameDataApiModel(
                 gameData.id,
                 gameData.game,
                 gameData.startTime,
@@ -54,15 +54,12 @@ data class GameDataApiModel(
                 gameData.meta,
                 gameData.participants.map { GameParticipantApiModel(it.participantId, it.role) },
             )
-        }
     }
 
-    override fun toJson(): JsonObject {
-        return JsonObject(jacksonObjectMapper().writeValueAsString(this))
-    }
+    override fun toJson(): JsonObject = JsonObject(jacksonObjectMapper().writeValueAsString(this))
 
-    override fun toModel(): GameData {
-        return GameData(
+    override fun toModel(): GameData =
+        GameData(
             id,
             game,
             startTime,
@@ -77,5 +74,4 @@ data class GameDataApiModel(
                 GameParticipant(it.participant_id, it.role)
             },
         )
-    }
 }

@@ -33,23 +33,24 @@ class GeneratedIncentiveDatabaseTest {
 
     @BeforeEach
     fun beforeEach() {
-        val injector = Guice.createInjector(
-            DatabaseModule(),
-            object : AbstractModule() {
-                override fun configure() {
-                    bind(DatabaseConfiguration::class.java).toInstance(
-                        DatabaseConfiguration(
-                            pg.host,
-                            pg.firstMappedPort,
-                            "vauhtijuoksu-api",
-                            pg.username,
-                            pg.password,
-                            6,
-                        ),
-                    )
-                }
-            },
-        )
+        val injector =
+            Guice.createInjector(
+                DatabaseModule(),
+                object : AbstractModule() {
+                    override fun configure() {
+                        bind(DatabaseConfiguration::class.java).toInstance(
+                            DatabaseConfiguration(
+                                pg.host,
+                                pg.firstMappedPort,
+                                "vauhtijuoksu-api",
+                                pg.username,
+                                pg.password,
+                                6,
+                            ),
+                        )
+                    }
+                },
+            )
 
         db = injector.getInstance(GeneratedIncentiveCodeDatabase::class.java)
         incentiveDb = injector.getInstance(IncentiveDatabase::class.java)
@@ -60,20 +61,23 @@ class GeneratedIncentiveDatabaseTest {
         val incentiveId1 = TestIncentive.incentive1.id
         val incentiveId2 = TestIncentive.incentive2.id
 
-        val generatedIncentive1 = GeneratedIncentive(
-            IncentiveCode.random(),
-            listOf(
-                ChosenIncentive(incentiveId1, null),
-                ChosenIncentive(incentiveId2, null),
-            ),
-        )
-        val generatedIncentive2 = GeneratedIncentive(
-            IncentiveCode.random(),
-            listOf(
-                ChosenIncentive(incentiveId2, "some param"),
-            ),
-        )
-        incentiveDb.add(TestIncentive.incentive1)
+        val generatedIncentive1 =
+            GeneratedIncentive(
+                IncentiveCode.random(),
+                listOf(
+                    ChosenIncentive(incentiveId1, null),
+                    ChosenIncentive(incentiveId2, null),
+                ),
+            )
+        val generatedIncentive2 =
+            GeneratedIncentive(
+                IncentiveCode.random(),
+                listOf(
+                    ChosenIncentive(incentiveId2, "some param"),
+                ),
+            )
+        incentiveDb
+            .add(TestIncentive.incentive1)
             .compose { incentiveDb.add(TestIncentive.incentive2) }
             .compose { db.add(generatedIncentive1) }
             .compose { db.add(generatedIncentive2) }

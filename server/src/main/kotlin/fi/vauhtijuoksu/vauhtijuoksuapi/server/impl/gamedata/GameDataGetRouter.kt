@@ -9,12 +9,13 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class GameDataGetRouter
-@Inject constructor(
-    @Named(PUBLIC_CORS)
-    publicEndpointCorsHandler: CorsHandler,
-    db: VauhtijuoksuDatabase<GameData>,
-) : GetRouter<GameData>(
-    publicEndpointCorsHandler,
-    db,
-    { gd: GameData -> GameDataApiModel.fromGameData(gd).toJson() },
-)
+    @Inject
+    constructor(
+        @Named(PUBLIC_CORS)
+        publicEndpointCorsHandler: CorsHandler,
+        db: VauhtijuoksuDatabase<GameData>,
+    ) : GetRouter<GameData>(
+            publicEndpointCorsHandler,
+            db,
+            { gd: GameData -> GameDataApiModel.fromGameData(gd).toJson() },
+        )

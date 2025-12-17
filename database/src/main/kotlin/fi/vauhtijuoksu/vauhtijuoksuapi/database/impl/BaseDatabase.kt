@@ -12,11 +12,14 @@ open class BaseDatabase(
     configuration: DatabaseConfiguration,
 ) {
     init {
-        val migrations = Flyway.configure().dataSource(
-            "jdbc:postgresql://${configuration.address}:${configuration.port}/${configuration.database}?sslmode=prefer",
-            configuration.user,
-            configuration.password,
-        ).load()
+        val migrations =
+            Flyway
+                .configure()
+                .dataSource(
+                    "jdbc:postgresql://${configuration.address}:${configuration.port}/${configuration.database}?sslmode=prefer",
+                    configuration.user,
+                    configuration.password,
+                ).load()
         migrations.migrate()
 
         DatabindCodec.mapper().registerModule(kotlinModule())

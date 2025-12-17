@@ -28,8 +28,8 @@ data class NewGameDataApiModel(
     val meta: String?,
     val participants: List<GameParticipantApiModel> = listOf(),
 ) {
-    fun toGameData(id: UUID): GameData {
-        return GameData(
+    fun toGameData(id: UUID): GameData =
+        GameData(
             id,
             game,
             startTime,
@@ -42,5 +42,4 @@ data class NewGameDataApiModel(
             meta,
             participants.map { GameParticipant(it.participant_id, it.role) },
         )
-    }
 }

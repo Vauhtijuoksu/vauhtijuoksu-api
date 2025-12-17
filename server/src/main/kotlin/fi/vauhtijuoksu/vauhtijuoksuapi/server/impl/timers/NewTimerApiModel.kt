@@ -12,12 +12,11 @@ data class NewTimerApiModel(
     val endTime: OffsetDateTime?,
     val name: String,
 ) {
-    fun toTimer(id: UUID): Timer {
-        return Timer(
+    fun toTimer(id: UUID): Timer =
+        Timer(
             id,
             startTime,
             endTime,
             name,
         )
-    }
 }

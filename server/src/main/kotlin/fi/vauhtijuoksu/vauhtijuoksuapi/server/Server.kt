@@ -39,6 +39,7 @@ import java.util.concurrent.CountDownLatch
 import kotlin.system.exitProcess
 
 private fun HttpServerRequest.referer(): String? = headers().get("referer")
+
 private var Session.referer: String?
     get() = get("referer")
     set(value): Unit {
@@ -46,121 +47,126 @@ private var Session.referer: String?
     }
 
 @Suppress("LongParameterList")
-class Server @Inject constructor(
-    private val httpServer: HttpServer,
-    router: Router,
-    gameDataRouter: GameDataRouter,
-    donationsRouter: DonationsRouter,
-    streamMetadataRouter: StreamMetadataRouter,
-    playerInfoRouter: PlayerInfoRouter,
-    incentivesRouter: IncentivesRouter,
-    incentiveCodeRouter: IncentiveCodeRouter,
-    participantsRouter: ParticipantsRouter,
-    timerRouter: TimerRouter,
-    @Named(AUTHENTICATED_CORS) corsHandler: CorsHandler,
-    sessionHandler: SessionHandler,
-    oAuthProvider: OAuth2Auth,
-    oauth2AuthHandler: OAuth2AuthHandler,
-) {
-    private val logger = KotlinLogging.logger {}
+class Server
+    @Inject
+    constructor(
+        private val httpServer: HttpServer,
+        router: Router,
+        gameDataRouter: GameDataRouter,
+        donationsRouter: DonationsRouter,
+        streamMetadataRouter: StreamMetadataRouter,
+        playerInfoRouter: PlayerInfoRouter,
+        incentivesRouter: IncentivesRouter,
+        incentiveCodeRouter: IncentiveCodeRouter,
+        participantsRouter: ParticipantsRouter,
+        timerRouter: TimerRouter,
+        @Named(AUTHENTICATED_CORS) corsHandler: CorsHandler,
+        sessionHandler: SessionHandler,
+        oAuthProvider: OAuth2Auth,
+        oauth2AuthHandler: OAuth2AuthHandler,
+    ) {
+        private val logger = KotlinLogging.logger {}
 
-    init {
-        router.route().handler(sessionHandler)
+        init {
+            router.route().handler(sessionHandler)
 
-        router.get("/login")
-            .handler(
-                PlatformHandler { // Need a platform handler or some other that is allowed before auth handler
-                    if (it.session().referer == null) {
-                        it.session().referer = it.request().referer()
-                    }
-                    it.next()
-                },
-            )
-            .handler(oauth2AuthHandler)
-            .handler {
-                if (it.session().referer != null) {
-                    it.redirect(it.session().referer)
-                } else {
-                    it.response().end()
-                }
-            }
-
-        router.post("/logout").handler {
-            it.user()?.run { oAuthProvider.revoke(this) }
-            it.session().destroy()
-            it.request().end()
-        }
-
-        oauth2AuthHandler.setupCallback(router.route("/callback"))
-
-        router.options().handler(corsHandler)
-        router.options().handler { ctx ->
-            ctx.response().headers().add(
-                HttpHeaders.ALLOW,
-                "${HttpMethod.GET}, ${HttpMethod.POST}, ${HttpMethod.PATCH}, ${HttpMethod.OPTIONS}, ${HttpMethod.DELETE}",
-            )
-            ctx.response().end()
-        }
-
-        gameDataRouter.configure(router)
-        donationsRouter.configure(router)
-        streamMetadataRouter.configure(router)
-        playerInfoRouter.configure(router)
-        incentivesRouter.configure(router)
-        incentiveCodeRouter.configure(router)
-        participantsRouter.configure(router)
-        timerRouter.configure(router)
-        router.route().failureHandler { ctx ->
-            when (val cause = ctx.failure()) {
-                is UserError -> {
-                    logger.warn { "Generic error: ${cause.message}" }
-                    ctx.response().setStatusCode(BAD_REQUEST).end(cause.message)
-                }
-
-                is MissingEntityException -> {
-                    logger.info { "Missing entity: ${cause.message}" }
-                    ctx.response().setStatusCode(NOT_FOUND).end(cause.message)
-                }
-
-                is ServerError, is VauhtijuoksuException -> {
-                    logger.warn { "ServerError: ${cause.message}" }
-                    ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(cause.message)
-                }
-
-                is HttpException -> {
-                    ctx.response().setStatusCode(cause.statusCode).end()
-                }
-
-                else -> {
-                    if (ctx.statusCode() in USER_ERROR_CODES) {
-                        ctx.response().setStatusCode(ctx.statusCode()).end()
+            router
+                .get("/login")
+                .handler(
+                    PlatformHandler {
+                        // Need a platform handler or some other that is allowed before auth handler
+                        if (it.session().referer == null) {
+                            it.session().referer = it.request().referer()
+                        }
+                        it.next()
+                    },
+                ).handler(oauth2AuthHandler)
+                .handler {
+                    if (it.session().referer != null) {
+                        it.redirect(it.session().referer)
                     } else {
-                        logger.warn { "Unexpected status code ${ctx.statusCode()} in failure handler with error $cause" }
-                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
+                        it.response().end()
+                    }
+                }
+
+            router.post("/logout").handler {
+                it.user()?.run { oAuthProvider.revoke(this) }
+                it.session().destroy()
+                it.request().end()
+            }
+
+            oauth2AuthHandler.setupCallback(router.route("/callback"))
+
+            router.options().handler(corsHandler)
+            router.options().handler { ctx ->
+                ctx.response().headers().add(
+                    HttpHeaders.ALLOW,
+                    "${HttpMethod.GET}, ${HttpMethod.POST}, ${HttpMethod.PATCH}, ${HttpMethod.OPTIONS}, ${HttpMethod.DELETE}",
+                )
+                ctx.response().end()
+            }
+
+            gameDataRouter.configure(router)
+            donationsRouter.configure(router)
+            streamMetadataRouter.configure(router)
+            playerInfoRouter.configure(router)
+            incentivesRouter.configure(router)
+            incentiveCodeRouter.configure(router)
+            participantsRouter.configure(router)
+            timerRouter.configure(router)
+            router.route().failureHandler { ctx ->
+                when (val cause = ctx.failure()) {
+                    is UserError -> {
+                        logger.warn { "Generic error: ${cause.message}" }
+                        ctx.response().setStatusCode(BAD_REQUEST).end(cause.message)
+                    }
+
+                    is MissingEntityException -> {
+                        logger.info { "Missing entity: ${cause.message}" }
+                        ctx.response().setStatusCode(NOT_FOUND).end(cause.message)
+                    }
+
+                    is ServerError, is VauhtijuoksuException -> {
+                        logger.warn { "ServerError: ${cause.message}" }
+                        ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end(cause.message)
+                    }
+
+                    is HttpException -> {
+                        ctx.response().setStatusCode(cause.statusCode).end()
+                    }
+
+                    else -> {
+                        if (ctx.statusCode() in USER_ERROR_CODES) {
+                            ctx.response().setStatusCode(ctx.statusCode()).end()
+                        } else {
+                            logger.warn { "Unexpected status code ${ctx.statusCode()} in failure handler with error $cause" }
+                            ctx.response().setStatusCode(INTERNAL_SERVER_ERROR).end()
+                        }
                     }
                 }
             }
+            httpServer.requestHandler(router)
         }
-        httpServer.requestHandler(router)
-    }
 
-    fun start() {
-        val latch = CountDownLatch(1)
-        httpServer.listen().onSuccess {
-            logger.info { "Server listening on port ${httpServer.actualPort()}" }
-            latch.countDown()
-        }.onFailure { t ->
-            logger.error { "Server could not start because ${t.message}. Exiting" }
-            exitProcess(1)
+        fun start() {
+            val latch = CountDownLatch(1)
+            httpServer
+                .listen()
+                .onSuccess {
+                    logger.info { "Server listening on port ${httpServer.actualPort()}" }
+                    latch.countDown()
+                }.onFailure { t ->
+                    logger.error { "Server could not start because ${t.message}. Exiting" }
+                    exitProcess(1)
+                }
+        }
+
+        fun stop() {
+            val latch = CountDownLatch(1)
+            httpServer.close { latch.countDown() }
+            latch.await()
         }
     }
-
-    fun stop() {
-        val latch = CountDownLatch(1)
-        httpServer.close { latch.countDown() }
-        latch.await()
-    }
-}
 
 fun main() {
     val injector = Guice.createInjector(ConfigurationModule(), ApiModule(), AuthModule(), DatabaseModule())

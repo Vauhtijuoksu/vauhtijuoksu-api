@@ -22,33 +22,46 @@ data class GeneratedCodeApiModel(
     val code: String,
 )
 
-class IncentiveCodePostRouter @Inject constructor(
-    @Named(DependencyInjectionConstants.PUBLIC_CORS)
-    private val publicEndpointCorsHandler: CorsHandler,
-    private val incentiveCodeService: IncentiveCodeService,
-) : PartialRouter {
-    override fun configure(router: Router, basepath: String) {
-        router.post(basepath)
-            .handler(publicEndpointCorsHandler)
-            .handler(BodyHandler.create())
-            .handler { ctx ->
-                val codes = ctx.body().asJsonArray()
-                    .map { (it as JsonObject).mapTo(ChosenIncentiveApiModel::class.java) }
-                    .map { ChosenIncentive(it.id, it.parameter) }
-                incentiveCodeService.generateCode(codes)
-                    .onFailure(ctx::fail)
-                    .onSuccess {
-                        ctx.response()
-                            .setStatusCode(ApiConstants.CREATED)
-                            .end(JsonObject.mapFrom(GeneratedCodeApiModel(it.code)).encode())
-                    }
-            }
+class IncentiveCodePostRouter
+    @Inject
+    constructor(
+        @Named(DependencyInjectionConstants.PUBLIC_CORS)
+        private val publicEndpointCorsHandler: CorsHandler,
+        private val incentiveCodeService: IncentiveCodeService,
+    ) : PartialRouter {
+        override fun configure(
+            router: Router,
+            basepath: String,
+        ) {
+            router
+                .post(basepath)
+                .handler(publicEndpointCorsHandler)
+                .handler(BodyHandler.create())
+                .handler { ctx ->
+                    val codes =
+                        ctx
+                            .body()
+                            .asJsonArray()
+                            .map { (it as JsonObject).mapTo(ChosenIncentiveApiModel::class.java) }
+                            .map { ChosenIncentive(it.id, it.parameter) }
+                    incentiveCodeService
+                        .generateCode(codes)
+                        .onFailure(ctx::fail)
+                        .onSuccess {
+                            ctx
+                                .response()
+                                .setStatusCode(ApiConstants.CREATED)
+                                .end(JsonObject.mapFrom(GeneratedCodeApiModel(it.code)).encode())
+                        }
+                }
+        }
     }
-}
 
-class IncentiveCodeRouter @Inject constructor(
-    incentiveCodePostRouter: IncentiveCodePostRouter,
-) : BaseRouter(
-    "/generate-incentive-code",
-    listOf(incentiveCodePostRouter),
-)
+class IncentiveCodeRouter
+    @Inject
+    constructor(
+        incentiveCodePostRouter: IncentiveCodePostRouter,
+    ) : BaseRouter(
+            "/generate-incentive-code",
+            listOf(incentiveCodePostRouter),
+        )

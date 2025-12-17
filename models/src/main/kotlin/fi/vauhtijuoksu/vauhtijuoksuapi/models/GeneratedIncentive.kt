@@ -25,9 +25,11 @@ data class IncentiveCode constructor(
         val codeFormat = Regex("""\{#Vj[A-F0-9]{$CODE_LENGTH}\}""")
 
         fun random(): IncentiveCode {
-            val code = Integer.toHexString(Random.nextBits(CODE_LENGTH * BITS_IN_HEX_DIGIT))
-                .uppercase()
-                .padStart(CODE_LENGTH, '0')
+            val code =
+                Integer
+                    .toHexString(Random.nextBits(CODE_LENGTH * BITS_IN_HEX_DIGIT))
+                    .uppercase()
+                    .padStart(CODE_LENGTH, '0')
             return IncentiveCode(
                 "{#Vj$code}",
             )

@@ -31,40 +31,42 @@ internal class GameDataApiModelTest {
 
     @BeforeEach
     fun setup() {
-        expectedGameData = JsonObject()
-            .put("id", uuid.toString())
-            .put("game", "Tetris")
-            .put("start_time", startUtc)
-            .put("end_time", endUtc)
-            .put("category", "any%")
-            .put("device", "PC")
-            .put("published", "1970")
-            .put("vod_link", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-            .put("img_filename", "tetris.png")
-            .put("meta", "k18")
-            .put("participants", listOf(JsonObject().put("participant_id", playerId.toString()).put("role", "PLAYER")))
+        expectedGameData =
+            JsonObject()
+                .put("id", uuid.toString())
+                .put("game", "Tetris")
+                .put("start_time", startUtc)
+                .put("end_time", endUtc)
+                .put("category", "any%")
+                .put("device", "PC")
+                .put("published", "1970")
+                .put("vod_link", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+                .put("img_filename", "tetris.png")
+                .put("meta", "k18")
+                .put("participants", listOf(JsonObject().put("participant_id", playerId.toString()).put("role", "PLAYER")))
     }
 
     @Test
     fun testGameDataSerialization() {
-        val gameData = GameDataApiModel(
-            uuid,
-            "Tetris",
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(start))),
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(end))),
-            "any%",
-            "PC",
-            "1970",
-            URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
-            "tetris.png",
-            "k18",
-            listOf(
-                GameParticipantApiModel(
-                    playerId,
-                    ParticipantRole.PLAYER,
+        val gameData =
+            GameDataApiModel(
+                uuid,
+                "Tetris",
+                Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(start))),
+                Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(end))),
+                "any%",
+                "PC",
+                "1970",
+                URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+                "tetris.png",
+                "k18",
+                listOf(
+                    GameParticipantApiModel(
+                        playerId,
+                        ParticipantRole.PLAYER,
+                    ),
                 ),
-            ),
-        )
+            )
 
         val gameDataAsJson = gameData.toJson()
         assertEquals(expectedGameData, gameDataAsJson)
@@ -73,24 +75,25 @@ internal class GameDataApiModelTest {
     @Test
     fun testGameDataSerializationNoVodLink() {
         expectedGameData.remove("vod_link")
-        val gameDataApiModel = GameDataApiModel(
-            uuid,
-            "Tetris",
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(start))),
-            Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(end))),
-            "any%",
-            "PC",
-            "1970",
-            null,
-            "tetris.png",
-            "k18",
-            listOf(
-                GameParticipantApiModel(
-                    playerId,
-                    ParticipantRole.PLAYER,
+        val gameDataApiModel =
+            GameDataApiModel(
+                uuid,
+                "Tetris",
+                Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(start))),
+                Date.from(Instant.from(DateTimeFormatter.ISO_INSTANT.parse(end))),
+                "any%",
+                "PC",
+                "1970",
+                null,
+                "tetris.png",
+                "k18",
+                listOf(
+                    GameParticipantApiModel(
+                        playerId,
+                        ParticipantRole.PLAYER,
+                    ),
                 ),
-            ),
-        )
+            )
 
         val gameDataAsJson = gameDataApiModel.toJson()
         assertEquals(expectedGameData, gameDataAsJson)

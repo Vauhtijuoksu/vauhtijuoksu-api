@@ -18,8 +18,12 @@ class MockitoUtils private constructor() {
     }
 }
 
-fun <T> Future<T>.verify(testContext: VertxTestContext, verifications: (T) -> Unit): Future<T> {
-    this.onFailure(testContext::failNow)
+fun <T> Future<T>.verify(
+    testContext: VertxTestContext,
+    verifications: (T) -> Unit,
+): Future<T> {
+    this
+        .onFailure(testContext::failNow)
         .onSuccess {
             testContext.verify {
                 verifications(it)
@@ -28,7 +32,10 @@ fun <T> Future<T>.verify(testContext: VertxTestContext, verifications: (T) -> Un
     return this
 }
 
-fun <T> Future<T>.verifyAndCompleteTest(testContext: VertxTestContext, verifications: (T) -> Unit) {
+fun <T> Future<T>.verifyAndCompleteTest(
+    testContext: VertxTestContext,
+    verifications: (T) -> Unit,
+) {
     verify(testContext, verifications)
         .onSuccess { testContext.completeNow() }
 }

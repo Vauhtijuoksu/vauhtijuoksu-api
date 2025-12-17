@@ -20,8 +20,8 @@ data class NewIncentiveApiModel(
     @JsonProperty("open_char_limit")
     val openCharLimit: Int?,
 ) {
-    fun toIncentive(id: UUID): Incentive {
-        return Incentive(
+    fun toIncentive(id: UUID): Incentive =
+        Incentive(
             id,
             gameId,
             title,
@@ -32,5 +32,4 @@ data class NewIncentiveApiModel(
             optionParameters,
             openCharLimit,
         )
-    }
 }

@@ -14,18 +14,18 @@ import mu.KotlinLogging
 import java.util.UUID
 
 class ParticipantDatabase
-@Inject constructor(
-    private val pool: PgPool,
-    configuration: DatabaseConfiguration,
-) :
-    BaseDatabase(configuration),
-    VauhtijuoksuDatabase<Participant> {
-    private val logger = KotlinLogging.logger {}
+    @Inject
+    constructor(
+        private val pool: PgPool,
+        configuration: DatabaseConfiguration,
+    ) : BaseDatabase(configuration),
+        VauhtijuoksuDatabase<Participant> {
+        private val logger = KotlinLogging.logger {}
 
-    @Suppress("MaxLineLength")
-    private val getAll =
-        pool.preparedQuery(
-            """
+        @Suppress("MaxLineLength")
+        private val getAll =
+            pool.preparedQuery(
+                """
             SELECT 
                 p.id,
                 p.display_name,
@@ -44,12 +44,12 @@ class ParticipantDatabase
             GROUP BY p.id, p.display_name
             ORDER BY p.display_name;
             """,
-        )
+            )
 
-    @Suppress("MaxLineLength")
-    private val getOne =
-        pool.preparedQuery(
-            """
+        @Suppress("MaxLineLength")
+        private val getOne =
+            pool.preparedQuery(
+                """
             SELECT 
                 p.id,
                 p.display_name,
@@ -68,110 +68,107 @@ class ParticipantDatabase
             WHERE p.id = $1
             GROUP BY p.id, p.display_name;
             """,
-        )
-    private val delete = pool.preparedQuery("DELETE from participants where id = $1;")
+            )
+        private val delete = pool.preparedQuery("DELETE from participants where id = $1;")
 
-    override fun getAll(): Future<List<Participant>> {
-        return getAll.execute()
-            .map { it.map(mapperToType<ParticipantDbModel>()) }
-            .map { it.map(ParticipantDbModel::toParticipant) }
-            .orServerError()
-    }
+        override fun getAll(): Future<List<Participant>> =
+            getAll
+                .execute()
+                .map { it.map(mapperToType<ParticipantDbModel>()) }
+                .map { it.map(ParticipantDbModel::toParticipant) }
+                .orServerError()
 
-    override fun getById(id: UUID): Future<Participant> {
-        return getOne.execute(Tuple.of(id))
-            .map {
-                return@map it.first()
-            }.recover {
-                if (it is NoSuchElementException) {
-                    throw MissingEntityException("No Participant with id $id")
-                } else {
-                    throw it
-                }
-            }
-            .map(mapperToType<ParticipantDbModel>())
-            .map(ParticipantDbModel::toParticipant)
-    }
-
-    override fun delete(id: UUID): Future<Unit> {
-        return delete.execute(Tuple.of(id))
-            .expectOneChangedRow()
-    }
-
-    override fun add(record: Participant): Future<Unit> {
-        return pool.withTransaction { client ->
-            client.preparedQuery("""INSERT INTO participants values ($1, $2)""")
-                .execute(
-                    ParticipantDbModel.fromParticipant(record).let {
-                        Tuple.of(
-                            it.id,
-                            it.display_name,
-                        )
-                    },
-                )
-                .flatMap {
-                    return@flatMap if (record.socialMedias.isEmpty()) {
-                        Future.succeededFuture()
+        override fun getById(id: UUID): Future<Participant> {
+            return getOne
+                .execute(Tuple.of(id))
+                .map {
+                    return@map it.first()
+                }.recover {
+                    if (it is NoSuchElementException) {
+                        throw MissingEntityException("No Participant with id $id")
                     } else {
-                        client.preparedQuery("INSERT INTO social_medias VALUES ($1, $2, $3)")
-                            .executeBatch(
-                                record.socialMedias.map {
-                                    Tuple.of(
-                                        record.id,
-                                        it.platform,
-                                        it.username,
-                                    )
-                                },
-                            )
+                        throw it
                     }
-                }
-                .recover {
-                    throw ServerError("Failed to insert $record because of ${it.message}")
-                }
-                .onSuccess {
-                    logger.debug { "Inserted participant $record" }
-                }
-                .mapEmpty()
+                }.map(mapperToType<ParticipantDbModel>())
+                .map(ParticipantDbModel::toParticipant)
         }
-    }
 
-    override fun update(record: Participant): Future<Unit> {
-        return pool.withTransaction { client ->
-            client.preparedQuery(
-                """UPDATE participants SET  
+        override fun delete(id: UUID): Future<Unit> =
+            delete
+                .execute(Tuple.of(id))
+                .expectOneChangedRow()
+
+        override fun add(record: Participant): Future<Unit> {
+            return pool.withTransaction { client ->
+                client
+                    .preparedQuery("""INSERT INTO participants values ($1, $2)""")
+                    .execute(
+                        ParticipantDbModel.fromParticipant(record).let {
+                            Tuple.of(
+                                it.id,
+                                it.display_name,
+                            )
+                        },
+                    ).flatMap {
+                        return@flatMap if (record.socialMedias.isEmpty()) {
+                            Future.succeededFuture()
+                        } else {
+                            client
+                                .preparedQuery("INSERT INTO social_medias VALUES ($1, $2, $3)")
+                                .executeBatch(
+                                    record.socialMedias.map {
+                                        Tuple.of(
+                                            record.id,
+                                            it.platform,
+                                            it.username,
+                                        )
+                                    },
+                                )
+                        }
+                    }.recover {
+                        throw ServerError("Failed to insert $record because of ${it.message}")
+                    }.onSuccess {
+                        logger.debug { "Inserted participant $record" }
+                    }.mapEmpty()
+            }
+        }
+
+        override fun update(record: Participant): Future<Unit> {
+            return pool.withTransaction { client ->
+                client
+                    .preparedQuery(
+                        """UPDATE participants SET  
                     display_name = $1
                     WHERE id = $2""",
-            )
-                .execute(
-                    ParticipantDbModel.fromParticipant(record).let {
-                        Tuple.of(
-                            it.display_name,
-                            it.id,
-                        )
-                    },
-                )
-                .expectOneChangedRow()
-                .flatMap {
-                    client.preparedQuery("DELETE FROM social_medias where participant_id = $1")
-                        .execute(Tuple.of(record.id))
-                }
-                .flatMap {
-                    return@flatMap if (record.socialMedias.isEmpty()) {
-                        Future.succeededFuture()
-                    } else {
-                        client.preparedQuery("INSERT INTO social_medias VALUES ($1, $2, $3)")
-                            .executeBatch(
-                                record.socialMedias.map {
-                                    Tuple.of(
-                                        record.id,
-                                        it.platform,
-                                        it.username,
-                                    )
-                                },
+                    ).execute(
+                        ParticipantDbModel.fromParticipant(record).let {
+                            Tuple.of(
+                                it.display_name,
+                                it.id,
                             )
-                    }
-                }
-                .mapEmpty()
+                        },
+                    ).expectOneChangedRow()
+                    .flatMap {
+                        client
+                            .preparedQuery("DELETE FROM social_medias where participant_id = $1")
+                            .execute(Tuple.of(record.id))
+                    }.flatMap {
+                        return@flatMap if (record.socialMedias.isEmpty()) {
+                            Future.succeededFuture()
+                        } else {
+                            client
+                                .preparedQuery("INSERT INTO social_medias VALUES ($1, $2, $3)")
+                                .executeBatch(
+                                    record.socialMedias.map {
+                                        Tuple.of(
+                                            record.id,
+                                            it.platform,
+                                            it.username,
+                                        )
+                                    },
+                                )
+                        }
+                    }.mapEmpty()
+            }
         }
     }
-}

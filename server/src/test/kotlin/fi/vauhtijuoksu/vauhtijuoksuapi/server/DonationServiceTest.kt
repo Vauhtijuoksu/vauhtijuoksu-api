@@ -37,39 +37,42 @@ class DonationServiceTest {
 
     @BeforeEach
     fun setup() {
-        donationService = DonationService(
-            incentiveCodeDb,
-            donationDb,
-        )
+        donationService =
+            DonationService(
+                incentiveCodeDb,
+                donationDb,
+            )
     }
 
-    private val generated1 = GeneratedIncentive(
-        IncentiveCode.random(),
-        listOf(
-            ChosenIncentive(
-                UUID.randomUUID(),
-                "kissa",
+    private val generated1 =
+        GeneratedIncentive(
+            IncentiveCode.random(),
+            listOf(
+                ChosenIncentive(
+                    UUID.randomUUID(),
+                    "kissa",
+                ),
+                ChosenIncentive(
+                    UUID.randomUUID(),
+                    null,
+                ),
             ),
-            ChosenIncentive(
-                UUID.randomUUID(),
-                null,
-            ),
-        ),
-    )
+        )
 
-    private val generated2 = GeneratedIncentive(
-        IncentiveCode.random(),
-        listOf(
-            ChosenIncentive(
-                UUID.randomUUID(),
-                "koira",
+    private val generated2 =
+        GeneratedIncentive(
+            IncentiveCode.random(),
+            listOf(
+                ChosenIncentive(
+                    UUID.randomUUID(),
+                    "koira",
+                ),
+                ChosenIncentive(
+                    UUID.randomUUID(),
+                    "Fruktoosi",
+                ),
             ),
-            ChosenIncentive(
-                UUID.randomUUID(),
-                "Fruktoosi",
-            ),
-        ),
-    )
+        )
 
     private val donationWithGen1 = TestDonation.donation1.copy(message = "Ota rahet: ${generated1.generatedCode}")
     private val donationWithGen2 = TestDonation.donation2.copy(message = "Ota rahet: ${generated2.generatedCode}")

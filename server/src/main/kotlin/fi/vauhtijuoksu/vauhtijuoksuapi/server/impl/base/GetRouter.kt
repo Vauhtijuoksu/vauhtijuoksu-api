@@ -17,28 +17,39 @@ open class GetRouter<M : Model>(
     private val db: VauhtijuoksuDatabase<M>,
     private val toJson: ((M) -> JsonObject),
 ) : PartialRouter {
-    override fun configure(router: Router, basepath: String) {
+    override fun configure(
+        router: Router,
+        basepath: String,
+    ) {
         configureGetAll(router, basepath)
         configureGetSingle(router, basepath)
     }
 
-    private fun configureGetAll(router: Router, basepath: String) {
-        router.get(basepath)
+    private fun configureGetAll(
+        router: Router,
+        basepath: String,
+    ) {
+        router
+            .get(basepath)
             .handler(publicEndpointCorsHandler)
             .handler { ctx ->
-                db.getAll()
+                db
+                    .getAll()
                     .onFailure { t ->
                         ctx.fail(ServerError("Failed to retrieve record because of ${t.message}"))
-                    }
-                    .onSuccess { all ->
+                    }.onSuccess { all ->
                         val res = JsonArray(all.map(toJson))
                         ctx.response().end(res.encode())
                     }
             }
     }
 
-    private fun configureGetSingle(router: Router, basepath: String) {
-        router.get("$basepath/:id")
+    private fun configureGetSingle(
+        router: Router,
+        basepath: String,
+    ) {
+        router
+            .get("$basepath/:id")
             .handler(publicEndpointCorsHandler)
             .handler { ctx ->
                 val id: UUID
@@ -47,7 +58,8 @@ open class GetRouter<M : Model>(
                 } catch (_: IllegalArgumentException) {
                     throw UserError("Not UUID: ${ctx.pathParam("id")}")
                 }
-                db.getById(id)
+                db
+                    .getById(id)
                     .onFailure(ctx::fail)
                     .onSuccess { res ->
                         if (res == null) {

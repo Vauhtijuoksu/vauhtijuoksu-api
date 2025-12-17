@@ -16,8 +16,8 @@ data class IncentiveDbModel(
     val optionParameters: List<String>?,
     val openCharLimit: Int?,
 ) {
-    fun toIncentive(): Incentive {
-        return Incentive(
+    fun toIncentive(): Incentive =
+        Incentive(
             id,
             gameId,
             title,
@@ -28,11 +28,10 @@ data class IncentiveDbModel(
             optionParameters,
             openCharLimit,
         )
-    }
 
     companion object {
-        fun fromIncentive(incentive: Incentive): IncentiveDbModel {
-            return IncentiveDbModel(
+        fun fromIncentive(incentive: Incentive): IncentiveDbModel =
+            IncentiveDbModel(
                 incentive.id,
                 incentive.gameId,
                 incentive.title,
@@ -43,6 +42,5 @@ data class IncentiveDbModel(
                 incentive.optionParameters,
                 incentive.openCharLimit,
             )
-        }
     }
 }

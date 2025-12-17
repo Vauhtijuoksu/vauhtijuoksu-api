@@ -10,7 +10,7 @@ jacoco = "0.8.14"
 # Used in buildSrc
 kotlin-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin" }
-spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:8.0.0"
+spotless-plugin = "com.diffplug.spotless:spotless-plugin-gradle:8.1.0"
 detekt-plugin = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.8"
 detekt-formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:1.23.8"
 # Used by feature tests to gather coverage

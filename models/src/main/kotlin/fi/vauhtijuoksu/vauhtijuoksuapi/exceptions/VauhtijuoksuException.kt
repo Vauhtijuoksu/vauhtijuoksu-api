@@ -6,9 +6,14 @@ sealed class VauhtijuoksuException : Throwable {
     constructor(message: String?, cause: Throwable?) : super(message, cause)
 }
 
-class MissingEntityException(message: String) : VauhtijuoksuException(message)
+class MissingEntityException(
+    message: String,
+) : VauhtijuoksuException(message)
 
-class UserError(message: String?, cause: Throwable?) : VauhtijuoksuException(message, cause) {
+class UserError(
+    message: String?,
+    cause: Throwable?,
+) : VauhtijuoksuException(message, cause) {
     constructor(message: String?) : this(message, null)
 }
 
