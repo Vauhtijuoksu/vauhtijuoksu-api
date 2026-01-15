@@ -1,6 +1,6 @@
 [versions]
 hoplite = "2.9.0"
-vertx = "4.5.22"
+vertx = "5.0.7"
 kotlin = "2.2.21"
 kotest = "6.0.7"
 flyway = "11.17.2"
