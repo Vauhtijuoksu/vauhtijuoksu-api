@@ -7,6 +7,7 @@ image:
 server:
   # Generate a htpasswd file
   # Create corresponding secret by running `kubectl create secret generic vauhtijuoksu-htpasswd --from-file <path>/htpasswd`
+  host: api.vauhtijuoksu.dev
   htpasswdSecret: vauhtijuoksu-api-htpasswd
   corsHeaders:
     - https://(.+[.])*vauhtijuoksu[.]fi
