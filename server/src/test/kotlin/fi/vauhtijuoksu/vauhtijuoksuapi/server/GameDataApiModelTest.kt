@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.net.URL
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -55,7 +54,7 @@ internal class GameDataApiModelTest {
             "any%",
             "PC",
             "1970",
-            URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
             "tetris.png",
             "k18",
             listOf(

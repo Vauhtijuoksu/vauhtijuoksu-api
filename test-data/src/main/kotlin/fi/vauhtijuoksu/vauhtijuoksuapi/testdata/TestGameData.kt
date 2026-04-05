@@ -3,7 +3,6 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.testdata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
-import java.net.URL
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -24,7 +23,7 @@ class TestGameData private constructor() {
             "any%",
             "PC",
             "1970",
-            URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
             "tetris.png",
             "k18",
             listOf(GameParticipant(TestParticipant.participant1.id, ParticipantRole.PLAYER)),
@@ -38,7 +37,7 @@ class TestGameData private constructor() {
             "100%",
             "Potato",
             "1971",
-            URL("https://www.youtube.com/watch?v=this is glukoosi"),
+            "https://www.youtube.com/watch?v=this is glukoosi",
             "chicken.png",
             "kid friendly",
             listOf(GameParticipant(TestParticipant.participant2.id, ParticipantRole.PLAYER)),

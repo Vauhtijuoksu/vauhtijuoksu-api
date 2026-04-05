@@ -349,22 +349,6 @@ class GameDataApiTest : ServerTestBase() {
     }
 
     @Test
-    fun testPatchWithNoneUrlVodFails(testContext: VertxTestContext) {
-        `when`(gameDataDb.getById(gameData1.id)).thenReturn(Future.succeededFuture(gameData1))
-        client.patch("/gamedata/${gameData1.id}")
-            .authentication(UsernamePasswordCredentials(username, password))
-            .sendJson(JsonObject().put("vod_link", "What is love"))
-            .onFailure(testContext::failNow)
-            .onSuccess { res ->
-                testContext.verify {
-                    assertEquals(400, res.statusCode())
-                    verifyNoMoreInteractions(gameDataDb)
-                }
-                testContext.completeNow()
-            }
-    }
-
-    @Test
     fun testSingleGameDataDbError(testContext: VertxTestContext) {
         `when`(gameDataDb.getById(any())).thenReturn(Future.failedFuture(RuntimeException("DB error")))
         client.get("/gamedata/${UUID.randomUUID()}").send()

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
-import java.net.URL
 import java.util.Date
 import java.util.UUID
 
@@ -22,7 +21,7 @@ data class NewGameDataApiModel(
     val published: String,
     @JsonProperty("vod_link")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val vodLink: URL?,
+    val vodLink: String?,
     @JsonProperty("img_filename")
     val imgFilename: String?,
     val meta: String?,

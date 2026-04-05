@@ -1,6 +1,5 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.models
 
-import java.net.URL
 import java.util.Date
 import java.util.UUID
 
@@ -22,7 +21,7 @@ data class GameData(
     val category: String,
     val device: String,
     val published: String,
-    val vodLink: URL?,
+    val vodLink: String?,
     val imgFilename: String?,
     val meta: String?,
     val participants: List<GameParticipant>,
