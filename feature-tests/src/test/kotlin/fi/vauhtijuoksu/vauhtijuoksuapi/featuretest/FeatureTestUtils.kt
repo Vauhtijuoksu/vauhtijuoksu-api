@@ -1,5 +1,9 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.featuretest
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.get
+import io.ktor.http.HttpStatusCode
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
@@ -9,7 +13,10 @@ import io.vertx.ext.web.client.WebClient
 import io.vertx.ext.web.client.WebClientOptions
 import io.vertx.junit5.VertxExtension
 import io.vertx.junit5.VertxTestContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource
@@ -17,7 +24,24 @@ import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
 import java.lang.annotation.Inherited
 
-class FeatureTestUtils : ParameterResolver {
+private const val POLL_INTERVAL_MS = 50L
+
+class FeatureTestUtils : ParameterResolver, BeforeAllCallback {
+    override fun beforeAll(extensionContext: ExtensionContext) = runTest {
+            val client = HttpClient(CIO)
+            try {
+                while (true) {
+                    val ok = runCatching {
+                        client.get("http://api.localhost/gamedata").status == HttpStatusCode.OK
+                    }.getOrDefault(false)
+                    if (ok) break
+                    delay(POLL_INTERVAL_MS)
+                }
+            } finally {
+                client.close()
+            }
+    }
+
     override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
         return parameterContext.parameter.type.equals(WebClient::class.java)
     }

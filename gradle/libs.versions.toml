@@ -5,6 +5,7 @@ kotlin = "2.2.21"
 kotest = "6.0.7"
 flyway = "11.17.2"
 jacoco = "0.8.14"
+ktor = "3.4.1"
 
 [libraries]
 # Used in buildSrc
@@ -71,3 +72,6 @@ kotest-assertions = { group = "io.kotest", name = "kotest-assertions-core", vers
 wirewock = { group = "org.wiremock", name = "wiremock", version = "3.13.2" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.10.2" }
 mock-oauth = "no.nav.security:mock-oauth2-server:3.0.1"
+
+ktor-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
