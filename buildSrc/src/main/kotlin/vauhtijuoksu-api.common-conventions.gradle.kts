@@ -19,6 +19,7 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     val ktLintVersion = "0.48.2"
     kotlin {
         ktlint(ktLintVersion)
+        targetExclude("**/generated*/**")
     }
     kotlinGradle {
         ktlint(ktLintVersion)

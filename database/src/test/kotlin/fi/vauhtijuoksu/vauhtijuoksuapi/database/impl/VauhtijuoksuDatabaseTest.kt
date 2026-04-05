@@ -15,9 +15,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.postgresql.PostgreSQLContainer
+import org.testcontainers.utility.DockerImageName
 import java.text.SimpleDateFormat
 import java.util.UUID
 
@@ -29,8 +30,8 @@ abstract class VauhtijuoksuDatabaseTest<T : Model> {
     val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
     @Container
-    var pg: PostgreSQLContainer<Nothing> =
-        PostgreSQLContainer<Nothing>("postgres:16.8").withDatabaseName("vauhtijuoksu-api")
+    var pg: PostgreSQLContainer =
+        PostgreSQLContainer(DockerImageName.parse("postgres:16.8")).withDatabaseName("vauhtijuoksu-api")
 
     abstract fun existingRecord1(): T
     abstract fun existingRecord2(): T

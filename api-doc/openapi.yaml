@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: 1.0.0
+  version: 1.1.0
   title: Vauhtijuoksu API
 servers:
   - url: https://api.dev.vauhtijuoksu.fi
@@ -193,7 +193,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StreamMetadataPatch'
+              $ref: '#/components/schemas/StreamMetadataUpdate'
       responses:
         '200':
           $ref: '#/components/responses/StreamMetadataOk'
@@ -207,7 +207,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TimerInput'
+              $ref: '#/components/schemas/TimerNew'
       responses:
         '201':
           $ref: '#/components/responses/TimerOk'
@@ -229,7 +229,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TimerPatch'
+              $ref: '#/components/schemas/TimerUpdate'
       responses:
         '200':
           $ref: '#/components/responses/TimerOk'
@@ -384,7 +384,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StreamMetadata'
+            $ref: '#/components/schemas/StreamMetadataResponse'
     PlayerInfoOk:
       description: Player info
       content:
@@ -408,7 +408,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Timer'
+            $ref: '#/components/schemas/TimerResponse'
 
   schemas:
     Donations:
@@ -900,40 +900,51 @@ components:
       required:
         - username
         - platform
-    StreamMetadata:
+    StreamMetadataResponse:
       type: object
       properties:
         donation_goal:
           type: integer
+          nullable: true
         current_game_id:
           type: string
           format: uuid
+          nullable: true
         now_playing:
           type: string
+          nullable: true
         donatebar_info:
           type: array
+          nullable: false
           items:
             type: string
         counters:
           type: array
+          nullable: false
           items:
             type: integer
         heart_rates:
           type: array
+          nullable: false
           items:
             type: integer
         server_time:
           type: string
+          nullable: false
           format: date-time
         timers:
           type: array
+          nullable: false
           items:
             type: object
             properties:
               id:
                 type: string
+                format: UUID
+                nullable: false
               name:
                 type: string
+                nullable: false
               start_time:
                 type: string
                 nullable: true
@@ -942,8 +953,18 @@ components:
                 type: string
                 nullable: true
                 format: date-time
+            required:
+              - id
+              - name
       required:
         - donation_goal
+        - current_game_id
+        - now_playing
+        - donatebar_info
+        - counters
+        - heart_rates
+        - server_time
+        - timers
       example:
         donation_goal: 10000
         current_game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
@@ -969,30 +990,34 @@ components:
           - id: 91aee618-2c62-42a1-b025-106baf6b71e8
             start_time: '2021-09-21T16:08:47.000+00:00'
             end_time: null
-    StreamMetadataPatch:
+    StreamMetadataUpdate:
       type: object
       properties:
         donation_goal:
           type: integer
+          nullable: true
         current_game_id:
           type: string
           format: uuid
+          nullable: true
         now_playing:
           type: string
+          nullable: true
         donatebar_info:
           type: array
+          nullable: false
           items:
             type: string
         counters:
           type: array
+          nullable: false
           items:
             type: integer
         heart_rates:
           type: array
+          nullable: false
           items:
             type: integer
-      required:
-        - donation_goal
       example:
         donation_goal: 10000
         current_game_id: 1fbdc860-170c-4231-b354-464a2dfab94b
@@ -1216,68 +1241,77 @@ components:
         example:
           id: 3a896646-70e0-4943-a3e3-01f29d0541f1
           parameter: kalle tetr
-    Timer:
+    TimerResponse:
       type: object
       properties:
         id:
           type: string
           format: uuid
+          nullable: false
         name:
           type: string
+          nullable: false
         start_time:
           type: string
           format: date-time
+          nullable: true
         end_time:
           type: string
           format: date-time
+          nullable: true
+      required:
+        - id
+        - name
+        - start_time
+        - end_time
+      example:
+        id: 91aee618-2c62-42a1-b025-106baf6b71e7
+        name: ykköstimeri
+        start_time: '2023-09-21T15:05:47.000+00:00'
+        end_time: '2023-09-21T15:05:48.000+00:00'
+    TimerNew:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: false
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - name
+      example:
+        name: ykköstimeri
+        start_time: '2023-09-21T15:05:47.000+00:00'
+    TimerUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+        name:
+          type: string
+          nullable: false
+        start_time:
+          type: string
+          format: date-time
+          nullable: true
+        end_time:
+          type: string
+          format: date-time
+          nullable: true
       required:
         - id
-        - name
-      example:
-        id: 91aee618-2c62-42a1-b025-106baf6b71e7
-        name: ykköstimeri
-        start_time: '2023-09-21T15:05:47.000+00:00'
-        end_time: '2023-09-21T15:05:48.000+00:00'
-    TimerInput:
-      type: object
-      properties:
-        name:
-          type: string
-        start_time:
-          type: string
-          format: date-time
-          nullable: true
-        end_time:
-          type: string
-          format: date-time
-          nullable: true
-      required:
-        - name
-      example:
-        name: ykköstimeri
-        start_time: '2023-09-21T15:05:47.000+00:00'
-        end_time: '2023-09-21T15:05:48.000+00:00'
-    TimerPatch:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        start_time:
-          type: string
-          format: date-time
-          nullable: true
-        end_time:
-          type: string
-          format: date-time
-          nullable: true
       example:
         id: 91aee618-2c62-42a1-b025-106baf6b71e7
         name: ykköstimeri
         end_time: '2023-09-21T15:05:48.000+00:00'
-
 
   securitySchemes:
     basicAuth:

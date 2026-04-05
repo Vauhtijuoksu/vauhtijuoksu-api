@@ -7,6 +7,9 @@ flyway = "12.3.0"
 jacoco = "0.8.14"
 ktor = "3.4.2"
 
+[plugins]
+openapi-generator = {id = "org.openapi.generator", version = "7.21.0" }
+
 [libraries]
 # Used in buildSrc
 kotlin-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -24,7 +27,9 @@ swagger-generator-plugin = "gradle.plugin.org.hidetake:gradle-swagger-generator-
 swagger-ui = "org.webjars:swagger-ui:5.32.1"
 
 arrow-kt = "io.arrow-kt:arrow-core:2.2.2.1"
-kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.10.0" }
+moshi = "com.squareup.moshi:moshi:1.15.2"
+kotlinx-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.7.1"
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.9.0" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations" }
 jackson-bom = "com.fasterxml.jackson:jackson-bom:2.21.2"
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind" }
@@ -59,10 +64,10 @@ junit-bom = "org.junit:junit-bom:6.0.3"
 junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api" }
 junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine" }
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
-testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version = "1.21.4" }
+testcontainers-bom = { group = "org.testcontainers", name = "testcontainers-bom", version = "2.0.4" }
 testcontainers-core = { group = "org.testcontainers", name = "testcontainers" }
-testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter" }
-testcontainers-postgresql = { group = "org.testcontainers", name = "postgresql" }
+testcontainers-junit = { group = "org.testcontainers", name = "testcontainers-junit-jupiter" }
+testcontainers-postgresql = { group = "org.testcontainers", name = "testcontainers-postgresql" }
 vertx-junit5 = { group = "io.vertx", name = "vertx-junit5", version.ref = "vertx" }
 vertx-web-client = { group = "io.vertx", name = "vertx-web-client", version.ref = "vertx" }
 mockito-bom = { group = "org.mockito", name = "mockito-bom", version = "5.23.0" }
@@ -75,3 +80,6 @@ mock-oauth = "no.nav.security:mock-oauth2-server:3.0.1"
 
 ktor-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+
+instanceio-platform = "org.instancio:instancio-bom:6.0.0-RC2"
+instanceio-kotlin = { group="org.instancio", name = "instancio-kotlin" }

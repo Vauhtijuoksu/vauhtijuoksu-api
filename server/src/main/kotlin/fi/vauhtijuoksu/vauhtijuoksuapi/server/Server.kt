@@ -13,12 +13,12 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants.Companion.USER_ERROR_
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ConfigurationModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.PlayerInfoRouter
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.StreamMetadataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentivecodes.IncentiveCodeRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentives.IncentivesRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.participants.ParticipantsRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.streammetadata.StreamMetadataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.timers.TimerRouter
 import io.vertx.core.http.HttpHeaders
 import io.vertx.core.http.HttpMethod

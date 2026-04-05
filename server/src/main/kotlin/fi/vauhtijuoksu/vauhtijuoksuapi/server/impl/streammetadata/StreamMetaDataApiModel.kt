@@ -1,49 +1,41 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.streammetadata
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import apimodels.StreamMetadataResponse
+import apimodels.StreamMetadataResponseTimersInner
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.timers.TimerApiModel
 import io.vertx.core.json.JsonObject
-import java.time.OffsetDateTime
-import java.util.UUID
+import kotlin.time.Instant
+import kotlin.time.toKotlinInstant
 
-internal data class StreamMetaDataApiModel(
-    @JsonProperty("donation_goal")
-    val donationGoal: Int?,
-    @JsonProperty("current_game_id")
-    val currentGameId: UUID?,
-    @JsonProperty("donatebar_info")
-    val donatebarInfo: List<String>,
-    @JsonProperty("counters")
-    val counters: List<Int>,
-    @JsonProperty("heart_rates")
-    val heartRates: List<Int>,
-    @JsonProperty("timers")
-    val timers: List<TimerApiModel>,
-    @JsonProperty("now_playing")
-    val nowPlaying: String?,
-    @JsonProperty("server_time")
-    val serverTime: OffsetDateTime,
-) {
-    companion object {
-        fun from(data: StreamMetadata, timers: List<Timer>, now: OffsetDateTime): StreamMetaDataApiModel {
-            return StreamMetaDataApiModel(
-                data.donationGoal,
-                data.currentGameId,
-                data.donateBarInfo,
-                data.counters,
-                data.heartRates,
-                timers.map {
-                    TimerApiModel.from(it)
-                },
-                data.nowPlaying,
-                now,
-            )
-        }
-    }
+fun StreamMetadataResponse.Companion.from(
+    data: StreamMetadata,
+    timers: List<Timer>,
+    now: Instant,
+): StreamMetadataResponse {
+    return StreamMetadataResponse(
+        donationGoal = data.donationGoal,
+        currentGameId = data.currentGameId,
+        nowPlaying = data.nowPlaying,
+        donatebarInfo = data.donateBarInfo,
+        counters = data.counters,
+        heartRates = data.heartRates,
+        serverTime = now,
+        timers = timers.map {
+            StreamMetadataResponseTimersInner.from(it)
+        },
+    )
+}
 
-    fun toJson(): JsonObject {
-        return JsonObject.mapFrom(this)
-    }
+fun StreamMetadataResponse.toJson(): JsonObject {
+    return JsonObject.mapFrom(this)
+}
+
+fun StreamMetadataResponseTimersInner.Companion.from(timer: Timer): StreamMetadataResponseTimersInner {
+    return StreamMetadataResponseTimersInner(
+        timer.id.toString(),
+        timer.name,
+        timer.startTime?.toInstant()?.toKotlinInstant(),
+        timer.endTime?.toInstant()?.toKotlinInstant(),
+    )
 }

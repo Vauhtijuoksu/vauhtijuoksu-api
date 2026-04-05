@@ -24,6 +24,7 @@ dependencies {
 
     testImplementation(project(path = ":test-data"))
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(platform { libs.testcontainers.bom })
     testImplementation(libs.testcontainers.junit)
     testImplementation(libs.testcontainers.core)
     testImplementation(libs.testcontainers.postgresql)

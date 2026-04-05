@@ -13,6 +13,7 @@ dependencies {
     implementation(project(path = ":models"))
     implementation(project(path = ":database-api"))
     implementation(project(path = ":database"))
+    implementation(project(path = ":api-doc"))
 
     implementation(libs.arrow.kt)
     implementation(libs.guice)
@@ -45,6 +46,8 @@ dependencies {
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.wirewock)
     testImplementation(libs.mock.oauth)
+    testImplementation(platform { libs.instanceio.platform })
+    testImplementation(libs.instanceio.kotlin)
 }
 
 application {

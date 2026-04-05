@@ -1,5 +1,7 @@
-package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl
+package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.streammetadata
 
+import apimodels.StreamMetadataResponse
+import apimodels.StreamMetadataUpdate
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.StreamMetadataDatabase
@@ -7,8 +9,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.StreamMetadata
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Timer
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.streammetadata.StreamMetaDataApiModel
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.streammetadata.UpdateStreamMetaDataApiModel
 import io.vertx.core.json.DecodeException
 import io.vertx.core.json.JsonObject
 import io.vertx.core.json.jackson.DatabindCodec
@@ -21,7 +21,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 import mu.KotlinLogging
 import java.time.Clock
-import java.time.OffsetDateTime
+import kotlin.time.toKotlinInstant
 
 // Throwing as soon as some validation fails is the simplest way
 @Suppress("ThrowsCount")
@@ -31,9 +31,9 @@ class StreamMetadataRouter
     private val timerDb: VauhtijuoksuDatabase<Timer>,
     private val authenticationHandler: AuthenticationHandler,
     private val adminRequired: AuthorizationHandler,
-    @Named(DependencyInjectionConstants.AUTHENTICATED_CORS)
+    @param:Named(DependencyInjectionConstants.Companion.AUTHENTICATED_CORS)
     private val authenticatedEndpointCorsHandler: CorsHandler,
-    @Named(DependencyInjectionConstants.PUBLIC_CORS)
+    @param:Named(DependencyInjectionConstants.Companion.PUBLIC_CORS)
     private val publicEndpointCorsHandler: CorsHandler,
     private val clock: Clock,
 ) {
@@ -51,13 +51,11 @@ class StreamMetadataRouter
 
     private val logger = KotlinLogging.logger {}
 
-    @Suppress("SwallowedException") // Not swallowed, the message is used in augmented error
     fun configure(router: Router) {
         router.route("/stream-metadata").handler { ctx ->
             ctx.response().putHeader("content-type", "application/json")
             ctx.next()
         }
-
         handleGet(router)
         handlePatch(router)
     }
@@ -69,10 +67,10 @@ class StreamMetadataRouter
                 db.get()
                     .flatMap { streamMetadata ->
                         timerDb.getAll().map { timers ->
-                            StreamMetaDataApiModel.from(
+                            StreamMetadataResponse.from(
                                 streamMetadata,
                                 timers,
-                                OffsetDateTime.now(clock),
+                                clock.instant().toKotlinInstant(),
                             )
                         }
                     }
@@ -114,10 +112,10 @@ class StreamMetadataRouter
                     .flatMap { db.get() }
                     .flatMap { streamMetadata ->
                         timerDb.getAll().map { timers ->
-                            StreamMetaDataApiModel.from(
+                            StreamMetadataResponse.from(
                                 streamMetadata,
                                 timers,
-                                OffsetDateTime.now(clock),
+                                clock.instant().toKotlinInstant(),
                             )
                         }
                     }
@@ -129,15 +127,15 @@ class StreamMetadataRouter
     }
 
     private fun updateStreamFromJson(data: StreamMetadata, json: JsonObject): StreamMetadata {
-        val oldData = DatabindCodec.mapper().readerForUpdating(UpdateStreamMetaDataApiModel.from(data))
-        val mergedData = oldData.readValue<UpdateStreamMetaDataApiModel>(json.encode())
+        val oldData = DatabindCodec.mapper().readerForUpdating(StreamMetadataUpdate.from(data))
+        val mergedData = oldData.readValue<StreamMetadataUpdate>(json.encode())
         return StreamMetadata(
-            mergedData.donationGoal,
-            mergedData.currentGameId,
-            mergedData.donatebarInfo,
-            mergedData.counters,
-            mergedData.heartRates,
-            mergedData.nowPlaying,
+            donationGoal = mergedData.donationGoal,
+            currentGameId = mergedData.currentGameId,
+            donateBarInfo = mergedData.donatebarInfo ?: emptyList(),
+            counters = mergedData.counters ?: emptyList(),
+            heartRates = mergedData.heartRates ?: emptyList(),
+            nowPlaying = mergedData.nowPlaying,
         )
     }
 }
