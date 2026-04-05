@@ -102,7 +102,7 @@ jobs:
           tags: tag:gh-runner
           use-cache: 'true'
       - name: Setup Kubectl
-        uses: azure/setup-kubectl@v4
+        uses: azure/setup-kubectl@v5
       - name: Setup kubeconfig
         run: |
           mkdir ~/.kube
