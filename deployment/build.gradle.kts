@@ -132,13 +132,18 @@ tasks {
         dependsOn(dockerImage, createCluster)
         doLast {
             execOperations.exec {
-                bashCommand("kind load docker-image vauhtijuoksu/vauhtijuoksu-api:${rootProject.version} --name vauhtijuoksu")
+                bashCommand(
+                    """
+                    docker tag vauhtijuoksu/vauhtijuoksu-api:${rootProject.version} localhost/vauhtijuoksu/vauhtijuoksu-api:${rootProject.version}
+                    kind load docker-image localhost/vauhtijuoksu/vauhtijuoksu-api:${rootProject.version} --name vauhtijuoksu
+                    """.trimIndent(),
+                )
             }
             execOperations.exec {
                 workingDir = projectDir
                 bashCommand(
                     """
-                helm upgrade --install vauhtijuoksu-api api-server -f kind-cluster/vauhtijuoksu-api-values.yaml --set image.tag=${rootProject.version}
+                helm upgrade --install vauhtijuoksu-api api-server -f kind-cluster/vauhtijuoksu-api-values.yaml --set image.tag=${rootProject.version} --set image.registry=localhost/
                 # Force restart, because in development pods might have a same dirty version if no commits were made
                 kubectl delete pod -l app.kubernetes.io/name=vauhtijuoksu-api
                 kubectl rollout status deployment vauhtijuoksu-api
