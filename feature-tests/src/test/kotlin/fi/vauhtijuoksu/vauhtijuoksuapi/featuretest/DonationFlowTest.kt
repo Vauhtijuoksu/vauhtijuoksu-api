@@ -8,7 +8,6 @@ import io.vertx.ext.auth.authentication.UsernamePasswordCredentials
 import io.vertx.ext.web.client.HttpRequest
 import io.vertx.ext.web.client.HttpResponse
 import io.vertx.ext.web.client.WebClient
-import io.vertx.junit5.VertxTestContext
 import io.vertx.kotlin.coroutines.coAwait
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -82,180 +81,137 @@ class DonationFlowTest {
 
     @Test
     @Order(1)
-    fun `an admin can create incentives`(testContext: VertxTestContext) {
-        Future.all(
+    fun `an admin can create incentives`() = runTest {
+        val postResults = Future.all(
             authenticatedPost("/incentives/")
                 .sendJson(JsonObject(newIncentive1)),
             authenticatedPost("/incentives/")
                 .sendJson(JsonObject(newIncentive2)),
-        )
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                val (first, second) = it.list<HttpResponse<Buffer>>()
-                    .map { res ->
-                        testContext.verify {
-                            assertEquals(201, res.statusCode())
-                        }
-                        res.bodyAsJsonObject().getString("id")
-                    }
-                incentiveId1 = first
-                incentiveId2 = second
-                testContext.completeNow()
+        ).coAwait()
+
+        val (first, second) = postResults.list<HttpResponse<Buffer>>()
+            .map { res ->
+                assertEquals(201, res.statusCode())
+                res.bodyAsJsonObject().getString("id")
             }
+        incentiveId1 = first
+        incentiveId2 = second
     }
 
     @Test
     @Order(2)
-    fun `users can generate incentive codes for incentives`(testContext: VertxTestContext) {
-        Future.all(
+    fun `users can generate incentive codes for incentives`() = runTest {
+        val postResults = Future.all(
             client.post("/generate-incentive-code")
                 .putHeader("Origin", "http://api.localhost")
                 .sendJson(JsonArray().add(JsonObject().put("id", incentiveId1).put("parameter", "neliö"))),
             client.post("/generate-incentive-code")
                 .putHeader("Origin", "http://api.localhost")
                 .sendJson(JsonArray().add(JsonObject().put("id", incentiveId2).put("parameter", "kirkas"))),
-        )
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    val (first, second) = it.list<HttpResponse<Buffer>>().map {
-                        assertEquals(201, it.statusCode())
-                        val body = it.bodyAsJsonObject()
-                        assertEquals(1, body.size())
-                        body.getString("code")
-                    }
-                    incentiveCode1 = first
-                    incentiveCode2 = second
-                }
-                testContext.completeNow()
-            }
+        ).coAwait()
+        val (first, second) = postResults.list<HttpResponse<Buffer>>().map {
+            assertEquals(201, it.statusCode())
+            val body = it.bodyAsJsonObject()
+            assertEquals(1, body.size())
+            body.getString("code")
+        }
+        incentiveCode1 = first
+        incentiveCode2 = second
     }
 
     @Test
     @Order(3)
-    fun `then one user makes a donation using the wrong generated code`(testContext: VertxTestContext) {
-        authenticatedPost("/donations")
+    fun `then one user makes a donation using the wrong generated code`() = runTest {
+        val donation = authenticatedPost("/donations")
             .sendJson(JsonObject(newDonation).put("message", "ota tää :D 🤔🤔 $incentiveCode2"))
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                donationId = it.bodyAsJsonObject().getString("id")
-                testContext.completeNow()
-            }
+            .coAwait()
+        donationId = donation.bodyAsJsonObject().getString("id")
     }
 
     @Test
     @Order(4)
-    fun `the user checks incentives, but doesn't see their money because it's on the wrong incentive`(
-        testContext: VertxTestContext,
-    ) {
-        val cp = testContext.checkpoint(2)
+    fun `the user checks incentives, but doesn't see their money because it's on the wrong incentive`() = runTest {
         client.get("/incentives/$incentiveId1")
             .send()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    val incentive = it.bodyAsJsonObject()
-                    val total = incentive.getDouble("total_amount")
-                    assertEquals(0.0, total)
-                    val statuses = incentive.getJsonArray("status")
-                    assertEquals(0, statuses.size())
-                }
-                cp.flag()
+            .coAwait().let {
+                val incentive = it.bodyAsJsonObject()
+                val total = incentive.getDouble("total_amount")
+                assertEquals(0.0, total)
+                val statuses = incentive.getJsonArray("status")
+                assertEquals(0, statuses.size())
             }
 
         client.get("/incentives/$incentiveId2")
             .send()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    val incentive = it.bodyAsJsonObject()
-                    val total = incentive.getDouble("total_amount")
-                    assertEquals(donationSum, total)
-                    val statuses = incentive.getJsonArray("status")
-                    assertEquals(1, statuses.size())
-                    val expectedStatus = JsonObject()
-                    expectedStatus.put("type", "option")
-                    expectedStatus.put("option", "kirkas")
-                    expectedStatus.put("amount", donationSum)
-                    val status = statuses.getJsonObject(0)
-                    assertEquals(expectedStatus, status)
-                }
-                cp.flag()
+            .coAwait().let {
+                val incentive = it.bodyAsJsonObject()
+                val total = incentive.getDouble("total_amount")
+                assertEquals(donationSum, total)
+                val statuses = incentive.getJsonArray("status")
+                assertEquals(1, statuses.size())
+                val expectedStatus = JsonObject()
+                expectedStatus.put("type", "option")
+                expectedStatus.put("option", "kirkas")
+                expectedStatus.put("amount", donationSum)
+                val status = statuses.getJsonObject(0)
+                assertEquals(expectedStatus, status)
             }
     }
 
     @Test
     @Order(5)
-    fun `the kind admin fixed the message`(testContext: VertxTestContext) {
+    fun `the kind admin fixed the message`() = runTest {
         authenticatedPatch("/donations/$donationId")
             .sendJson(JsonObject().put("message", "ota tää :D 🤔🤔: $incentiveCode1"))
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    assertEquals(200, it.statusCode())
-                }
-                testContext.completeNow()
+            .coAwait().let {
+                assertEquals(200, it.statusCode())
             }
     }
 
     @Test
     @Order(6)
-    fun `the user checks incentives, and sees their donation money in the status and gone from the wrong incentive`(
-        testContext: VertxTestContext,
-    ) {
-        val cp = testContext.checkpoint(2)
+    fun `the user checks incentives, and sees their donation money in the status and gone from the wrong incentive`() = runTest {
         client.get("/incentives/$incentiveId1")
             .send()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    val incentive = it.bodyAsJsonObject()
-                    val total = incentive.getDouble("total_amount")
-                    assertEquals(donationSum, total)
-                    val statuses = incentive.getJsonArray("status")
-                    assertEquals(1, statuses.size())
-                    val expectedStatus = JsonObject()
-                    expectedStatus.put("type", "option")
-                    expectedStatus.put("option", "neliö")
-                    expectedStatus.put("amount", donationSum)
-                    val status = statuses.getJsonObject(0)
-                    assertEquals(expectedStatus, status)
-                }
-                cp.flag()
+            .coAwait().let {
+                val incentive = it.bodyAsJsonObject()
+                val total = incentive.getDouble("total_amount")
+                assertEquals(donationSum, total)
+                val statuses = incentive.getJsonArray("status")
+                assertEquals(1, statuses.size())
+                val expectedStatus = JsonObject()
+                expectedStatus.put("type", "option")
+                expectedStatus.put("option", "neliö")
+                expectedStatus.put("amount", donationSum)
+                val status = statuses.getJsonObject(0)
+                assertEquals(expectedStatus, status)
             }
-
         client.get("/incentives/$incentiveId2")
             .send()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    val incentive = it.bodyAsJsonObject()
-                    val total = incentive.getDouble("total_amount")
-                    assertEquals(0.0, total)
-                    val statuses = incentive.getJsonArray("status")
-                    assertEquals(0, statuses.size())
-                }
-                cp.flag()
+            .coAwait()
+            .let {
+                val incentive = it.bodyAsJsonObject()
+                val total = incentive.getDouble("total_amount")
+                assertEquals(0.0, total)
+                val statuses = incentive.getJsonArray("status")
+                assertEquals(0, statuses.size())
             }
     }
 
     @Test
     @Order(7)
-    fun `the donation shows up in donations list`(testContext: VertxTestContext) {
+    fun `the donation shows up in donations list`() = runTest {
         client.get("/donations")
             .send()
-            .onFailure(testContext::failNow)
-            .onSuccess {
-                testContext.verify {
-                    val donations = it.bodyAsJsonArray()
-                    val donation = donations.find {
-                        (it as JsonObject).getString("id") == donationId
-                    } as JsonObject
-                    assertEquals(donationId, donation.getString("id"))
-                    assertEquals(donationSum, donation.getDouble("amount"))
-                    assertEquals("ota tää :D 🤔🤔: $incentiveCode1", donation.getString("message"))
-                }
-                testContext.completeNow()
+            .coAwait()
+            .let {
+                val donations = it.bodyAsJsonArray()
+                val donation = donations.find {
+                    (it as JsonObject).getString("id") == donationId
+                } as JsonObject
+                assertEquals(donationId, donation.getString("id"))
+                assertEquals(donationSum, donation.getDouble("amount"))
+                assertEquals("ota tää :D 🤔🤔: $incentiveCode1", donation.getString("message"))
             }
     }
 }

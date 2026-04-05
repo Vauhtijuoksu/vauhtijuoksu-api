@@ -28,18 +28,18 @@ private const val POLL_INTERVAL_MS = 50L
 
 class FeatureTestUtils : ParameterResolver, BeforeAllCallback {
     override fun beforeAll(extensionContext: ExtensionContext) = runTest {
-            val client = HttpClient(CIO)
-            try {
-                while (true) {
-                    val ok = runCatching {
-                        client.get("http://api.localhost/gamedata").status == HttpStatusCode.OK
-                    }.getOrDefault(false)
-                    if (ok) break
-                    delay(POLL_INTERVAL_MS)
-                }
-            } finally {
-                client.close()
+        val client = HttpClient(CIO)
+        try {
+            while (true) {
+                val ok = runCatching {
+                    client.get("http://api.localhost/gamedata").status == HttpStatusCode.OK
+                }.getOrDefault(false)
+                if (ok) break
+                delay(POLL_INTERVAL_MS)
             }
+        } finally {
+            client.close()
+        }
     }
 
     override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
