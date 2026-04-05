@@ -6,21 +6,17 @@ metadata:
     {{- include "mockserver.labels" . | nindent 4 }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    # To work on kind cluster
-    nginx.ingress.kubernetes.io/server-alias: mockapi.localhost
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   tls:
     - hosts:
-        - mockapi.dev.vauhtijuoksu.fi
-      secretName: mockapi.dev.vauhtijuoksu.fi
+        - {{ .Values.host }}
+      secretName: {{ .Values.host }}
   rules:
-    - host: mockapi.dev.vauhtijuoksu.fi
+    - host: {{ .Values.host }}
       http:
         paths:
-          - path: /(.*)
+          - path: /
             pathType: Prefix
             backend:
               service:

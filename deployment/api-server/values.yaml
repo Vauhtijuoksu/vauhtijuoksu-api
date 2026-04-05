@@ -11,6 +11,7 @@ server:
   corsHeaders:
     - https://(.+[.])*vauhtijuoksu[.]fi
     - https://vauhtijuoksu[.]github[.]io
+  host: api.vauhtijuoksu.fi
 
 database:
   address: postgres-postgresql.default.svc.cluster.local
@@ -40,5 +41,3 @@ redis:
 
 logging:
   level: info
-
-ingress: traefik

@@ -66,11 +66,9 @@ tasks {
                     workingDir = projectDir
                     bashCommand(
                         """
-                        #docker pull registry.k8s.io/ingress-nginx/controller:v1.3.1@sha256:54f7fe2c6c5a9db9a0ebf1131797109bb7a4d91f56b9b362bde2abd237dd1974
-                        #docker pull registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.3.0@sha256:549e71a6ca248c5abd51cdb73dbc3083df62cf92ed5e6147c780e30f7e007a47
-                        #kind load docker-image registry.k8s.io/ingress-nginx/controller:v1.3.1@sha256:54f7fe2c6c5a9db9a0ebf1131797109bb7a4d91f56b9b362bde2abd237dd1974 --name=vauhtijuoksu
-                        #kind load docker-image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.3.0@sha256:549e71a6ca248c5abd51cdb73dbc3083df62cf92ed5e6147c780e30f7e007a47 --name=vauhtijuoksu
-                        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/e079486d4dc40387389adbaed7ec9b80d897d810/deploy/static/provider/kind/deploy.yaml
+                        helm repo add traefik https://traefik.github.io/charts
+                        helm repo update
+                        helm install traefik traefik/traefik --namespace traefik --create-namespace -f kind-cluster/traefik-values.yaml
                         """,
                     )
                 }
@@ -119,10 +117,10 @@ tasks {
                     bashCommand("kubectl create secret generic vauhtijuoksu-api-oauth --from-file ${oAuthSecret.path}")
                 }
 
-                // Wait for ingress
+                // Wait for traefik
                 execOperations.exec {
                     workingDir = projectDir
-                    bashCommand("kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=90s")
+                    bashCommand("kubectl rollout status deployment traefik -n traefik --timeout=90s")
                 }
             }
         }
