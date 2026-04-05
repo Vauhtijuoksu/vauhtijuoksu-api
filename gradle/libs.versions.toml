@@ -22,7 +22,7 @@ swagger-generator-plugin = "gradle.plugin.org.hidetake:gradle-swagger-generator-
 # Codegen components
 swagger-ui = "org.webjars:swagger-ui:5.30.3"
 
-arrow-kt = "io.arrow-kt:arrow-core:2.2.0"
+arrow-kt = "io.arrow-kt:arrow-core:2.2.2"
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.9.0" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations" }
 jackson-bom = "com.fasterxml.jackson:jackson-bom:2.20.1"
