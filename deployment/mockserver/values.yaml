@@ -7,3 +7,5 @@ image:
 # if_present
 # exclusively
 use_examples: if_present
+
+host: mockapi.vauhtijuoksu.fi

@@ -11,7 +11,6 @@ spec:
   tls:
     - hosts:
         - {{ .Values.server.host }}
-      secretName: {{ .Values.server.host }}
   rules:
     - host: {{ .Values.server.host }}
       http:
