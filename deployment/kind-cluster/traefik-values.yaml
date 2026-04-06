@@ -1,0 +1,9 @@
+service:
+  type: NodePort
+ports:
+  web:
+    nodePort: 30080
+    protocol: TCP
+  websecure:
+    nodePort: 30443
+    protocol: TCP

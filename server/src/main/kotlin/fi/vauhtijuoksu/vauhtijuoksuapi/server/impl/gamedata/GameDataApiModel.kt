@@ -9,7 +9,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameParticipant
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.ParticipantRole
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
 import io.vertx.core.json.JsonObject
-import java.net.URL
 import java.util.Date
 import java.util.UUID
 
@@ -33,7 +32,7 @@ data class GameDataApiModel(
     val published: String,
     @JsonProperty("vod_link")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val vodLink: URL?,
+    val vodLink: String?,
     @JsonProperty("img_filename")
     val imgFilename: String?,
     val meta: String?,

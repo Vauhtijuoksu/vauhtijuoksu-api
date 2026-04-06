@@ -1,6 +1,7 @@
 image:
   registry:
 server:
+  host: api.localhost
   corsHeaders:
     - http(s)?://api.localhost(:\d{1,5})?$
 oAuth:
@@ -9,7 +10,6 @@ oAuth:
   authorizationPath: "/oauth2/authorize"
   tokenPath: "/api/oauth2/token"
   tokenRevocationUrl: "/api/oauth2/token/revoke"
-ingress: nginx
+
 redis:
   host: valkey
-

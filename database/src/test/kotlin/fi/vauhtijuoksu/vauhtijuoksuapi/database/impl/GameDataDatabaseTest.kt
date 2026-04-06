@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.net.URL
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
@@ -157,7 +156,7 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
                 randomString(prefix = "category-"),
                 randomString(prefix = "device-"),
                 randomString(prefix = "published-"),
-                URL("https://${randomString(prefix = "vodlink-")}"),
+                "https://${randomString(prefix = "vodlink-")}",
                 randomString(prefix = "img-"),
                 randomString(prefix = "meta-"),
                 players.map { GameParticipant(it, ParticipantRole.PLAYER) },

@@ -28,6 +28,8 @@ dependencies {
     testImplementation(libs.vertx.web.client)
     testImplementation(libs.jackson.databind)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.ktor.core)
+    testImplementation(libs.ktor.cio)
 }
 
 val jacocoPath = "$buildDir/tmp/jacocoagent.jar"

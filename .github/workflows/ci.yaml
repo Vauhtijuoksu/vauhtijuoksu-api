@@ -107,6 +107,7 @@ jobs:
         run: |
           mkdir ~/.kube
           echo "${{ vars.KUBECONFIG }}" > ~/.kube/config
+          kubectl config use-context vauhtis-upcloud-tailscale
           kubectl get all
       - uses: actions/download-artifact@v8
         with:
