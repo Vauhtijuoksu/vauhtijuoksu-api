@@ -8,7 +8,6 @@ plugins {
 
 dependencies {
     swaggerUI(libs.swagger.ui)
-    implementation(libs.kotlinx.datetime)
     implementation(libs.jackson.annotations)
 }
 
@@ -41,7 +40,7 @@ tasks {
         configOptions.putAll(
             mapOf(
                 "serializationLibrary" to "jackson",
-                "dateLibrary" to "kotlinx-datetime",
+                "dateLibrary" to "string",
                 "companionObject" to "true",
             ),
         )

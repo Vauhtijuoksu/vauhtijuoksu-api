@@ -22,10 +22,11 @@ dependencies {
     // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-
     testImplementation(platform(libs.findLibraryOrThrow("junit-bom")))
     testImplementation(platform(libs.findLibraryOrThrow("mockito-bom")))
     testImplementation(platform(libs.findLibraryOrThrow("testcontainers-bom")))
+
+    implementation(platform(libs.findLibraryOrThrow("instancio-platform")))
 
     // Use JUnit Jupiter API for testing.
     testImplementation(libs.findLibraryOrThrow("junit-jupiter-api"))

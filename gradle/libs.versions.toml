@@ -81,5 +81,5 @@ mock-oauth = "no.nav.security:mock-oauth2-server:3.0.1"
 ktor-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
 
-instanceio-platform = "org.instancio:instancio-bom:6.0.0-RC2"
-instanceio-kotlin = { group="org.instancio", name = "instancio-kotlin" }
+instancio-platform = "org.instancio:instancio-bom:6.0.0-RC2"
+instancio-kotlin = { group="org.instancio", name = "instancio-kotlin" }

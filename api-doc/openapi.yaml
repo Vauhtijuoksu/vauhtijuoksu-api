@@ -68,7 +68,7 @@ paths:
         Get list of all game data. List of games that are scheduled for the event.
       responses:
         '200':
-          $ref: '#/components/responses/AllGameData'
+          $ref: '#/components/responses/AllGameDataResponse'
     post:
       description: Add a new gamedata object.
       security:
@@ -78,10 +78,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameDataInput'
+              $ref: '#/components/schemas/GameDataCreate'
       responses:
         '201':
-          $ref: '#/components/responses/GameData'
+          $ref: '#/components/responses/GameDataResponse'
   /gamedata/{gamedataId}:
     parameters:
       - name: gamedataId
@@ -95,7 +95,7 @@ paths:
       description: Get game data by id.
       responses:
         '200':
-          $ref: '#/components/responses/GameData'
+          $ref: '#/components/responses/GameDataResponse'
     patch:
       description: Patch game data.
       security:
@@ -105,10 +105,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameDataPatch'
+              $ref: '#/components/schemas/GameDataUpdate'
       responses:
         '200':
-          $ref: '#/components/responses/GameData'
+          $ref: '#/components/responses/GameDataResponse'
     delete:
       description: Delete game data.
       security:
@@ -133,10 +133,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ParticipantAdd'
+              $ref: '#/components/schemas/ParticipantCreate'
       responses:
         '201':
-          $ref: '#/components/responses/Participant'
+          $ref: '#/components/responses/ParticipantResponse'
 
   /participants/{participantId}:
     parameters:
@@ -152,7 +152,7 @@ paths:
         Get a participant by id
       responses:
         '200':
-          $ref: '#/components/responses/Participant'
+          $ref: '#/components/responses/ParticipantResponse'
     patch:
       description:
         Modify participant info
@@ -163,10 +163,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ParticipantPatch'
+              $ref: '#/components/schemas/ParticipantUpdate'
       responses:
         '200':
-          $ref: '#/components/responses/Participant'
+          $ref: '#/components/responses/ParticipantResponse'
     delete:
       description:
         Remove a participant by id
@@ -353,24 +353,24 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/DonationOutput'
-    AllGameData:
+    AllGameDataResponse:
       description: List of game data
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GameDataAll'
-    GameData:
+            $ref: '#/components/schemas/GameDataOutputList'
+    GameDataResponse:
       description: Game data by id
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/GameDataOutput'
-    Participant:
+    ParticipantResponse:
       description: A single participant
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Participant'
+            $ref: '#/components/schemas/ParticipantOutput'
     ParticipantList:
       description: A list of participants
       content:
@@ -378,7 +378,7 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Participant'
+              $ref: '#/components/schemas/ParticipantOutput'
     StreamMetadataOk:
       description: Stream metadata
       content:
@@ -533,38 +533,44 @@ components:
               chosen_incentives:
                 - incentive_id: d3fed394-193b-493b-b670-c9bea2bdfab0
                   parameter: kissa
-    GameData:
+    GameDataOutput:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         game:
           type: string
+          nullable: false
         participants:
           type: array
           items:
             $ref: '#/components/schemas/GameParticipant'
+          nullable: false
         start_time:
           type: string
           format: date-time
+          nullable: false
         end_time:
           type: string
           format: date-time
+          nullable: false
         category:
           type: string
+          nullable: false
         device:
           type: string
+          nullable: false
         published:
           type: string
+          nullable: false
         vod_link:
           type: string
+          nullable: true
         img_filename:
           type: string
+          nullable: true
         meta:
           type: string
+          nullable: true
       required:
-        - id
         - game
         - participants
         - start_time
@@ -572,26 +578,28 @@ components:
         - category
         - device
         - published
+        - vod_link
+        - img_filename
+        - meta
       example:
-        id: 1fbdc860-170c-4231-b354-464a2dfab94b
-        game: Tetris
+        id: 1571fccf-cc89-48ce-82d4-6b2173d782ec
+        game: Tetris2
         participants:
-          - id: be3649a7-50e4-44e9-b157-05a3fbcf738c
-            role: PLAYER
           - id: 91aee618-2c62-42a1-b025-106baf6b71e7
-            role: COUCH
-        start_time: '2021-09-21T15:05:47.000+00:00'
-        end_time: '2021-09-21T16:05:47.000+00:00'
-        category: any%
+            role: PLAYER
+        start_time: '2021-09-21T15:07:47.000+00:00'
+        end_time: '2021-09-21T16:08:47.000+00:00'
+        category: any% no t
         device: PC
-        published: '1970'
-        vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+        published: '1971'
+        vod_link:
         img_filename: tetris.png
         meta: k18
-    GameDataAll:
+    GameDataOutputList:
       type: array
       items:
-        $ref: '#/components/schemas/GameData'
+        $ref: '#/components/schemas/GameDataOutput'
+      nullable: false
       example:
         - id: 1fbdc860-170c-4231-b354-464a2dfab94b
           game: Tetris
@@ -621,33 +629,43 @@ components:
           vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
           img_filename: tetris.png
           meta: k18
-    GameDataInput:
+    GameDataCreate:
       type: object
       properties:
         game:
           type: string
+          nullable: false
         participants:
           type: array
           items:
             $ref: '#/components/schemas/GameParticipant'
+          nullable: false
         start_time:
           type: string
           format: date-time
+          nullable: false
         end_time:
           type: string
           format: date-time
+          nullable: false
         category:
           type: string
+          nullable: false
         device:
           type: string
+          nullable: false
         published:
           type: string
+          nullable: false
         vod_link:
           type: string
+          nullable: true
         img_filename:
           type: string
+          nullable: true
         meta:
           type: string
+          nullable: true
       required:
         - game
         - start_time
@@ -655,6 +673,7 @@ components:
         - category
         - device
         - published
+        - participants
       example:
         game: Tetris
         start_time: '2021-09-21T15:05:47.000+00:00'
@@ -665,129 +684,83 @@ components:
         vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
         img_filename: tetris.png
         meta: k18
-    GameDataPatch:
-      type: object
-      properties:
-        game:
-          type: string
-        participants:
-          type: array
-          items:
-            $ref: '#/components/schemas/GameParticipant'
-        start_time:
-          type: string
-          format: date-time
-        end_time:
-          type: string
-          format: date-time
-        category:
-          type: string
-        device:
-          type: string
-        published:
-          type: string
-        vod_link:
-          type: string
-        img_filename:
-          type: string
-        meta:
-          type: string
-      example:
-        game: Tetris
-        device: PC
-        published: '1970'
-    GameDataOutput:
-      type: object
-      properties:
-        game:
-          type: string
-        participants:
-          type: array
-          items:
-            $ref: '#/components/schemas/GameParticipant'
-        start_time:
-          type: string
-          format: date-time
-        end_time:
-          type: string
-          format: date-time
-        category:
-          type: string
-        device:
-          type: string
-        published:
-          type: string
-        vod_link:
-          type: string
-        img_filename:
-          type: string
-        meta:
-          type: string
-      required:
-        - game
-        - participants
-        - start_time
-        - end_time
-        - category
-        - device
-        - published
-      example:
-        id: 1571fccf-cc89-48ce-82d4-6b2173d782ec
-        game: Tetris2
         participants:
           - id: 91aee618-2c62-42a1-b025-106baf6b71e7
             role: PLAYER
-        start_time: '2021-09-21T15:07:47.000+00:00'
-        end_time: '2021-09-21T16:08:47.000+00:00'
-        category: any% no t
+    GameDataUpdate:
+      type: object
+      properties:
+        game:
+          type: string
+          nullable: false
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameParticipant'
+          nullable: false
+        start_time:
+          type: string
+          format: date-time
+          nullable: false
+        end_time:
+          type: string
+          format: date-time
+          nullable: false
+        category:
+          type: string
+          nullable: false
+        device:
+          type: string
+          nullable: false
+        published:
+          type: string
+          nullable: false
+        vod_link:
+          type: string
+          nullable: true
+        img_filename:
+          type: string
+          nullable: true
+        meta:
+          type: string
+          nullable: true
+      example:
+        game: Tetris
+        start_time: '2021-09-21T15:05:47.000+00:00'
+        end_time: '2021-09-21T16:05:47.000+00:00'
+        category: any%
         device: PC
-        published: '1971'
-        vod_link: https://www.youtube.com/watch?v=dQw4w9WgXcQ
-        img_filename: tetris.png
-        meta: k18
+        published: '1970'
+        participants: []
     GameParticipant:
       type: object
       properties:
         id:
           type: string
           format: uuid
+          nullable: false
         role:
           type: string
           enum: [ PLAYER, COUCH ]
+          nullable: false
       required:
         - id
         - role
-    GameParticipantPatch:
+    ParticipantOutput:
       type: object
       properties:
         id:
           type: string
           format: uuid
-        role:
-          type: string
-          enum: [ PLAYER, COUCH ]
-    Participant:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
+          nullable: false
         display_name:
           type: string
+          nullable: false
         social_medias:
           type: array
           items:
             $ref: '#/components/schemas/SocialMedia'
-            type: object
-            properties:
-              nick:
-                type: string
-              platform:
-                type: string
-                enum: [ TWITCH, DISCORD ]
-            required:
-              - nick
-              - platform
+          nullable: false
       required:
         - id
         - display_name
@@ -800,41 +773,47 @@ components:
             nick: jiisloth
           - type: DISCORD
             nick: joosloth#1234
-    ParticipantAdd:
+    ParticipantCreate:
       type: object
       properties:
         display_name:
           type: string
+          nullable: false
         social_medias:
           type: array
           items:
             $ref: '#/components/schemas/SocialMedia'
+          nullable: false
       required:
         - display_name
         - social_medias
       example:
         display_name: jiisloth
         social_medias: [ ]
-    ParticipantPatch:
+    ParticipantUpdate:
       type: object
       properties:
         display_name:
           type: string
+          nullable: false
         social_medias:
           type: array
           items:
             $ref: '#/components/schemas/SocialMedia'
+          nullable: false
       example:
         display_name: jiisloth
     SocialMedia:
       properties:
         username:
           type: string
+          nullable: false
         platform:
           type: string
           enum:
             - TWITCH
             - YOUTUBE
+          nullable: false
       required:
         - username
         - platform

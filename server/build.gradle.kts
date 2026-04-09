@@ -46,8 +46,7 @@ dependencies {
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.wirewock)
     testImplementation(libs.mock.oauth)
-    testImplementation(platform { libs.instanceio.platform })
-    testImplementation(libs.instanceio.kotlin)
+    testImplementation(libs.instancio.kotlin)
 }
 
 application {

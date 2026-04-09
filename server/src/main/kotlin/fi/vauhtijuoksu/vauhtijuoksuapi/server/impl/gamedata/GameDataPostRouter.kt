@@ -1,5 +1,6 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata
 
+import apimodels.GameDataCreate
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.AUTHENTICATED_CORS
@@ -24,7 +25,7 @@ class GameDataPostRouter
     adminRequired,
     authenticatedEndpointCorsHandler,
     db,
-    { json -> json.mapTo(NewGameDataApiModel::class.java).toGameData(UUID.randomUUID()) },
+    { json -> json.mapTo(GameDataCreate::class.java).toGameData(UUID.randomUUID()) },
     { gameData -> GameDataApiModel.fromGameData(gameData).toJson() },
     postInputValidator,
 )

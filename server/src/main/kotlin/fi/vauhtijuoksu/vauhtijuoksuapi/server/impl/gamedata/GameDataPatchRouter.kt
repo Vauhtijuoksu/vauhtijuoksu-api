@@ -1,5 +1,6 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata
 
+import apimodels.GameDataOutput
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants
@@ -18,11 +19,11 @@ class GameDataPatchRouter
     authenticatedEndpointCorsHandler: CorsHandler,
     db: VauhtijuoksuDatabase<GameData>,
     gamedataPatchInputValidator: GameDataPatchInputValidator,
-) : PatchRouter<GameData, GameDataApiModel>(
+) : PatchRouter<GameData, GameDataOutput>(
     authenticationHandler,
     adminRequired,
     authenticatedEndpointCorsHandler,
     db,
     gamedataPatchInputValidator::validate,
-    { gameData: GameData -> GameDataApiModel.fromGameData(gameData) },
+    { gameData: GameData -> GameDataOutput.fromGameData(gameData) },
 )

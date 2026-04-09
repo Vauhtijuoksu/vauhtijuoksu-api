@@ -1,5 +1,6 @@
 package fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata
 
+import apimodels.GameDataOutput
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Companion.PUBLIC_CORS
@@ -16,5 +17,5 @@ class GameDataGetRouter
 ) : GetRouter<GameData>(
     publicEndpointCorsHandler,
     db,
-    { gd: GameData -> GameDataApiModel.fromGameData(gd).toJson() },
+    { gd: GameData -> GameDataOutput.fromGameData(gd).toJson() },
 )

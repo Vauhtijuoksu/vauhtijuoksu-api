@@ -4,7 +4,6 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Model
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.ApiConstants
-import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.ApiModel
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.api.PartialRouter
 import io.vertx.core.Future
 import io.vertx.core.json.jackson.DatabindCodec.mapper
@@ -17,13 +16,13 @@ import io.vertx.ext.web.handler.CorsHandler
 import mu.KotlinLogging
 import java.util.UUID
 
-open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
+open class PatchRouter<M : Model, UpdateRepresentation, OutputRepresentation>(
     private val authenticationHandler: AuthenticationHandler,
     private val adminRequired: AuthorizationHandler,
     private val authenticatedEndpointCorsHandler: CorsHandler,
     private val db: VauhtijuoksuDatabase<M>,
     private val patchValidator: (M) -> String?,
-    private val toApiRepresentation: (M) -> ApiRepresentation,
+    private val toApiRepresentation: (M) -> UpdateRepresentation,
 ) : PartialRouter {
     private val logger = KotlinLogging.logger {}
 
@@ -55,7 +54,7 @@ open class PatchRouter<M : Model, ApiRepresentation : ApiModel<M>>(
     private fun merge(ctx: RoutingContext, existingData: M): M {
         val oldData = mapper().readerForUpdating(toApiRepresentation(existingData))
         val mergedData: M = try {
-            oldData.readValue<ApiRepresentation>(ctx.body().asString()).toModel()
+            oldData.readValue<UpdateRepresentation>(ctx.body().asString()).toModel()
         } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
             throw UserError("Error patching object: ${e.message}", e)
         }

@@ -14,6 +14,7 @@ import io.vertx.junit5.VertxTestContext
 import org.instancio.kotlin.KInstancio
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.atLeast
@@ -30,6 +31,7 @@ import kotlin.time.toKotlinInstant
 
 class StreamMetadataTest : ServerTestBase() {
     private val now = OffsetDateTime.now(clock)
+    private val nowAsString = DateTimeFormatter.ISO_INSTANT.format(now)
     private val streamMetadataEndpoint = "/stream-metadata"
     private val someUuid = UUID.randomUUID()
     private val someTimer = Timer(
@@ -165,14 +167,14 @@ class StreamMetadataTest : ServerTestBase() {
                 testContext.verify {
                     assertEquals(200, res.statusCode())
                     assertEquals("application/json", res.getHeader("content-type"))
-                    val original = apimodels.StreamMetadataResponse.from(
+                    val original = StreamMetadataResponse.from(
                         someMetadataNoTimer.copy(donationGoal = 1000),
                         listOf(),
                         now.toInstant().toKotlinInstant(),
                     )
-                    val response = res.bodyAsJson(apimodels.StreamMetadataResponse::class.java)
-//                    assertTrue(original.serverTime.isEqual(response.serverTime))
-//                    assertEquals(original, response.copy(serverTime = now))
+                    val response = res.bodyAsJson(StreamMetadataResponse::class.java)
+                    assertTrue(original.serverTime == response.serverTime)
+                    assertEquals(original, response.copy(serverTime = nowAsString))
                     verify(streamMetadataDatabase).save(someMetadataNoTimer.copy(donationGoal = 1000))
                 }
                 testContext.completeNow()
