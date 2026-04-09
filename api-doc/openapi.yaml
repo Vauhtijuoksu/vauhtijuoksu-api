@@ -766,19 +766,6 @@ components:
         role:
           type: string
           enum: [ PLAYER, COUCH ]
-    PlayerList:
-      type: array
-      items:
-        $ref: '#/components/schemas/Player'
-      example:
-        - id: be3649a7-50e4-44e9-b157-05a3fbcf738c
-          display_name: glukoosi
-          twitch_channel: hluposti
-          discord_nick: sakkaroosi#9898
-        - id: 91aee618-2c62-42a1-b025-106baf6b71e7
-          display_name: jiisloth
-          twitch_channel: jeesloth
-          discord_nick: jooosloth#1234
     Participant:
       type: object
       properties:
@@ -838,56 +825,7 @@ components:
             $ref: '#/components/schemas/SocialMedia'
       example:
         display_name: jiisloth
-    Player:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        display_name:
-          type: string
-        twitch_channel:
-          type: string
-        discord_nick:
-          type: string
-      required:
-        - id
-        - display_name
-      example:
-        id: 91aee618-2c62-42a1-b025-106baf6b71e7
-        display_name: jiisloth
-        twitch_channel: jeesloth
-        discord_nick: jooosloth#1234
     PlayerInput:
-      type: object
-      properties:
-        display_name:
-          type: string
-          minLength: 1
-        twitch_channel:
-          type: string
-        discord_nick:
-          type: string
-      required:
-        - display_name
-      example:
-        display_name: jiisloth
-        twitch_channel: jeesloth
-        discord_nick: jooosloth#1234
-    PlayerPatch:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        display_name:
-          type: string
-        twitch_channel:
-          type: string
-        discord_nick:
-          type: string
-      example:
-        discord_nick: juusloth#4321
     SocialMedia:
       properties:
         username:
