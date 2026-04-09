@@ -777,6 +777,7 @@ components:
         social_medias:
           type: array
           items:
+            $ref: '#/components/schemas/SocialMedia'
             type: object
             properties:
               nick:
@@ -825,7 +826,6 @@ components:
             $ref: '#/components/schemas/SocialMedia'
       example:
         display_name: jiisloth
-    PlayerInput:
     SocialMedia:
       properties:
         username:
