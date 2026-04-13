@@ -10,7 +10,6 @@ open class DonationInputValidator {
             return errors
         }
 
-        // Verified to be non-null above
         if (input.amount < 0) {
             return "No stealing from norppas!!"
         }

@@ -16,13 +16,13 @@ import io.vertx.ext.web.handler.CorsHandler
 import mu.KotlinLogging
 import java.util.UUID
 
-open class PatchRouter<M : Model, UpdateRepresentation, OutputRepresentation>(
+open class PatchRouter<MODEL : Model, UPDATE_API_OBJECT, CREATE_OBJECT, RESPONSE_OBJECT>(
     private val authenticationHandler: AuthenticationHandler,
     private val adminRequired: AuthorizationHandler,
     private val authenticatedEndpointCorsHandler: CorsHandler,
-    private val db: VauhtijuoksuDatabase<M>,
-    private val patchValidator: (M) -> String?,
-    private val toApiRepresentation: (M) -> UpdateRepresentation,
+    private val db: VauhtijuoksuDatabase<MODEL>,
+    private val patchValidator: (MODEL) -> String?,
+    private val toApiRepresentation: (MODEL) -> RESPONSE_OBJECT,
 ) : PartialRouter {
     private val logger = KotlinLogging.logger {}
 
@@ -51,10 +51,10 @@ open class PatchRouter<M : Model, UpdateRepresentation, OutputRepresentation>(
             }
     }
 
-    private fun merge(ctx: RoutingContext, existingData: M): M {
+    private fun merge(ctx: RoutingContext, existingData: MODEL): MODEL {
         val oldData = mapper().readerForUpdating(toApiRepresentation(existingData))
-        val mergedData: M = try {
-            oldData.readValue<UpdateRepresentation>(ctx.body().asString()).toModel()
+        val mergedData: MODEL = try {
+            oldData.readValue<UPDATE_API_OBJECT>(ctx.body().asString()).toModel()
         } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
             throw UserError("Error patching object: ${e.message}", e)
         }

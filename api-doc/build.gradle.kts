@@ -9,6 +9,7 @@ plugins {
 dependencies {
     swaggerUI(libs.swagger.ui)
     implementation(libs.jackson.annotations)
+    implementation(libs.kotlinx.serialization)
 }
 
 sourceSets {
@@ -32,7 +33,7 @@ tasks {
     }
 
     val generateClient by registering(GenerateTask::class) {
-        generatorName.set("kotlin")
+        generatorName.set("kotlin-server")
         inputSpec.set("${layout.projectDirectory}/openapi.yaml")
         outputDir.set("${layout.buildDirectory.get()}/generated-client")
         modelPackage.set("apimodels")
@@ -42,6 +43,7 @@ tasks {
                 "serializationLibrary" to "jackson",
                 "dateLibrary" to "string",
                 "companionObject" to "true",
+                "serializableModel" to "false",
             ),
         )
     }
