@@ -32,7 +32,7 @@ jobs:
             --info
       - name: Add coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
-        uses: madrapps/jacoco-report@v1.6
+        uses: madrapps/jacoco-report@v1.7.2
         continue-on-error: true # Commenting doesn't work from forked PRs, because those have no access to secrets
         with:
           title: Unit and integration test coverage
@@ -43,7 +43,7 @@ jobs:
           min-coverage-changed-files: 80 # Okay target for now
       - name: Add feature test coverage report to PR
         if: ${{ github.event_name == 'pull_request' }}
-        uses: madrapps/jacoco-report@v1.6
+        uses: madrapps/jacoco-report@v1.7.2
         continue-on-error: true
         with:
           title: Feature test coverage
