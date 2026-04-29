@@ -121,7 +121,7 @@ jobs:
         run: |
           docker tag vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }} ghcr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
           docker push ghcr.io/vauhtijuoksu/vauhtijuoksu-api:${{ env.VERSION }}
-      - uses: azure/setup-helm@v3.5
+      - uses: azure/setup-helm@v5.0.0
         id: install
       - name: Deploy mock server to AKS
         run: |
