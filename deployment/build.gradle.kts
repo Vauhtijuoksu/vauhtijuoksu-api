@@ -143,7 +143,7 @@ tasks {
                 workingDir = projectDir
                 bashCommand(
                     """
-                helm upgrade --install vauhtijuoksu-api api-server -f kind-cluster/vauhtijuoksu-api-values.yaml --set image.tag=${rootProject.version} --set image.registry=localhost/
+                helm upgrade --install vauhtijuoksu-api api-server -f kind-cluster/vauhtijuoksu-api-values.yaml --set image.tag=${rootProject.version}
                 # Force restart, because in development pods might have a same dirty version if no commits were made
                 kubectl delete pod -l app.kubernetes.io/name=vauhtijuoksu-api
                 kubectl rollout status deployment vauhtijuoksu-api

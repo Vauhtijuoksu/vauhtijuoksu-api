@@ -1,5 +1,5 @@
 image:
-  registry:
+  registry: localhost/
 server:
   host: api.localhost
   corsHeaders:
