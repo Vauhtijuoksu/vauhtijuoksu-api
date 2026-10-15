@@ -113,10 +113,8 @@ class GameDataDatabaseTest : VauhtijuoksuDatabaseTest<GameData>() {
     @Test
     fun `deserialising a game with no participants works`() = runTest {
         val newGame = TestGameData.gameData2.copy(id = UUID.randomUUID(), participants = emptyList())
-        db.getAll().map { games ->
-            games.forEach {
-                db.delete(it.id)
-            }
+        db.getAll().flatMap { games ->
+            Future.all(games.map { db.delete(it.id) })
         }.coAwait()
 
         db.add(newGame)
