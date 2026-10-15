@@ -3,7 +3,6 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.models.DonationDbModel
-import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import io.vertx.core.Future
 import io.vertx.sqlclient.SqlClient
@@ -31,13 +30,13 @@ class DonationDatabase
         return SqlTemplate.forUpdate(
             client,
             "INSERT INTO donations " +
-                "(id, name, message, timestamp, amount, read, external_id) VALUES " +
-                "(#{id}, #{name}, #{message}, #{timestamp}, #{amount}, #{read}, #{external_id})",
+                "(id, name, message, timestamp, amount, read, external_id, charity) VALUES " +
+                "(#{id}, #{name}, #{message}, #{timestamp}, #{amount}, #{read}, #{external_id}, #{charity})",
         )
             .mapFrom(DonationDbModel::class.java)
             .execute(DonationDbModel.fromDonation(record))
             .recover {
-                throw ServerError("Failed to insert $record because of ${it.message}")
+                throw databaseError(it, "Failed to insert $record")
             }
             .expectOneChangedRow()
             .map {
@@ -53,13 +52,14 @@ class DonationDatabase
                 "message = #{message}, " +
                 "timestamp = #{timestamp}, " +
                 "amount = #{amount}, " +
-                "read = #{read} " +
+                "read = #{read}, " +
+                "charity = #{charity} " +
                 "WHERE id = #{id}",
         )
             .mapFrom(DonationDbModel::class.java)
             .execute(DonationDbModel.fromDonation(record))
             .recover {
-                throw ServerError("Failed to update $record because of ${it.message}")
+                throw databaseError(it, "Failed to update $record")
             }
             .expectOneChangedRow()
     }

@@ -34,6 +34,7 @@ data class DonationApiModel(
     @JsonProperty("external_id")
     val externalId: String?,
     val incentives: List<IncentiveInDonationApi>,
+    val charity: UUID?,
 ) :
     ApiModel<Donation> {
     override fun toModel(): Donation {
@@ -45,6 +46,7 @@ data class DonationApiModel(
             amount,
             read,
             externalId,
+            charity,
         )
     }
 
@@ -63,6 +65,7 @@ data class DonationApiModel(
                 donation.read,
                 donation.externalId,
                 listOf(),
+                donation.charity,
             )
         }
 
@@ -88,6 +91,7 @@ data class DonationApiModel(
                         },
                     )
                 },
+                donation.charity,
             )
         }
     }

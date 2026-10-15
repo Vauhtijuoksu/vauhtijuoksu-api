@@ -21,6 +21,7 @@ class TestDonation private constructor() {
             10F,
             false,
             null,
+            TestCharity.charity1.id,
         )
         val donation2 = Donation(
             UUID.randomUUID(),

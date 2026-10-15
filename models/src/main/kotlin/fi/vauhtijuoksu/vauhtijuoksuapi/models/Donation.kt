@@ -11,6 +11,7 @@ data class Donation(
     val amount: Float,
     val read: Boolean = false,
     val externalId: String?,
+    val charity: UUID? = null,
 ) : Model {
     val codes: Set<IncentiveCode> by lazy {
         if (message == null) {

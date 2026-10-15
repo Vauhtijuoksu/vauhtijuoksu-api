@@ -16,6 +16,7 @@ import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
+import java.util.UUID
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @FeatureTest
@@ -58,6 +59,7 @@ class DonationFlowTest {
         private lateinit var incentiveCode1: String
         private lateinit var incentiveCode2: String
         private lateinit var donationId: String
+        private lateinit var charityId: String
     }
 
     @BeforeEach
@@ -122,8 +124,13 @@ class DonationFlowTest {
     @Test
     @Order(3)
     fun `then one user makes a donation using the wrong generated code`() = runTest {
+        val charity = authenticatedPost("/charities")
+            .sendJson(JsonObject().put("name", "Norppien suojelu"))
+            .coAwait()
+        assertEquals(201, charity.statusCode())
+        charityId = charity.bodyAsJsonObject().getString("id")
         val donation = authenticatedPost("/donations")
-            .sendJson(JsonObject(newDonation).put("message", "ota tää :D 🤔🤔 $incentiveCode2"))
+            .sendJson(JsonObject(newDonation).put("message", "ota tää :D 🤔🤔 $incentiveCode2").put("charity", charityId))
             .coAwait()
         donationId = donation.bodyAsJsonObject().getString("id")
     }
@@ -212,6 +219,27 @@ class DonationFlowTest {
                 assertEquals(donationId, donation.getString("id"))
                 assertEquals(donationSum, donation.getDouble("amount"))
                 assertEquals("ota tää :D 🤔🤔: $incentiveCode1", donation.getString("message"))
+                assertEquals(charityId, donation.getString("charity"))
+            }
+    }
+
+    @Test
+    @Order(8)
+    fun `a donation can't be moved to an unknown charity`() = runTest {
+        authenticatedPatch("/donations/$donationId")
+            .sendJson(JsonObject().put("charity", UUID.randomUUID().toString()))
+            .coAwait().let {
+                assertEquals(400, it.statusCode())
+            }
+    }
+
+    @Test
+    @Order(9)
+    fun `a charity with donations can't be deleted`() = runTest {
+        authenticatedRequest(client.delete("/charities/$charityId"))
+            .send()
+            .coAwait().let {
+                assertEquals(400, it.statusCode())
             }
     }
 }
