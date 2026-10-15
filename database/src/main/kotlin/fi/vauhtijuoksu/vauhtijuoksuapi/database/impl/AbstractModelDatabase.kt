@@ -93,7 +93,7 @@ abstract class AbstractModelDatabase<T : Model, DbModel : Any>(
         return deleteQuery
             .execute(Tuple.of(id))
             .recover {
-                throw ServerError("Failed to delete a record with id $id because ${it.message}")
+                throw databaseError(it, "Failed to delete a record with id $id")
             }
             .expectOneChangedRow()
     }

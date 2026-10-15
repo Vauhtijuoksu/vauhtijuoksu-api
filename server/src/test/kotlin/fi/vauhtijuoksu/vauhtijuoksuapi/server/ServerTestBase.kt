@@ -11,6 +11,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.GeneratedIncentiveCodeDataba
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.StreamMetadataDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Charity
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
@@ -76,6 +77,9 @@ open class ServerTestBase {
     @Mock
     protected lateinit var participantDatabase: VauhtijuoksuDatabase<Participant>
 
+    @Mock
+    protected lateinit var charityDb: VauhtijuoksuDatabase<Charity>
+
     protected val clock: Clock = Clock.fixed(Instant.now(), ZoneId.of("Europe/Helsinki"))
 
     @TempDir
@@ -127,6 +131,7 @@ open class ServerTestBase {
                 bind(GeneratedIncentiveCodeDatabase::class.java).toInstance(generatedIncentiveCodeDatabase)
                 bind(object : TypeLiteral<StreamMetadataDatabase>() {}).toInstance(streamMetadataDatabase)
                 bind(object : TypeLiteral<VauhtijuoksuDatabase<Participant>>() {}).toInstance(participantDatabase)
+                bind(object : TypeLiteral<VauhtijuoksuDatabase<Charity>>() {}).toInstance(charityDb)
                 bind(ServerConfiguration::class.java).toInstance(
                     ServerConfiguration(
                         serverPort,

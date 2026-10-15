@@ -13,6 +13,7 @@ import java.util.UUID
 
 class DonationApiModelTest {
     private val uuid = UUID.randomUUID()
+    private val charity = UUID.randomUUID()
 
     // Slight variations in input, within ISO 8601
     private val date = "2021-09-21T15:05:47Z"
@@ -38,6 +39,7 @@ class DonationApiModelTest {
             .put("read", true)
             .put("external_id", "an id")
             .put("incentives", JsonArray())
+            .put("charity", charity.toString())
     }
 
     @Test
@@ -51,6 +53,7 @@ class DonationApiModelTest {
             true,
             "an id",
             listOf(),
+            charity,
         )
 
         val donationAsJson = donation.toJson()
@@ -69,6 +72,7 @@ class DonationApiModelTest {
             true,
             "an id",
             listOf(),
+            charity,
         )
 
         val donationAsJson = donation.toJson()

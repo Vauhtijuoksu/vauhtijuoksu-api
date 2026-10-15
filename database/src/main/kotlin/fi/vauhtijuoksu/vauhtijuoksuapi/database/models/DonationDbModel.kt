@@ -18,6 +18,7 @@ data class DonationDbModel(
     val read: Boolean,
     @JsonProperty("external_id")
     val externalId: String?,
+    val charity: UUID?,
 ) {
     fun toDonation(): Donation {
         return Donation(
@@ -28,6 +29,7 @@ data class DonationDbModel(
             amount,
             read,
             externalId,
+            charity,
         )
     }
 
@@ -41,6 +43,7 @@ data class DonationDbModel(
                 donation.amount,
                 donation.read,
                 donation.externalId,
+                donation.charity,
             )
         }
     }
