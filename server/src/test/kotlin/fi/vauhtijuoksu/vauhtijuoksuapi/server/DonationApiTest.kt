@@ -7,6 +7,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.models.ChosenIncentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GeneratedIncentive
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.IncentiveCode
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationApiModel
+import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestCharity.Companion.charity2
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation1
 import fi.vauhtijuoksu.vauhtijuoksuapi.testdata.TestDonation.Companion.donation2
 import io.vertx.core.Future
@@ -149,7 +150,7 @@ class DonationApiTest : ServerTestBase() {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["name", "amount", "timestamp"])
+    @ValueSource(strings = ["name", "amount", "timestamp", "charity"])
     fun testMandatoryFieldsAreRequiredWhenAddingDonation(missingField: String, testContext: VertxTestContext) {
         val json = JsonObject.mapFrom(DonationApiModel.fromDonation(donation1))
         json.remove("id")
@@ -262,6 +263,7 @@ class DonationApiTest : ServerTestBase() {
         val newDonation = donation1.copy(
             read = true,
             message = null,
+            charity = charity2.id,
         )
 
         `when`(donationDb.getById(donation1.id)).thenReturn(
@@ -271,7 +273,7 @@ class DonationApiTest : ServerTestBase() {
         `when`(donationDb.update(any())).thenReturn(Future.succeededFuture())
         client.patch("/donations/${donation1.id}")
             .authentication(UsernamePasswordCredentials(username, password))
-            .sendJson(JsonObject().put("read", true).put("message", null))
+            .sendJson(JsonObject().put("read", true).put("message", null).put("charity", charity2.id.toString()))
             .onFailure(testContext::failNow)
             .onSuccess { res ->
                 testContext.verify {

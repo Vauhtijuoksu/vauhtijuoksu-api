@@ -8,6 +8,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.GeneratedIncentiveCodeDataba
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.SingletonDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.api.VauhtijuoksuDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.configuration.DatabaseConfiguration
+import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.CharityDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.DonationDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.GameDataDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.GeneratedIncentiveCodeDatabaseImpl
@@ -15,6 +16,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.IncentiveDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.ParticipantDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.PlayerInfoDatabase
 import fi.vauhtijuoksu.vauhtijuoksuapi.database.impl.TimerDatabase
+import fi.vauhtijuoksu.vauhtijuoksuapi.models.Charity
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Donation
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.GameData
 import fi.vauhtijuoksu.vauhtijuoksuapi.models.Incentive
@@ -31,6 +33,7 @@ class DatabaseModule : AbstractModule() {
     override fun configure() {
         bind(object : TypeLiteral<VauhtijuoksuDatabase<GameData>>() {}).to(GameDataDatabase::class.java)
         bind(object : TypeLiteral<VauhtijuoksuDatabase<Donation>>() {}).to(DonationDatabase::class.java)
+        bind(object : TypeLiteral<VauhtijuoksuDatabase<Charity>>() {}).to(CharityDatabase::class.java)
         bind(object : TypeLiteral<VauhtijuoksuDatabase<Incentive>>() {}).to(IncentiveDatabase::class.java)
         bind(object : TypeLiteral<VauhtijuoksuDatabase<Participant>>() {}).to(ParticipantDatabase::class.java)
         bind(object : TypeLiteral<SingletonDatabase<PlayerInfo>>() {}).to(PlayerInfoDatabase::class.java)

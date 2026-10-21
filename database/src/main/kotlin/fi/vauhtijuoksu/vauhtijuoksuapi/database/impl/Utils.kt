@@ -2,8 +2,10 @@ package fi.vauhtijuoksu.vauhtijuoksuapi.database.impl
 
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.MissingEntityException
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.ServerError
+import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.UserError
 import fi.vauhtijuoksu.vauhtijuoksuapi.exceptions.VauhtijuoksuException
 import io.vertx.core.Future
+import io.vertx.pgclient.PgException
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlResult
@@ -22,6 +24,17 @@ internal fun <V> Future<V>.orServerError(): Future<V> {
         } else {
             throw ServerError(it)
         }
+    }
+}
+
+private const val FOREIGN_KEY_VIOLATION = "23503"
+
+// Foreign key violations are caused by the input, e.g. an unknown charity
+internal fun databaseError(error: Throwable, message: String): VauhtijuoksuException {
+    return if (error is PgException && error.sqlState == FOREIGN_KEY_VIOLATION) {
+        UserError("$message: ${error.errorMessage}. ${error.detail}")
+    } else {
+        ServerError("$message because of ${error.message}")
     }
 }
 

@@ -14,6 +14,7 @@ import fi.vauhtijuoksu.vauhtijuoksuapi.server.DependencyInjectionConstants.Compa
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.configuration.ConfigurationModule
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.PlayerInfoRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.StreamMetadataRouter
+import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.charities.CharityRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.donation.DonationsRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.gamedata.GameDataRouter
 import fi.vauhtijuoksu.vauhtijuoksuapi.server.impl.incentivecodes.IncentiveCodeRouter
@@ -57,6 +58,7 @@ class Server @Inject constructor(
     incentiveCodeRouter: IncentiveCodeRouter,
     participantsRouter: ParticipantsRouter,
     timerRouter: TimerRouter,
+    charityRouter: CharityRouter,
     @Named(AUTHENTICATED_CORS) corsHandler: CorsHandler,
     sessionHandler: SessionHandler,
     oAuthProvider: OAuth2Auth,
@@ -110,6 +112,7 @@ class Server @Inject constructor(
         incentiveCodeRouter.configure(router)
         participantsRouter.configure(router)
         timerRouter.configure(router)
+        charityRouter.configure(router)
         router.route().failureHandler { ctx ->
             when (val cause = ctx.failure()) {
                 is UserError -> {
